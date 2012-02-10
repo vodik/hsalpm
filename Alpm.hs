@@ -47,9 +47,12 @@ alpmInitialize opt = do
 
 foreign import ccall "&alpm_release" c_alpm_release :: FinalizerPtr a
 
+withAlpmPtr :: (Ptr AlpmHandle -> IO b) -> Alpm b
+withAlpmPtr f = asks alpm >>= \a -> liftIO $ withForeignPtr a f
+
 foreign import ccall "alpm_option_get_localdb" c_alpm_option_get_localdb :: Ptr a -> IO (Ptr b)
 localDB :: Alpm DB
-localDB = asks alpm >>= \a -> liftIO $ withForeignPtr a $ \alpm_ptr -> do
+localDB = withAlpmPtr $ \alpm_ptr -> do
     db_ptr <- c_alpm_option_get_localdb alpm_ptr
     if db_ptr == nullPtr
         then fail "could not register 'local' database"
@@ -67,17 +70,17 @@ foreign import ccall "alpm_list_next" c_alpm_list_next :: Ptr a -> IO (Ptr b)
 foreign import ccall "alpm_list_getdata" c_alpm_list_getdata :: Ptr a -> IO (Ptr b)
 
 packages :: PkgCache -> Alpm [Package]
-packages (PkgCache ptr) = liftIO $ packages' ptr
+packages (PkgCache ptr) = packages' ptr
 
-pkgInfo :: Ptr a -> IO Package
+pkgInfo :: Ptr a -> Alpm Package
 pkgInfo ptr = do
-    pkg <- c_alpm_list_getdata ptr
+    pkg <- liftIO $ c_alpm_list_getdata ptr
     return $ Package pkg
 
-packages' :: Ptr a -> IO [Package]
+packages' :: Ptr a -> Alpm [Package]
 packages' ptr
     | ptr == nullPtr = return []
-    | otherwise      = do next <- c_alpm_list_next ptr
+    | otherwise      = do next <- liftIO $ c_alpm_list_next ptr
                           (:) <$> pkgInfo ptr <*> packages' next
 
 -- mapPackages_ :: Monad m => (Package -> m b) -> PkgCache -> m ()
@@ -89,7 +92,7 @@ packages' ptr
 --     | otherwise      = do next <- c_alpm_list_next ptr
 --                           (:) <$> pkgInfo ptr <*> packages' next
 
--- withAlpm :: AlpmOptions -> (Alpm ()) -> IO ()
+withAlpm :: AlpmOptions -> Alpm a -> IO a
 withAlpm opt (Alpm f) = do
     a <- alpmInitialize opt
     runReaderT f a
