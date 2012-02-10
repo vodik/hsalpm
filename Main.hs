@@ -5,11 +5,14 @@ import Data.List
 
 import Alpm
 import Alpm.Package
+import Alpm.List
 
 main = do
     pkgs <- runAlpm options $ do
-        local <- packages <$> localDB
-        return $ filter (("xorg" `isPrefixOf`) . packageName) local
+        db <- localDB
+        let pk  = packagesSorted db simpleSort
+            pk' = filter (("xorg" `isPrefixOf`) . packageName) pk
+        return pk'
     mapM_ putPkgInfo pkgs
   where
     options = defaultOptions
