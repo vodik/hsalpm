@@ -56,9 +56,6 @@ localDB = withAlpmPtr $ \alpm_ptr -> do
         else return $ DB db_ptr
 
 foreign import ccall "alpm_db_get_pkgcache" c_alpm_db_get_pkgcache :: Ptr a -> IO (Ptr b)
-foreign import ccall "alpm_list_next" c_alpm_list_next :: Ptr a -> IO (Ptr b)
-foreign import ccall "alpm_list_getdata" c_alpm_list_getdata :: Ptr a -> IO (Ptr b)
-
 packages :: DB -> Alpm [Package]
 packages (DB db_ptr) = do
     cache_ptr <- liftIO $ c_alpm_db_get_pkgcache db_ptr
@@ -66,6 +63,8 @@ packages (DB db_ptr) = do
         then fail "could not get package cache"
         else packages' cache_ptr
 
+foreign import ccall "alpm_list_next"    c_alpm_list_next    :: Ptr a -> IO (Ptr b)
+foreign import ccall "alpm_list_getdata" c_alpm_list_getdata :: Ptr a -> IO (Ptr b)
 packages' :: Ptr a -> Alpm [Package]
 packages' ptr
     | ptr == nullPtr = return []
