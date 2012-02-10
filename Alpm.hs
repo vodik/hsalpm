@@ -72,16 +72,16 @@ localDB = withAlpmPtr $ \alpm_ptr -> do
         then fail "could not register 'local' database"
         else return $ DB db_ptr
 
-foreign import ccall "alpm_db_get_pkgcache" c_alpm_db_get_pkgcache :: Ptr a -> IO (Ptr b)
+foreign import ccall "alpm_db_get_pkgcache" c_alpm_db_get_pkgcache :: Ptr a -> Ptr b
 packages :: DB -> [Package]
-packages (DB db_ptr) = unsafePerformIO $ packages' <$> c_alpm_db_get_pkgcache db_ptr
+packages (DB db_ptr) = packages' $ c_alpm_db_get_pkgcache db_ptr
 
-foreign import ccall "alpm_list_next"    c_alpm_list_next    :: Ptr a -> IO (Ptr b)
-foreign import ccall "alpm_list_getdata" c_alpm_list_getdata :: Ptr a -> IO (Ptr b)
+foreign import ccall "alpm_list_next"    c_alpm_list_next    :: Ptr a -> Ptr b
+foreign import ccall "alpm_list_getdata" c_alpm_list_getdata :: Ptr a -> Ptr b
 packages' :: Ptr a -> [Package]
 packages' ptr
     | ptr == nullPtr = []
-    | otherwise      = let next = unsafePerformIO $ c_alpm_list_next ptr
+    | otherwise      = let next = c_alpm_list_next ptr
                        in boxPackage ptr : packages' next
   where
-    boxPackage ptr = Package . unsafePerformIO $ c_alpm_list_getdata ptr
+    boxPackage ptr = Package $ c_alpm_list_getdata ptr
