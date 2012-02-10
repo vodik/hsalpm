@@ -16,10 +16,13 @@ data Package = Package (Ptr PkgHandle)
 unsafePeekCString :: CString -> String
 unsafePeekCString = unsafePerformIO . peekCString
 
-foreign import ccall "alpm_pkg_get_name"    c_alpm_get_name    :: Ptr a -> CString
-foreign import ccall "alpm_pkg_get_version" c_alpm_get_version :: Ptr a -> CString
-foreign import ccall "alpm_pkg_get_desc"    c_alpm_get_desc    :: Ptr a -> CString
-foreign import ccall "alpm_pkg_get_url"     c_alpm_get_url     :: Ptr a -> CString
+foreign import ccall "alpm_pkg_get_name"      c_alpm_get_name      :: Ptr a -> CString
+foreign import ccall "alpm_pkg_get_version"   c_alpm_get_version   :: Ptr a -> CString
+foreign import ccall "alpm_pkg_get_desc"      c_alpm_get_desc      :: Ptr a -> CString
+foreign import ccall "alpm_pkg_get_url"       c_alpm_get_url       :: Ptr a -> CString
+foreign import ccall "alpm_pkg_get_packager"  c_alpm_get_packager  :: Ptr a -> CString
+foreign import ccall "alpm_pkg_get_arch"      c_alpm_get_arch      :: Ptr a -> CString
+
 foreign import ccall "alpm_pkg_get_size"    c_alpm_get_size    :: Ptr a -> CSize
 
 packageName :: Package -> String
@@ -33,6 +36,12 @@ packageDescription (Package pkg_ptr) = unsafePeekCString $ c_alpm_get_desc pkg_p
 
 packageURL :: Package -> String
 packageURL (Package pkg_ptr) = unsafePeekCString $ c_alpm_get_url pkg_ptr
+
+packagePackager :: Package -> String
+packagePackager (Package pkg_ptr) = unsafePeekCString $ c_alpm_get_packager pkg_ptr
+
+packageArch :: Package -> String
+packageArch (Package pkg_ptr) = unsafePeekCString $ c_alpm_get_arch pkg_ptr
 
 packageSize :: Package -> Int
 packageSize (Package pkg_ptr) = fromIntegral $ c_alpm_get_size pkg_ptr

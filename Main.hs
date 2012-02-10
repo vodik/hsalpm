@@ -18,8 +18,9 @@ main = withAlpm options $ do
 
 putPkgInfo :: Package -> IO ()
 putPkgInfo pkg = do
-    putStrLn $ "PACKAGE: " ++ packageName pkg ++ ": " ++ packageVersion pkg
-    putStrLn $ "         " ++ packageDescription pkg
-    putStrLn $ "   size: " ++ (show $ packageSize pkg)
-    putStrLn $ "    url: " ++ packageURL pkg
+    putStrLn $ "  PACKAGE: " ++ packageName pkg ++ ": " ++ packageVersion pkg
+    putStrLn $ "           " ++ packageDescription pkg
+    putStrLn $ "      url: " ++ packageURL pkg
+    putStrLn $ "     arch: " ++ packageArch pkg
+    putStrLn $ " packager: " ++ packagePackager pkg
     putStrLn ""
