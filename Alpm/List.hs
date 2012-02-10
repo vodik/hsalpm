@@ -7,7 +7,6 @@ import System.IO.Unsafe
 import Foreign.C
 import Foreign.Ptr
 
-import Debug.Trace
 import Alpm.Util
 
 data AlpmList
@@ -25,9 +24,9 @@ type SortFunc a = Ptr a -> Ptr a -> CInt
 
 foreign import ccall "wrapper" wrap :: SortFunc a -> IO (FunPtr (SortFunc a))
 
-mSort' :: (Ptr a -> b) -> (b -> b -> Ordering) -> Ptr a -> Ptr a -> CInt
-mSort' box comp p1 p2 = orderingToC $ comp (box p1) (box p2)
+mkSorter :: (Ptr a -> b) -> (b -> b -> Ordering) -> SortFunc a
+mkSorter box comp p1 p2 = orderingToC $ comp (box p1) (box p2)
 
-mSort :: Ptr AlpmList -> SortFunc a -> Ptr AlpmList
-mSort ptr sorter = unsafePerformIO $
+sort :: Ptr AlpmList -> SortFunc a -> Ptr AlpmList
+sort ptr sorter = unsafePerformIO $
     c_alpm_list_msort ptr (c_alpm_list_count ptr) <$> wrap sorter

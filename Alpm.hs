@@ -15,7 +15,8 @@ import Foreign.ForeignPtr
 import Foreign.Marshal.Alloc
 import Foreign.Storable
 
-import Alpm.List
+import Alpm.List (AlpmList)
+import qualified Alpm.List as A
 import Alpm.Package
 import Alpm.Util
 
@@ -73,9 +74,10 @@ localDB = withAlpmPtr $ \alpm_ptr -> do
 
 foreign import ccall "alpm_db_get_pkgcache" c_alpm_db_get_pkgcache :: Ptr AlpmList -> Ptr AlpmList
 packages :: DB -> [Package]
-packages (DB db_ptr) = integrate (mkPackage . c_alpm_list_getdata) $ c_alpm_db_get_pkgcache db_ptr
+packages (DB db_ptr) = A.integrate (mkPackage . c_alpm_list_getdata) $ c_alpm_db_get_pkgcache db_ptr
 
 packagesSorted :: DB -> (Package -> Package -> Ordering) -> [Package]
 packagesSorted (DB db_ptr) f =
-    let db_ptr' = mSort (c_alpm_db_get_pkgcache db_ptr) $ mSortPackage f
-    in integrate (mkPackage . c_alpm_list_getdata) db_ptr'
+    let cache = c_alpm_db_get_pkgcache db_ptr
+        ptr   = A.sort cache $ mkPackageSorter f
+    in A.integrate (mkPackage . c_alpm_list_getdata) ptr

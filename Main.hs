@@ -5,7 +5,6 @@ import Data.List
 
 import Alpm
 import Alpm.Package
-import Alpm.List
 
 main = do
     pkgs <- runAlpm options $ do
