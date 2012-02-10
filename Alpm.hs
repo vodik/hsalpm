@@ -36,9 +36,7 @@ data AlpmOptions = AlpmOptions
     }
 
 withAlpm :: AlpmOptions -> Alpm a -> IO a
-withAlpm opt (Alpm f) = do
-    a <- alpmInitialize opt
-    runReaderT f a
+withAlpm opt (Alpm f) = alpmInitialize opt >>= runReaderT f
 
 defaultOptions = AlpmOptions
     { root   = "/"
