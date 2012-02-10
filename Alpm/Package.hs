@@ -55,5 +55,8 @@ mkPackage ptr = Package
     , packageInstallSize = fromIntegral $ c_alpm_get_isize ptr
     }
 
--- bySize :: Package -> Package -> Ordering
-bySize = mSort' mkPackage (compare `on` packageInstallSize)
+mSortPackage :: (Package -> Package -> Ordering) -> SortFunc PkgHandle
+mSortPackage = mSort' mkPackage
+
+bySize :: Package -> Package -> Ordering
+bySize = compare `on` packageInstallSize

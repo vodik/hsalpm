@@ -75,7 +75,7 @@ foreign import ccall "alpm_db_get_pkgcache" c_alpm_db_get_pkgcache :: Ptr AlpmLi
 packages :: DB -> [Package]
 packages (DB db_ptr) = integrate (mkPackage . c_alpm_list_getdata) $ c_alpm_db_get_pkgcache db_ptr
 
--- packagesSorted :: DB -> (Package -> Package -> Ordering) -> [Package]
+packagesSorted :: DB -> (Package -> Package -> Ordering) -> [Package]
 packagesSorted (DB db_ptr) f =
-    let db_ptr' = mSort (c_alpm_db_get_pkgcache db_ptr) bySize
+    let db_ptr' = mSort (c_alpm_db_get_pkgcache db_ptr) $ mSortPackage f
     in integrate (mkPackage . c_alpm_list_getdata) db_ptr'

@@ -2,6 +2,7 @@
 
 module Alpm.List where
 
+import Control.Applicative
 import System.IO.Unsafe
 import Foreign.C
 import Foreign.Ptr
@@ -33,9 +34,5 @@ mSort' :: (Ptr a -> b) -> (b -> b -> Ordering) -> Ptr a -> Ptr a -> CInt
 mSort' box comp p1 p2 = orderingToC $ comp (box p1) (box p2)
 
 mSort :: Ptr AlpmList -> SortFunc a -> Ptr AlpmList
-mSort ptr sorter = unsafePerformIO $ do
-    wSort <- wrap sorter
-    let len = c_alpm_list_count ptr
-    return $ c_alpm_list_msort ptr len wSort
-
--- mSort db box comp
+mSort ptr sorter = unsafePerformIO $
+    c_alpm_list_msort ptr (c_alpm_list_count ptr) <$> wrap sorter
