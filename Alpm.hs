@@ -20,7 +20,7 @@ data AlpmHandle
 data AlpmList
 
 data AlpmConf = AlpmConf
-    { alpm    :: !(ForeignPtr AlpmHandle)
+    { alpmPtr :: !(ForeignPtr AlpmHandle)
     , options :: AlpmOptions
     }
 
@@ -48,7 +48,7 @@ alpmInitialize opt = do
 foreign import ccall "&alpm_release" c_alpm_release :: FinalizerPtr a
 
 withAlpmPtr :: (Ptr AlpmHandle -> IO b) -> Alpm b
-withAlpmPtr f = asks alpm >>= \a -> liftIO $ withForeignPtr a f
+withAlpmPtr f = asks alpmPtr >>= \a -> liftIO $ withForeignPtr a f
 
 foreign import ccall "alpm_option_get_localdb" c_alpm_option_get_localdb :: Ptr a -> IO (Ptr b)
 localDB :: Alpm DB
