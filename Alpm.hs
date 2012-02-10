@@ -73,18 +73,19 @@ localDB = withAlpmPtr $ \alpm_ptr -> do
         else return $ DB db_ptr
 
 foreign import ccall "alpm_db_get_pkgcache" c_alpm_db_get_pkgcache :: Ptr a -> Ptr b
-packages :: DB -> [Package]
-packages (DB db_ptr) = packages' $ c_alpm_db_get_pkgcache db_ptr
+foreign import ccall "alpm_list_next"       c_alpm_list_next       :: Ptr a -> Ptr b
+foreign import ccall "alpm_list_getdata"    c_alpm_list_getdata    :: Ptr a -> Ptr b
 
-foreign import ccall "alpm_list_next"    c_alpm_list_next    :: Ptr a -> Ptr b
-foreign import ccall "alpm_list_getdata" c_alpm_list_getdata :: Ptr a -> Ptr b
-packages' :: Ptr a -> [Package]
-packages' ptr
+packages :: DB -> [Package]
+packages (DB db_ptr) = integrate boxPackage $ c_alpm_db_get_pkgcache db_ptr
+  where
+    boxPackage = Package . c_alpm_list_getdata
+
+integrate :: (Ptr a -> b) -> Ptr a -> [b]
+integrate box ptr
     | isNull ptr = []
     | otherwise  = let next = c_alpm_list_next ptr
-                   in boxPackage ptr : packages' next
-  where
-    boxPackage ptr = Package $ c_alpm_list_getdata ptr
+                   in box ptr : integrate box next
 
 isNull :: Ptr a -> Bool
 isNull = (== nullPtr)
