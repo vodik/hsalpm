@@ -44,5 +44,6 @@ packageArch (Package pkg_ptr) = unsafePeekCString $ c_alpm_get_arch pkg_ptr
 packageSize :: Package -> Int
 packageSize (Package pkg_ptr) = fromIntegral $ c_alpm_get_size pkg_ptr
 
+foreign import ccall "alpm_list_getdata" c_alpm_list_getdata :: Ptr AlpmList -> Ptr b
 mkPackage :: Ptr AlpmList -> Package
 mkPackage = Package . c_alpm_list_getdata
