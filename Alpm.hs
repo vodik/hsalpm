@@ -55,7 +55,7 @@ alpmInitialize opt = do
     dbpath' <- newCString $ dbPath opt
     alloca $ \errPtr -> do
         alpm_ptr <- c_alpm_initialize root' dbpath' errPtr
-        if alpm_ptr == nullPtr
+        if isNull alpm_ptr
             then peek errPtr >>= fail . printf "failed to initialize alpm library (%s)" . alpmStrerror
             else flip AlpmConf opt <$> newForeignPtr c_alpm_release alpm_ptr
 
@@ -68,7 +68,7 @@ foreign import ccall "alpm_option_get_localdb" c_alpm_option_get_localdb :: Ptr 
 localDB :: Alpm DB
 localDB = withAlpmPtr $ \alpm_ptr -> do
     db_ptr <- c_alpm_option_get_localdb alpm_ptr
-    if db_ptr == nullPtr
+    if isNull db_ptr
         then fail "could not register 'local' database"
         else return $ DB db_ptr
 
@@ -80,8 +80,11 @@ foreign import ccall "alpm_list_next"    c_alpm_list_next    :: Ptr a -> Ptr b
 foreign import ccall "alpm_list_getdata" c_alpm_list_getdata :: Ptr a -> Ptr b
 packages' :: Ptr a -> [Package]
 packages' ptr
-    | ptr == nullPtr = []
-    | otherwise      = let next = c_alpm_list_next ptr
-                       in boxPackage ptr : packages' next
+    | isNull ptr = []
+    | otherwise  = let next = c_alpm_list_next ptr
+                   in boxPackage ptr : packages' next
   where
     boxPackage ptr = Package $ c_alpm_list_getdata ptr
+
+isNull :: Ptr a -> Bool
+isNull = (== nullPtr)
