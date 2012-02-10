@@ -15,9 +15,11 @@ main = withAlpm options $ do
     liftIO $ putStrLn "Done!"
   where
     options = defaultOptions
-    putPkgInfo pkg = do
-        putStrLn $ "PACKAGE: " ++ packageName pkg ++ ": " ++ packageVersion pkg
-        putStrLn $ "         " ++ packageDescription pkg
-        putStrLn $ "   size: " ++ (show $ packageSize pkg)
-        putStrLn $ "    url: " ++ packageURL pkg
-        putStrLn ""
+
+putPkgInfo :: Package -> IO ()
+putPkgInfo pkg = do
+    putStrLn $ "PACKAGE: " ++ packageName pkg ++ ": " ++ packageVersion pkg
+    putStrLn $ "         " ++ packageDescription pkg
+    putStrLn $ "   size: " ++ (show $ packageSize pkg)
+    putStrLn $ "    url: " ++ packageURL pkg
+    putStrLn ""
