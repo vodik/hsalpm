@@ -28,6 +28,7 @@ instance NFData Package where
       `seq` packageURL p
       `seq` packagePackager p
       `seq` packageArch p
+      `seq` packageInstallSize p
       `seq` ()
 
 unsafePeekCString :: CString -> String
@@ -41,7 +42,7 @@ foreign import ccall "alpm_pkg_get_packager" c_alpm_get_packager :: Ptr PkgHandl
 foreign import ccall "alpm_pkg_get_arch"     c_alpm_get_arch     :: Ptr PkgHandle -> CString
 foreign import ccall "alpm_pkg_get_isize"    c_alpm_get_isize    :: Ptr PkgHandle -> CSize
 
-foreign import ccall "alpm_list_getdata" c_alpm_list_getdata :: Ptr AlpmList -> Ptr b
+foreign import ccall "alpm_list_getdata" c_alpm_list_getdata :: Ptr AlpmList -> Ptr PkgHandle
 mkPackage :: Ptr PkgHandle -> Package
 mkPackage ptr = Package
     { packageName        = unsafePeekCString $ c_alpm_get_name ptr
