@@ -9,7 +9,14 @@ import Alpm.List
 
 data PkgHandle
 
-data Package = Package (Ptr PkgHandle)
+data Package = Package
+    { packageName        :: String
+    , packageVersion     :: String
+    , packageDescription :: String
+    , packageURL         :: String
+    , packagePackager    :: String
+    , packageArch        :: String
+    }
 
 unsafePeekCString :: CString -> String
 unsafePeekCString = unsafePerformIO . peekCString
@@ -20,30 +27,16 @@ foreign import ccall "alpm_pkg_get_desc"     c_alpm_get_desc     :: Ptr PkgHandl
 foreign import ccall "alpm_pkg_get_url"      c_alpm_get_url      :: Ptr PkgHandle -> CString
 foreign import ccall "alpm_pkg_get_packager" c_alpm_get_packager :: Ptr PkgHandle -> CString
 foreign import ccall "alpm_pkg_get_arch"     c_alpm_get_arch     :: Ptr PkgHandle -> CString
-
 foreign import ccall "alpm_pkg_get_size"     c_alpm_get_size     :: Ptr PkgHandle -> CSize
-
-packageName :: Package -> String
-packageName (Package pkg_ptr) = unsafePeekCString $ c_alpm_get_name pkg_ptr
-
-packageVersion :: Package -> String
-packageVersion (Package pkg_ptr) = unsafePeekCString $ c_alpm_get_version pkg_ptr
-
-packageDescription :: Package -> String
-packageDescription (Package pkg_ptr) = unsafePeekCString $ c_alpm_get_desc pkg_ptr
-
-packageURL :: Package -> String
-packageURL (Package pkg_ptr) = unsafePeekCString $ c_alpm_get_url pkg_ptr
-
-packagePackager :: Package -> String
-packagePackager (Package pkg_ptr) = unsafePeekCString $ c_alpm_get_packager pkg_ptr
-
-packageArch :: Package -> String
-packageArch (Package pkg_ptr) = unsafePeekCString $ c_alpm_get_arch pkg_ptr
-
-packageSize :: Package -> Int
-packageSize (Package pkg_ptr) = fromIntegral $ c_alpm_get_size pkg_ptr
 
 foreign import ccall "alpm_list_getdata" c_alpm_list_getdata :: Ptr AlpmList -> Ptr b
 mkPackage :: Ptr AlpmList -> Package
-mkPackage = Package . c_alpm_list_getdata
+mkPackage ptr = let pkg_ptr = c_alpm_list_getdata ptr
+    in Package
+        { packageName        = unsafePeekCString $ c_alpm_get_name pkg_ptr
+        , packageVersion     = unsafePeekCString $ c_alpm_get_version pkg_ptr
+        , packageDescription = unsafePeekCString $ c_alpm_get_desc pkg_ptr
+        , packageURL         = unsafePeekCString $ c_alpm_get_url pkg_ptr
+        , packagePackager    = unsafePeekCString $ c_alpm_get_packager pkg_ptr
+        , packageArch        = unsafePeekCString $ c_alpm_get_arch pkg_ptr
+        }

@@ -35,8 +35,8 @@ data AlpmOptions = AlpmOptions
     , dbPath :: String
     }
 
-withAlpm :: AlpmOptions -> Alpm a -> IO a
-withAlpm opt (Alpm f) = alpmInitialize opt >>= runReaderT f
+runAlpm :: AlpmOptions -> Alpm a -> IO a
+runAlpm opt (Alpm f) = alpmInitialize opt >>= runReaderT f
 
 defaultOptions = AlpmOptions
     { root   = "/"
