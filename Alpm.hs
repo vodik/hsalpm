@@ -77,7 +77,7 @@ foreign import ccall "alpm_list_next"       c_alpm_list_next       :: Ptr AlpmLi
 foreign import ccall "alpm_list_getdata"    c_alpm_list_getdata    :: Ptr AlpmList -> Ptr b
 
 packages :: DB -> [Package]
-packages (DB db_ptr) = integrate (Package . c_alpm_list_getdata) $ c_alpm_db_get_pkgcache db_ptr
+packages (DB db_ptr) = integrate mkPackage $ c_alpm_db_get_pkgcache db_ptr
 
 integrate :: (Ptr AlpmList -> b) -> Ptr AlpmList -> [b]
 integrate box ptr
@@ -86,3 +86,6 @@ integrate box ptr
 
 isNull :: Ptr a -> Bool
 isNull = (== nullPtr)
+
+mkPackage :: Ptr AlpmList -> Package
+mkPackage = Package . c_alpm_list_getdata
