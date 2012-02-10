@@ -6,11 +6,7 @@ import Control.Monad.IO.Class
 import Alpm
 import Alpm.Package
 
-main = withAlpm options $ do
-    liftIO $ putStrLn "Hello World!"
-    db <- localDB
-    mapM_ (liftIO . putPkgInfo) $ packages db
-    liftIO $ putStrLn "Done!"
+main = withAlpm options $ localDB >>= mapM_ (liftIO . putPkgInfo) . packages
   where
     options = defaultOptions
 
