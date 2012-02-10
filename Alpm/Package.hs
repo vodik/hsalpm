@@ -28,6 +28,7 @@ instance NFData Package where
       `seq` packageURL p
       `seq` packagePackager p
       `seq` packageArch p
+      `seq` packageInstallSize p
       `seq` ()
 
 unsafePeekCString :: CString -> String
