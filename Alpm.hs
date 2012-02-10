@@ -74,15 +74,6 @@ packages' ptr
   where
     boxPackage ptr = Package . unsafePerformIO $ c_alpm_list_getdata ptr
 
--- mapPackages_ :: Monad m => (Package -> m b) -> PkgCache -> m ()
--- mapPackages_ f (PkgCache ptr) =
-
--- mapPackages' :: Ptr a -> IO [Package]
--- mapPackages' ptr
---     | ptr == nullPtr = return []
---     | otherwise      = do next <- c_alpm_list_next ptr
---                           (:) <$> pkgInfo ptr <*> packages' next
-
 withAlpm :: AlpmOptions -> Alpm a -> IO a
 withAlpm opt (Alpm f) = do
     a <- alpmInitialize opt
