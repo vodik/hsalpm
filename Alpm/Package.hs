@@ -2,6 +2,7 @@
 
 module Alpm.Package where
 
+import Data.Function
 import Control.DeepSeq
 import System.IO.Unsafe
 import Foreign.C
@@ -55,4 +56,4 @@ mkPackage ptr = Package
     }
 
 -- bySize :: Package -> Package -> Ordering
-bySize = mSort' mkPackage $ \p1 p2 -> packageInstallSize p1 `compare` packageInstallSize p2
+bySize = mSort' mkPackage (compare `on` packageInstallSize)

@@ -24,12 +24,13 @@ type SortFunc a = Ptr a -> Ptr a -> CInt
 
 foreign import ccall "wrapper" wrap :: SortFunc a -> IO (FunPtr (SortFunc a))
 
+orderingToC :: Ordering -> CInt
+orderingToC LT = 1
+orderingToC EQ = 0
+orderingToC GT = -1
+
 mSort' :: (Ptr a -> b) -> (b -> b -> Ordering) -> Ptr a -> Ptr a -> CInt
-mSort' box comp p1 p2 =
-    case comp (box p1) (box p2) of
-       LT -> 1
-       EQ -> 0
-       GT -> -1
+mSort' box comp p1 p2 = orderingToC $ comp (box p1) (box p2)
 
 mSort :: Ptr AlpmList -> SortFunc a -> Ptr AlpmList
 mSort ptr sorter = unsafePerformIO $ do
