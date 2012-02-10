@@ -7,11 +7,13 @@ import Control.Exception
 import Control.Monad
 import Control.Monad.Reader
 import System.IO.Unsafe
+import Text.Printf
 
 import Foreign.C
 import Foreign.Ptr (Ptr, nullPtr)
 import Foreign.ForeignPtr
 import Foreign.Marshal.Alloc
+import Foreign.Storable
 
 import Alpm.Package
 
@@ -33,15 +35,29 @@ data AlpmOptions = AlpmOptions
     , dbPath :: String
     }
 
+withAlpm :: AlpmOptions -> Alpm a -> IO a
+withAlpm opt (Alpm f) = do
+    a <- alpmInitialize opt
+    runReaderT f a
+
+defaultOptions = AlpmOptions
+    { root   = "/"
+    , dbPath = "/var/lib/pacman"
+    }
+
+foreign import ccall "alpm_strerror" c_alpm_strerror :: CInt -> CString
+alpmStrerror errno = unsafePerformIO . peekCString $ c_alpm_strerror errno
+
 foreign import ccall "alpm_initialize" c_alpm_initialize :: CString -> CString -> Ptr a -> IO (Ptr b)
 alpmInitialize :: AlpmOptions -> IO AlpmConf
 alpmInitialize opt = do
-    root'    <- newCString $ root opt
-    dbpath'  <- newCString $ dbPath opt
-    alpm_ptr <- c_alpm_initialize root' dbpath' nullPtr
-    if alpm_ptr == nullPtr
-        then fail "alpm_initialize returned null"
-        else flip AlpmConf opt <$> newForeignPtr c_alpm_release alpm_ptr
+    root'   <- newCString $ root opt
+    dbpath' <- newCString $ dbPath opt
+    alloca $ \errPtr -> do
+        alpm_ptr <- c_alpm_initialize root' dbpath' errPtr
+        if alpm_ptr == nullPtr
+            then peek errPtr >>= fail . printf "failed to initialize alpm library (%s)" . alpmStrerror
+            else flip AlpmConf opt <$> newForeignPtr c_alpm_release alpm_ptr
 
 foreign import ccall "&alpm_release" c_alpm_release :: FinalizerPtr a
 
@@ -58,11 +74,7 @@ localDB = withAlpmPtr $ \alpm_ptr -> do
 
 foreign import ccall "alpm_db_get_pkgcache" c_alpm_db_get_pkgcache :: Ptr a -> IO (Ptr b)
 packages :: DB -> [Package]
-packages (DB db_ptr) = unsafePerformIO $ do
-    cache_ptr <- c_alpm_db_get_pkgcache db_ptr
-    if cache_ptr == nullPtr
-        then fail "could not get package cache"
-        else return $ packages' cache_ptr
+packages (DB db_ptr) = unsafePerformIO $ packages' <$> c_alpm_db_get_pkgcache db_ptr
 
 foreign import ccall "alpm_list_next"    c_alpm_list_next    :: Ptr a -> IO (Ptr b)
 foreign import ccall "alpm_list_getdata" c_alpm_list_getdata :: Ptr a -> IO (Ptr b)
@@ -73,13 +85,3 @@ packages' ptr
                        in boxPackage ptr : packages' next
   where
     boxPackage ptr = Package . unsafePerformIO $ c_alpm_list_getdata ptr
-
-withAlpm :: AlpmOptions -> Alpm a -> IO a
-withAlpm opt (Alpm f) = do
-    a <- alpmInitialize opt
-    runReaderT f a
-
-defaultOptions = AlpmOptions
-    { root   = "/"
-    , dbPath = "/var/lib/pacman"
-    }
