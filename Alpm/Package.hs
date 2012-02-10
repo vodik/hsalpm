@@ -17,6 +17,7 @@ data Package = Package
     , packageURL         :: String
     , packagePackager    :: String
     , packageArch        :: String
+    , packageInstallSize :: Integer
     }
     deriving (Eq, Show)
 
@@ -38,7 +39,7 @@ foreign import ccall "alpm_pkg_get_desc"     c_alpm_get_desc     :: Ptr PkgHandl
 foreign import ccall "alpm_pkg_get_url"      c_alpm_get_url      :: Ptr PkgHandle -> CString
 foreign import ccall "alpm_pkg_get_packager" c_alpm_get_packager :: Ptr PkgHandle -> CString
 foreign import ccall "alpm_pkg_get_arch"     c_alpm_get_arch     :: Ptr PkgHandle -> CString
-foreign import ccall "alpm_pkg_get_size"     c_alpm_get_size     :: Ptr PkgHandle -> CSize
+foreign import ccall "alpm_pkg_get_isize"    c_alpm_get_isize    :: Ptr PkgHandle -> CSize
 
 foreign import ccall "alpm_list_getdata" c_alpm_list_getdata :: Ptr AlpmList -> Ptr b
 mkPackage :: Ptr AlpmList -> Package
@@ -50,4 +51,5 @@ mkPackage ptr = let pkg_ptr = c_alpm_list_getdata ptr
         , packageURL         = unsafePeekCString $ c_alpm_get_url pkg_ptr
         , packagePackager    = unsafePeekCString $ c_alpm_get_packager pkg_ptr
         , packageArch        = unsafePeekCString $ c_alpm_get_arch pkg_ptr
+        , packageInstallSize = fromIntegral $ c_alpm_get_isize pkg_ptr
         }
