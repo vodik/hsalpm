@@ -9,8 +9,7 @@ import Alpm.Package
 main = withAlpm options $ do
     liftIO $ putStrLn "Hello World!"
     db <- localDB
-    pl <- packages db
-    mapM_ (liftIO . putPkgInfo) pl
+    mapM_ (liftIO . putPkgInfo) $ packages db
     liftIO $ putStrLn "Done!"
   where
     options = defaultOptions
