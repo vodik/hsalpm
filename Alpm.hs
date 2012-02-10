@@ -72,16 +72,13 @@ foreign import ccall "alpm_list_getdata" c_alpm_list_getdata :: Ptr a -> IO (Ptr
 packages :: PkgCache -> Alpm [Package]
 packages (PkgCache ptr) = packages' ptr
 
-pkgInfo :: Ptr a -> Alpm Package
-pkgInfo ptr = do
-    pkg <- liftIO $ c_alpm_list_getdata ptr
-    return $ Package pkg
-
 packages' :: Ptr a -> Alpm [Package]
 packages' ptr
     | ptr == nullPtr = return []
     | otherwise      = do next <- liftIO $ c_alpm_list_next ptr
-                          (:) <$> pkgInfo ptr <*> packages' next
+                          (:) <$> boxPackage ptr <*> packages' next
+  where
+    boxPackage ptr = liftIO $ Package <$> c_alpm_list_getdata ptr
 
 -- mapPackages_ :: Monad m => (Package -> m b) -> PkgCache -> m ()
 -- mapPackages_ f (PkgCache ptr) =
