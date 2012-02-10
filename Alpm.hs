@@ -23,7 +23,6 @@ data AlpmConf = AlpmConf
     }
 
 data DB = DB !(Ptr AlpmList)
-data PkgCache = PkgCache !(Ptr AlpmList)
 
 newtype Alpm a = Alpm (ReaderT AlpmConf IO a)
     deriving (Functor, Applicative, Monad, MonadIO, MonadReader AlpmConf)
@@ -57,18 +56,15 @@ localDB = withAlpmPtr $ \alpm_ptr -> do
         else return $ DB db_ptr
 
 foreign import ccall "alpm_db_get_pkgcache" c_alpm_db_get_pkgcache :: Ptr a -> IO (Ptr b)
-packageCache :: DB -> Alpm PkgCache
-packageCache (DB db_ptr) = do
-    cache_ptr <- liftIO $ c_alpm_db_get_pkgcache db_ptr
-    if cache_ptr == nullPtr
-        then fail "could not get package cache"
-        else return $ PkgCache cache_ptr
-
 foreign import ccall "alpm_list_next" c_alpm_list_next :: Ptr a -> IO (Ptr b)
 foreign import ccall "alpm_list_getdata" c_alpm_list_getdata :: Ptr a -> IO (Ptr b)
 
-packages :: PkgCache -> Alpm [Package]
-packages (PkgCache ptr) = packages' ptr
+packages :: DB -> Alpm [Package]
+packages (DB db_ptr) = do
+    cache_ptr <- liftIO $ c_alpm_db_get_pkgcache db_ptr
+    if cache_ptr == nullPtr
+        then fail "could not get package cache"
+        else packages' cache_ptr
 
 packages' :: Ptr a -> Alpm [Package]
 packages' ptr
