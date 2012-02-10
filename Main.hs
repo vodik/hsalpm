@@ -9,10 +9,8 @@ import Alpm.List
 
 main = do
     pkgs <- runAlpm options $ do
-        db <- localDB
-        let pk  = packagesSorted db simpleSort
-            pk' = filter (("xorg" `isPrefixOf`) . packageName) pk
-        return pk'
+        local <- flip packagesSorted bySize <$> localDB
+        return $ filter (("xorg" `isPrefixOf`) . packageName) local
     mapM_ putPkgInfo pkgs
   where
     options = defaultOptions
