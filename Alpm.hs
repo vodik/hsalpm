@@ -40,7 +40,7 @@ runAlpm :: (NFData a) => AlpmOptions -> Alpm a -> IO a
 runAlpm opt (Alpm f) =
     alpmInitialize opt >>= \alpm -> do
         r <- runReaderT f alpm
-        withForeignPtr (alpmPtr alpm) $ \_ -> r `deepseq` return r
+        withForeignPtr (alpmPtr alpm) $ \_ -> return $!! r
 
 defaultOptions = AlpmOptions
     { root   = "/"
