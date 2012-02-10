@@ -3,11 +3,9 @@
 module Alpm.Package where
 
 import System.IO.Unsafe
-
 import Foreign.C
 import Foreign.Ptr (Ptr, nullPtr)
-import Foreign.ForeignPtr
-import Foreign.Marshal.Alloc
+import Alpm.List
 
 data PkgHandle
 
@@ -45,3 +43,6 @@ packageArch (Package pkg_ptr) = unsafePeekCString $ c_alpm_get_arch pkg_ptr
 
 packageSize :: Package -> Int
 packageSize (Package pkg_ptr) = fromIntegral $ c_alpm_get_size pkg_ptr
+
+mkPackage :: Ptr AlpmList -> Package
+mkPackage = Package . c_alpm_list_getdata

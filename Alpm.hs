@@ -15,10 +15,11 @@ import Foreign.ForeignPtr
 import Foreign.Marshal.Alloc
 import Foreign.Storable
 
+import Alpm.List
 import Alpm.Package
+import Alpm.Util
 
 data AlpmHandle
-data AlpmList
 
 data AlpmConf = AlpmConf
     { alpmPtr :: !(ForeignPtr AlpmHandle)
@@ -71,19 +72,5 @@ localDB = withAlpmPtr $ \alpm_ptr -> do
         else return $ DB db_ptr
 
 foreign import ccall "alpm_db_get_pkgcache" c_alpm_db_get_pkgcache :: Ptr AlpmList -> Ptr AlpmList
-foreign import ccall "alpm_list_next"       c_alpm_list_next       :: Ptr AlpmList -> Ptr AlpmList
-foreign import ccall "alpm_list_getdata"    c_alpm_list_getdata    :: Ptr AlpmList -> Ptr b
-
 packages :: DB -> [Package]
 packages (DB db_ptr) = integrate mkPackage $ c_alpm_db_get_pkgcache db_ptr
-
-integrate :: (Ptr AlpmList -> b) -> Ptr AlpmList -> [b]
-integrate box ptr
-    | isNull ptr = []
-    | otherwise  = box ptr : integrate box (c_alpm_list_next ptr)
-
-isNull :: Ptr a -> Bool
-isNull = (== nullPtr)
-
-mkPackage :: Ptr AlpmList -> Package
-mkPackage = Package . c_alpm_list_getdata
