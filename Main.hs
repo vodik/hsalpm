@@ -1,14 +1,15 @@
 module Main where
 
 import Control.Applicative
-import Control.DeepSeq
-import Control.Monad.IO.Class
+import Data.List
 
 import Alpm
 import Alpm.Package
 
 main = do
-    pkgs <- runAlpm options $ packages <$> localDB
+    pkgs <- runAlpm options $ do
+        local <- packages <$> localDB
+        return $ filter (("xorg" `isPrefixOf`) . packageName) local
     mapM_ putPkgInfo pkgs
   where
     options = defaultOptions
