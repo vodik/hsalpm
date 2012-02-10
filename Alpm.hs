@@ -6,7 +6,6 @@ import Control.Applicative
 import Control.Exception
 import Control.Monad
 import Control.Monad.Reader
-import System.IO.Unsafe
 import Text.Printf
 
 import Foreign.C
@@ -43,9 +42,6 @@ defaultOptions = AlpmOptions
     { root   = "/"
     , dbPath = "/var/lib/pacman"
     }
-
-foreign import ccall "alpm_strerror" c_alpm_strerror :: CInt -> CString
-alpmStrerror errno = unsafePerformIO . peekCString $ c_alpm_strerror errno
 
 foreign import ccall "alpm_initialize" c_alpm_initialize :: CString -> CString -> Ptr CInt -> IO (Ptr AlpmHandle)
 alpmInitialize :: AlpmOptions -> IO AlpmConf
