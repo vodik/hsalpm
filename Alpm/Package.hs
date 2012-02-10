@@ -2,6 +2,7 @@
 
 module Alpm.Package where
 
+import Control.DeepSeq
 import System.IO.Unsafe
 import Foreign.C
 import Foreign.Ptr (Ptr, nullPtr)
@@ -17,6 +18,16 @@ data Package = Package
     , packagePackager    :: String
     , packageArch        :: String
     }
+    deriving (Eq, Show)
+
+instance NFData Package where
+    rnf p = packageName p
+      `seq` packageVersion p
+      `seq` packageDescription p
+      `seq` packageURL p
+      `seq` packagePackager p
+      `seq` packageArch p
+      `seq` ()
 
 unsafePeekCString :: CString -> String
 unsafePeekCString = unsafePerformIO . peekCString

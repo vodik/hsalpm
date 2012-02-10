@@ -1,18 +1,15 @@
 module Main where
 
 import Control.Applicative
+import Control.DeepSeq
 import Control.Monad.IO.Class
 
 import Alpm
 import Alpm.Package
 
 main = do
-    pkgs2 <- runAlpm options $ do
-        pkgs <- packages <$> localDB
-        mapM_ (liftIO . putPkgInfo) pkgs
-        return pkgs
-    mapM_ putPkgInfo pkgs2
-    return ()
+    pkgs <- runAlpm options $ packages <$> localDB
+    mapM_ putPkgInfo pkgs
   where
     options = defaultOptions
 

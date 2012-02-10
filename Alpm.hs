@@ -4,6 +4,7 @@ module Alpm where
 
 import Control.Applicative
 import Control.Exception
+import Control.DeepSeq
 import Control.Monad
 import Control.Monad.Reader
 import Text.Printf
@@ -35,8 +36,11 @@ data AlpmOptions = AlpmOptions
     , dbPath :: String
     }
 
-runAlpm :: AlpmOptions -> Alpm a -> IO a
-runAlpm opt (Alpm f) = alpmInitialize opt >>= runReaderT f
+runAlpm :: (NFData a) => AlpmOptions -> Alpm a -> IO a
+runAlpm opt (Alpm f) =
+    alpmInitialize opt >>= \alpm -> do
+        r <- runReaderT f alpm
+        withForeignPtr (alpmPtr alpm) $ \_ -> r `deepseq` return r
 
 defaultOptions = AlpmOptions
     { root   = "/"
