@@ -23,7 +23,7 @@ foreign import ccall "alpm_pkg_get_url"       c_alpm_get_url       :: Ptr a -> C
 foreign import ccall "alpm_pkg_get_packager"  c_alpm_get_packager  :: Ptr a -> CString
 foreign import ccall "alpm_pkg_get_arch"      c_alpm_get_arch      :: Ptr a -> CString
 
-foreign import ccall "alpm_pkg_get_size"    c_alpm_get_size    :: Ptr a -> CSize
+foreign import ccall "alpm_pkg_get_size"      c_alpm_get_size      :: Ptr a -> CSize
 
 packageName :: Package -> String
 packageName (Package pkg_ptr) = unsafePeekCString $ c_alpm_get_name pkg_ptr
