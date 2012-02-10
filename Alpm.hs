@@ -73,4 +73,4 @@ localDB = withAlpmPtr $ \alpm_ptr -> do
 
 foreign import ccall "alpm_db_get_pkgcache" c_alpm_db_get_pkgcache :: Ptr AlpmList -> Ptr AlpmList
 packages :: DB -> [Package]
-packages (DB db_ptr) = integrate mkPackage $ c_alpm_db_get_pkgcache db_ptr
+packages (DB db_ptr) = integrate (mkPackage . c_alpm_list_getdata) $ c_alpm_db_get_pkgcache db_ptr

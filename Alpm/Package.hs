@@ -41,15 +41,14 @@ foreign import ccall "alpm_pkg_get_packager" c_alpm_get_packager :: Ptr PkgHandl
 foreign import ccall "alpm_pkg_get_arch"     c_alpm_get_arch     :: Ptr PkgHandle -> CString
 foreign import ccall "alpm_pkg_get_isize"    c_alpm_get_isize    :: Ptr PkgHandle -> CSize
 
-foreign import ccall "alpm_list_getdata" c_alpm_list_getdata :: Ptr AlpmList -> Ptr b
-mkPackage :: Ptr AlpmList -> Package
-mkPackage ptr = let pkg_ptr = c_alpm_list_getdata ptr
-    in Package
-        { packageName        = unsafePeekCString $ c_alpm_get_name pkg_ptr
-        , packageVersion     = unsafePeekCString $ c_alpm_get_version pkg_ptr
-        , packageDescription = unsafePeekCString $ c_alpm_get_desc pkg_ptr
-        , packageURL         = unsafePeekCString $ c_alpm_get_url pkg_ptr
-        , packagePackager    = unsafePeekCString $ c_alpm_get_packager pkg_ptr
-        , packageArch        = unsafePeekCString $ c_alpm_get_arch pkg_ptr
-        , packageInstallSize = fromIntegral $ c_alpm_get_isize pkg_ptr
-        }
+foreign import ccall "alpm_list_getdata" c_alpm_list_getdata :: Ptr AlpmList -> Ptr PkgHandle
+mkPackage :: Ptr PkgHandle -> Package
+mkPackage ptr = Package
+    { packageName        = unsafePeekCString $ c_alpm_get_name ptr
+    , packageVersion     = unsafePeekCString $ c_alpm_get_version ptr
+    , packageDescription = unsafePeekCString $ c_alpm_get_desc ptr
+    , packageURL         = unsafePeekCString $ c_alpm_get_url ptr
+    , packagePackager    = unsafePeekCString $ c_alpm_get_packager ptr
+    , packageArch        = unsafePeekCString $ c_alpm_get_arch ptr
+    , packageInstallSize = fromIntegral $ c_alpm_get_isize ptr
+    }
