@@ -8,8 +8,7 @@ import System.IO.Unsafe
 import Foreign.C
 import Foreign.Ptr (Ptr, nullPtr)
 
-import Alpm.List (AlpmList)
-import qualified Alpm.List as A
+import Alpm.List
 
 data PkgHandle
 
@@ -62,7 +61,7 @@ mkPackage ptr = Package
     , packagePackager    = unsafePeekCString $ c_alpm_get_packager ptr
     , packageArch        = unsafePeekCString $ c_alpm_get_arch ptr
     , packageInstallSize = fromIntegral $ c_alpm_get_isize ptr
-    , packageGroups      = A.integrate (mkGroup . c_alpm_list_getdata_char) $ c_alpm_get_groups ptr
+    , packageGroups      = integrate (mkGroup . c_alpm_list_getdata_char) $ c_alpm_get_groups ptr
     }
 
 mkGroup :: CString -> Group
