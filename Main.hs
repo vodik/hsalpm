@@ -14,8 +14,6 @@ import Alpm.Network
 main = do
     args <- getArgs
     pkgs <- runAlpm options $ do
-        -- path <- fetchPkgUrl "google"
-        -- liftIO $ putStrLn $ show path
         local <- packages <$> localDB
         return $ filter (myFilter args) local
     mapM_ ppPkgInfo pkgs
