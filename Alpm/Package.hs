@@ -14,7 +14,9 @@ import Foreign.Ptr (Ptr, nullPtr)
 import Alpm.List
 import Alpm.Util
 
+type Arch = String
 type Group = String
+type License = String
 
 data PkgHandle
 
@@ -36,10 +38,11 @@ data Package = Package
     , packagePackager    :: String
     , packageMD5Sum      :: Maybe String
     , packageSHA256Sum   :: Maybe String
-    , packageArch        :: String
+    , packageArch        :: Arch
     , packageSize        :: Maybe Integer
     , packageInstallSize :: Integer
     , packageReason      :: Reason
+    , packageLicenses    :: [License]
     , packageGroups      :: [Group]
     }
     deriving (Eq, Show)
@@ -59,6 +62,7 @@ instance NFData Package where
       `seq` packageArch p
       `seq` packageSize p
       `seq` packageInstallSize p
+      `seq` packageLicenses p
       `seq` packageGroups p
       `seq` ()
 
@@ -77,7 +81,7 @@ foreign import ccall "alpm_pkg_get_arch"        c_alpm_pkg_get_arch        :: Pt
 foreign import ccall "alpm_pkg_get_size"        c_alpm_pkg_get_size        :: Ptr PkgHandle -> CSize
 foreign import ccall "alpm_pkg_get_isize"       c_alpm_pkg_get_isize       :: Ptr PkgHandle -> CSize
 foreign import ccall "alpm_pkg_get_reason"      c_alpm_pkg_get_reason      :: Ptr PkgHandle -> CInt
--- TODO: license
+foreign import ccall "alpm_pkg_get_licenses"    c_alpm_pkg_get_licenses    :: Ptr PkgHandle -> Ptr AlpmList
 foreign import ccall "alpm_pkg_get_groups"      c_alpm_pkg_get_groups      :: Ptr PkgHandle -> Ptr AlpmList
 -- TODO: depends
 -- TODO: optdepends
@@ -108,6 +112,7 @@ mkPackage node = let ptr = c_alpm_list_getpkg node in Package
     , packageSize        = maybeFromIntegral $ c_alpm_pkg_get_size ptr
     , packageInstallSize = fromIntegral $ c_alpm_pkg_get_isize ptr
     , packageReason      = toEnum . fromIntegral $ c_alpm_pkg_get_reason ptr
+    , packageLicenses    = integrate mkStringList $ c_alpm_pkg_get_licenses ptr
     , packageGroups      = integrate mkStringList $ c_alpm_pkg_get_groups ptr
     }
 
