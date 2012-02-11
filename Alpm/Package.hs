@@ -14,16 +14,21 @@ import Foreign.Ptr (Ptr, nullPtr)
 import Alpm.List
 import Alpm.Util
 
+type Group = String
+
 data PkgHandle
 
-data PackageOrigin = File | LocalDB | SyncDB
+data Origin = File | LocalDB | SyncDB
+    deriving (Eq, Show, Read, Enum)
+
+data Reason = Explicit | Dependency
     deriving (Eq, Show, Read, Enum)
 
 data Package = Package
     { packageFilename    :: Maybe String
     , packageName        :: String
     , packageVersion     :: String
-    , packageOrigin      :: PackageOrigin
+    , packageOrigin      :: Origin
     , packageDescription :: String
     , packageURL         :: String
     , packageBuildDate   :: UTCTime
@@ -32,11 +37,10 @@ data Package = Package
     , packageArch        :: String
     , packageSize        :: Maybe Integer
     , packageInstallSize :: Integer
+    , packageReason      :: Reason
     , packageGroups      :: [Group]
     }
     deriving (Eq, Show)
-
-type Group = String
 
 instance NFData Package where
     rnf p = packageFilename p
@@ -68,7 +72,7 @@ foreign import ccall "alpm_pkg_get_packager"    c_alpm_pkg_get_packager    :: Pt
 foreign import ccall "alpm_pkg_get_arch"        c_alpm_pkg_get_arch        :: Ptr PkgHandle -> CString
 foreign import ccall "alpm_pkg_get_size"        c_alpm_pkg_get_size        :: Ptr PkgHandle -> CSize
 foreign import ccall "alpm_pkg_get_isize"       c_alpm_pkg_get_isize       :: Ptr PkgHandle -> CSize
--- TODO: reason
+foreign import ccall "alpm_pkg_get_reason"      c_alpm_pkg_get_reason      :: Ptr PkgHandle -> CInt
 -- TODO: license
 foreign import ccall "alpm_pkg_get_groups"      c_alpm_pkg_get_groups      :: Ptr PkgHandle -> Ptr AlpmList
 -- TODO: depends
@@ -97,6 +101,7 @@ mkPackage node = let ptr = c_alpm_list_getpkg node in Package
     , packageArch        = unsafePeekCString $ c_alpm_pkg_get_arch ptr
     , packageSize        = maybeFromIntegral $ c_alpm_pkg_get_size ptr
     , packageInstallSize = fromIntegral $ c_alpm_pkg_get_isize ptr
+    , packageReason      = toEnum . fromIntegral $ c_alpm_pkg_get_reason ptr
     , packageGroups      = integrate mkStringList $ c_alpm_pkg_get_groups ptr
     }
 
