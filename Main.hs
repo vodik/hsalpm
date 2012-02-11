@@ -2,6 +2,7 @@ module Main where
 
 import Control.Applicative
 import Control.Monad.Trans (liftIO)
+import Control.Parallel (par)
 import Data.List
 import Data.Char
 import System.Environment
@@ -13,17 +14,18 @@ main = do
     args <- getArgs
     pkgs <- runAlpm options $ do
         local <- packages <$> localDB
-        return $ filter (myFilter $ head args) local
+        return $ filter (myFilter args) local
     mapM_ ppPkgInfo pkgs
   where
     options = defaultOptions
 
-myFilter :: String -> Package -> Bool
-myFilter term pkg =
-    let term' = map toLower term in
-           term' `isInfixOf` packageName pkg
-        || term' `isInfixOf` map toLower (packageDescription pkg)
-        || term' `elem` packageGroups pkg
+myFilter :: [String] -> Package -> Bool
+myFilter ts pkg =
+    let ts' = map (map toLower) ts
+        f1  = all (`isInfixOf` packageName pkg) ts'
+        f2  = all (`isInfixOf` map toLower (packageDescription pkg)) ts'
+        f3  = any (`elem` packageGroups pkg) ts'
+    in f1 `par` f2 `par` f3 `par` f1 || f2 || f3
 
 ppPkgInfo :: Package -> IO ()
 ppPkgInfo pkg = do
