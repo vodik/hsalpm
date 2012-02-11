@@ -68,8 +68,5 @@ mkPackage ptr = Package
 mkGroup :: CString -> Group
 mkGroup = unsafePeekCString
 
--- mkPackageSorter :: (Package -> Package -> Ordering) -> A.CompareFunc PkgHandle
--- mkPackageSorter = A.mkSorter mkPackage
-
 bySize :: Package -> Package -> Ordering
 bySize = compare `on` packageInstallSize

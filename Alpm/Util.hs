@@ -16,8 +16,3 @@ whenJust p f = maybe (return ()) f p
 
 ($!!) :: (NFData a) => (a -> b) -> a -> b
 f $!! x = x `deepseq` f x
-
--- orderingToC :: Ordering -> CInt
--- orderingToC LT = 1
--- orderingToC EQ = 0
--- orderingToC GT = -1

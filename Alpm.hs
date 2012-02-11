@@ -82,9 +82,3 @@ localDB = withAlpmPtr $ \alpm_ptr -> do
 foreign import ccall "alpm_db_get_pkgcache" c_alpm_db_get_pkgcache :: Ptr AlpmList -> Ptr AlpmList
 packages :: DB -> [Package]
 packages (DB db_ptr) = A.integrate (mkPackage . c_alpm_list_getdata) $ c_alpm_db_get_pkgcache db_ptr
-
--- packagesSorted :: DB -> (Package -> Package -> Ordering) -> [Package]
--- packagesSorted (DB db_ptr) f =
---     let cache = c_alpm_db_get_pkgcache db_ptr
---         ptr   = A.sortBy cache $ mkPackageSorter f
---     in A.integrate (mkPackage . c_alpm_list_getdata) ptr

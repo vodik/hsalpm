@@ -17,10 +17,9 @@ main = do
     options = defaultOptions
 
 myFilter :: String -> Package -> Bool
-myFilter term pkg = foldl1 (||) [ term `isInfixOf` packageName pkg
-                                , term `isInfixOf` packageDescription pkg
-                                , term `elem` packageGroups pkg
-                                ]
+myFilter term pkg = term `isInfixOf` packageName pkg
+                 || term `isInfixOf` packageDescription pkg
+                 || term `elem` packageGroups pkg
 
 ppPkgInfo :: Package -> IO ()
 ppPkgInfo pkg = do
