@@ -11,10 +11,13 @@ alpmStrerror errno = unsafePerformIO . peekCString $ c_alpm_strerror errno
 isNull :: Ptr a -> Bool
 isNull = (== nullPtr)
 
+whenJust :: Monad m => Maybe a -> (a -> m ()) -> m ()
+whenJust p f = maybe (return ()) f p
+
 ($!!) :: (NFData a) => (a -> b) -> a -> b
 f $!! x = x `deepseq` f x
 
-orderingToC :: Ordering -> CInt
-orderingToC LT = 1
-orderingToC EQ = 0
-orderingToC GT = -1
+-- orderingToC :: Ordering -> CInt
+-- orderingToC LT = 1
+-- orderingToC EQ = 0
+-- orderingToC GT = -1
