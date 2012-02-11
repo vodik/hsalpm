@@ -23,7 +23,7 @@ data PkgHandle
 data Origin = File | LocalDB | SyncDB
     deriving (Eq, Show, Read, Enum)
 
-data Reason = Explicit | Dependency
+data Reason = Explicit | Dependent
     deriving (Eq, Show, Read, Enum)
 
 data Package = Package
