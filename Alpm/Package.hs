@@ -100,5 +100,8 @@ mkPackage node = let ptr = c_alpm_list_getpkg node in Package
     , packageGroups      = integrate mkStringList $ c_alpm_pkg_get_groups ptr
     }
 
+byInstallSize :: Package -> Package -> Ordering
+byInstallSize = compare `on` packageInstallSize
+
 bySize :: Package -> Package -> Ordering
-bySize = compare `on` packageInstallSize
+bySize = compare `on` packageSize
