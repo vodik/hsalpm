@@ -52,8 +52,8 @@ foreign import ccall "alpm_pkg_get_groups"   c_alpm_get_groups   :: Ptr PkgHandl
 foreign import ccall "alpm_list_getdata" c_alpm_list_getpkg :: Ptr AlpmList -> Ptr PkgHandle
 foreign import ccall "alpm_list_getdata" c_alpm_list_getstr :: Ptr AlpmList -> CString
 
-mkPackage :: Ptr PkgHandle -> Package
-mkPackage ptr = Package
+mkPackage :: Ptr AlpmList -> Package
+mkPackage node = let ptr = c_alpm_list_getpkg node in Package
     { packageName        = unsafePeekCString $ c_alpm_get_name ptr
     , packageVersion     = unsafePeekCString $ c_alpm_get_version ptr
     , packageDescription = unsafePeekCString $ c_alpm_get_desc ptr
@@ -61,11 +61,11 @@ mkPackage ptr = Package
     , packagePackager    = unsafePeekCString $ c_alpm_get_packager ptr
     , packageArch        = unsafePeekCString $ c_alpm_get_arch ptr
     , packageInstallSize = fromIntegral $ c_alpm_get_isize ptr
-    , packageGroups      = integrate (mkGroup . c_alpm_list_getstr) $ c_alpm_get_groups ptr
+    , packageGroups      = integrate mkGroup $ c_alpm_get_groups ptr
     }
 
-mkGroup :: CString -> Group
-mkGroup = unsafePeekCString
+mkGroup :: Ptr AlpmList -> Group
+mkGroup = unsafePeekCString . c_alpm_list_getstr
 
 bySize :: Package -> Package -> Ordering
 bySize = compare `on` packageInstallSize
