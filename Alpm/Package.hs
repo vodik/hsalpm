@@ -95,7 +95,7 @@ mkPackage node = let ptr = c_alpm_list_getpkg node in Package
     , packageInstallDate = posixSecondsToUTCTime . realToFrac $ c_alpm_pkg_get_installdate ptr
     , packagePackager    = unsafePeekCString $ c_alpm_pkg_get_packager ptr
     , packageArch        = unsafePeekCString $ c_alpm_pkg_get_arch ptr
-    , packageSize        = let x = fromIntegral $ c_alpm_pkg_get_size ptr in if x > 0 then Just x else Nothing
+    , packageSize        = maybeFromIntegral $ c_alpm_pkg_get_size ptr
     , packageInstallSize = fromIntegral $ c_alpm_pkg_get_isize ptr
     , packageGroups      = integrate mkStringList $ c_alpm_pkg_get_groups ptr
     }

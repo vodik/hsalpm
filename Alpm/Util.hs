@@ -26,6 +26,9 @@ unsafeMaybeCString cstr
     | isNull cstr = Nothing
     | otherwise   = unsafePerformIO $ Just <$> peekCString cstr
 
+maybeFromIntegral :: (Integral a, Num b) => a -> Maybe b
+maybeFromIntegral x = if x > 0 then Just $ fromIntegral x else Nothing
+
 foreign import ccall "alpm_list_getdata" c_alpm_list_getstr :: Ptr a -> CString
 mkStringList :: Ptr a -> String
 mkStringList = unsafePeekCString . c_alpm_list_getstr
