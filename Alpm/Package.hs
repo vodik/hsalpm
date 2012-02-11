@@ -2,9 +2,10 @@
 
 module Alpm.Package where
 
-import Data.Function
 import Control.DeepSeq
+import Data.Function
 import System.IO.Unsafe
+
 import Foreign.C
 import Foreign.Ptr (Ptr, nullPtr)
 

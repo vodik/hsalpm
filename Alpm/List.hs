@@ -6,8 +6,7 @@ import Control.Applicative
 import System.IO.Unsafe
 
 import Foreign.C
-import Foreign.Marshal.Alloc
-import Foreign.Ptr
+import Foreign.Ptr (Ptr, nullPtr)
 
 import Alpm.Util
 

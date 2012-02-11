@@ -1,7 +1,10 @@
+{-# LANGUAGE ForeignFunctionInterface #-}
+
 module Alpm.Util where
 
 import Control.DeepSeq
 import System.IO.Unsafe
+
 import Foreign.C
 import Foreign.Ptr (Ptr, nullPtr)
 
