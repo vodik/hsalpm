@@ -34,6 +34,8 @@ data Package = Package
     , packageBuildDate   :: UTCTime
     , packageInstallDate :: UTCTime
     , packagePackager    :: String
+    , packageMD5Sum      :: Maybe String
+    , packageSHA256Sum   :: Maybe String
     , packageArch        :: String
     , packageSize        :: Maybe Integer
     , packageInstallSize :: Integer
@@ -52,6 +54,8 @@ instance NFData Package where
       `seq` packageBuildDate p
       `seq` packageInstallDate p
       `seq` packagePackager p
+      `seq` packageMD5Sum p
+      `seq` packageSHA256Sum p
       `seq` packageArch p
       `seq` packageSize p
       `seq` packageInstallSize p
@@ -67,8 +71,8 @@ foreign import ccall "alpm_pkg_get_url"         c_alpm_pkg_get_url         :: Pt
 foreign import ccall "alpm_pkg_get_builddate"   c_alpm_pkg_get_builddate   :: Ptr PkgHandle -> CTime
 foreign import ccall "alpm_pkg_get_installdate" c_alpm_pkg_get_installdate :: Ptr PkgHandle -> CTime
 foreign import ccall "alpm_pkg_get_packager"    c_alpm_pkg_get_packager    :: Ptr PkgHandle -> CString
--- TODO: md5
--- TODO: sha256sum
+foreign import ccall "alpm_pkg_get_md5sum"      c_alpm_pkg_get_md5sum      :: Ptr PkgHandle -> CString
+foreign import ccall "alpm_pkg_get_sha256sum"   c_alpm_pkg_get_sha256sum   :: Ptr PkgHandle -> CString
 foreign import ccall "alpm_pkg_get_arch"        c_alpm_pkg_get_arch        :: Ptr PkgHandle -> CString
 foreign import ccall "alpm_pkg_get_size"        c_alpm_pkg_get_size        :: Ptr PkgHandle -> CSize
 foreign import ccall "alpm_pkg_get_isize"       c_alpm_pkg_get_isize       :: Ptr PkgHandle -> CSize
@@ -98,6 +102,8 @@ mkPackage node = let ptr = c_alpm_list_getpkg node in Package
     , packageBuildDate   = posixSecondsToUTCTime . realToFrac $ c_alpm_pkg_get_builddate ptr
     , packageInstallDate = posixSecondsToUTCTime . realToFrac $ c_alpm_pkg_get_installdate ptr
     , packagePackager    = unsafePeekCString $ c_alpm_pkg_get_packager ptr
+    , packageMD5Sum      = unsafeMaybeCString $ c_alpm_pkg_get_md5sum ptr
+    , packageSHA256Sum   = unsafeMaybeCString $ c_alpm_pkg_get_sha256sum ptr
     , packageArch        = unsafePeekCString $ c_alpm_pkg_get_arch ptr
     , packageSize        = maybeFromIntegral $ c_alpm_pkg_get_size ptr
     , packageInstallSize = fromIntegral $ c_alpm_pkg_get_isize ptr
