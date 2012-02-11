@@ -2,7 +2,6 @@ module Main where
 
 import Control.Applicative
 import Control.Monad.Trans (liftIO)
-import Control.Parallel (par)
 import Data.List
 import Data.Char
 import System.Environment
@@ -25,7 +24,7 @@ myFilter ts pkg =
         f1  = all (`isInfixOf` packageName pkg) ts'
         f2  = all (`isInfixOf` map toLower (packageDescription pkg)) ts'
         f3  = any (`elem` packageGroups pkg) ts'
-    in f1 `par` f2 `par` f3 `par` f1 || f2 || f3
+    in f1 || f2 || f3
 
 ppPkgInfo :: Package -> IO ()
 ppPkgInfo pkg = do
