@@ -49,8 +49,8 @@ foreign import ccall "alpm_pkg_get_arch"     c_alpm_get_arch     :: Ptr PkgHandl
 foreign import ccall "alpm_pkg_get_isize"    c_alpm_get_isize    :: Ptr PkgHandle -> CSize
 foreign import ccall "alpm_pkg_get_groups"   c_alpm_get_groups   :: Ptr PkgHandle -> Ptr AlpmList
 
-foreign import ccall "alpm_list_getdata" c_alpm_list_getdata :: Ptr AlpmList -> Ptr PkgHandle
-foreign import ccall "alpm_list_getdata" c_alpm_list_getdata_char :: Ptr AlpmList -> CString
+foreign import ccall "alpm_list_getdata" c_alpm_list_getpkg :: Ptr AlpmList -> Ptr PkgHandle
+foreign import ccall "alpm_list_getdata" c_alpm_list_getstr :: Ptr AlpmList -> CString
 
 mkPackage :: Ptr PkgHandle -> Package
 mkPackage ptr = Package
@@ -61,7 +61,7 @@ mkPackage ptr = Package
     , packagePackager    = unsafePeekCString $ c_alpm_get_packager ptr
     , packageArch        = unsafePeekCString $ c_alpm_get_arch ptr
     , packageInstallSize = fromIntegral $ c_alpm_get_isize ptr
-    , packageGroups      = integrate (mkGroup . c_alpm_list_getdata_char) $ c_alpm_get_groups ptr
+    , packageGroups      = integrate (mkGroup . c_alpm_list_getstr) $ c_alpm_get_groups ptr
     }
 
 mkGroup :: CString -> Group
