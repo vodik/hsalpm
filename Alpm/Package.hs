@@ -94,7 +94,6 @@ foreign import ccall "alpm_pkg_get_groups"      c_alpm_pkg_get_groups      :: Pt
 -- TODO: db
 -- TODO: sig
 
-foreign import ccall "alpm_list_getdata" c_alpm_list_getpkg :: Ptr AlpmList -> Ptr PkgHandle
 mkPackage :: Ptr PkgHandle -> Package
 mkPackage ptr = Package
     { packageFilename    = unsafeMaybeCString $ c_alpm_pkg_get_filename ptr

@@ -15,8 +15,9 @@ import Alpm.Network
 main = do
     args <- getArgs
     pkgs <- runAlpm options $ do
-        local <- packages <$> localDB
-        return $ filter (myFilter args) local
+        db1 <- registerDB "core"
+        db2 <- registerDB "extra"
+        return . filter (myFilter args) $ packages db1 ++ packages db2
     forM_ pkgs ppPkgInfo
   where
     options = defaultOptions

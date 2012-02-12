@@ -3,6 +3,9 @@
 module Alpm.Database where
 
 import Control.Applicative
+import Control.DeepSeq
+import Data.Bits
+
 import Foreign.C
 import Foreign.Ptr (Ptr, nullPtr)
 
@@ -14,6 +17,10 @@ import Alpm.Util
 data DBHandle
 
 data DB = DB !(Ptr DBHandle)
+
+foreign import ccall "alpm_db_get_name" c_alpm_db_get_name :: Ptr DBHandle -> CString
+dbName :: DB -> String
+dbName (DB db_ptr) = unsafePeekCString $ c_alpm_db_get_name db_ptr
 
 foreign import ccall "alpm_option_get_localdb" c_alpm_option_get_localdb :: Ptr AlpmHandle -> IO (Ptr DBHandle)
 localDB :: Alpm DB
@@ -31,15 +38,14 @@ syncDBs = withAlpmPtr $ \alpm_ptr -> do
         then return []
         else return . integrate DB $ list_ptr
 
--- foreign input ccall "alpm_db_register_sync" c_alpm_db_register_sync :: Ptr AlpmHandle -> CString -> IO (Ptr DBHandle)
--- syncDB :: String -> Alpm DB
--- syncDB name = withAlpmPtr $ \alpm_ptr -> do
---     name'  <- newCString name
---     db_ptr <- c_alpm_db_register_sync alpm_ptr name'
---     if isNull db_ptr
---         then fail "could not register 'local' database"
---         else return $ DB db_ptr
+foreign import ccall "alpm_db_register_sync" c_alpm_db_register_sync :: Ptr AlpmHandle -> CString -> CInt -> IO (Ptr DBHandle)
+registerDB :: String -> Alpm DB
+registerDB name = withAlpmPtr $ \alpm_ptr -> do
+    name'  <- newCString name
+    db_ptr <- c_alpm_db_register_sync alpm_ptr name' (1 `shiftL` 31)
+    if isNull db_ptr
+        then fail $ "could not register '" ++ name ++ "' database"
+        else return $ DB db_ptr
 
 foreign import ccall "alpm_db_get_pkgcache" c_alpm_db_get_pkgcache :: Ptr DBHandle -> Ptr AlpmList
-packages :: DB -> [Package]
 packages (DB db_ptr) = integrate mkPackage $ c_alpm_db_get_pkgcache db_ptr
