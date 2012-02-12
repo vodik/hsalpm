@@ -15,7 +15,8 @@ import Pacman
 
 main = do
     args <- getArgs
-    pkgs <- runAlpm options $ concatMap (find args) <$> pacmanDBs
+    conf <- getPacman
+    pkgs <- runAlpm options $ concatMap (find args) <$> (pacmanDBs =<< liftIO getPacman)
     mapM_ ppPkgInfo pkgs
   where
     find args = filter (myFilter args) . packages
