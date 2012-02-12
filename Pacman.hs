@@ -26,7 +26,7 @@ eol :: (Monad m) => ParsecT String u m ()
 eol = oneOf "\n\r" >> return () <?> "end of line"
 
 equals :: (Monad m) => ParsecT String u m ()
-equals = skipMany space >> char '=' >> skipMany space
+equals = skipMany space >> char '=' >> skipMany space <?> "equals"
 
 key :: (Monad m) => ParsecT String u m String
 key = many1 (letter <|> digit) <?> "identifier"
@@ -34,7 +34,7 @@ key = many1 (letter <|> digit) <?> "identifier"
 pair :: (Monad m) => ParsecT String u m String
 pair = rstrip <$> do
     equals
-    anyChar `manyTill` (try eol <|> try comment <|> eof)
+    anyChar `manyTill` (try eol <|> try comment <|> eof) <?> "value"
   where
     rstrip = reverse . dropWhile isSpace . reverse
 
