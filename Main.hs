@@ -24,8 +24,7 @@ main = do
         db5 <- registerDB "community"
         db6 <- registerDB "haskell"
         let func = filter (myFilter args) . packages
-            list = map func [ db1, db2, db3, db4, db5, db6 ]
-        return $ concat list
+        return $ concatMap func [ db1, db2, db3, db4, db5, db6 ]
     mapM_ ppPkgInfo pkgs
   where
     options = defaultOptions
