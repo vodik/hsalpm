@@ -26,7 +26,10 @@ eol :: (Monad m) => ParsecT String u m ()
 eol = oneOf "\n\r" >> return () <?> "end of line"
 
 ident :: (Monad m) => ParsecT String u m String
-ident = many (letter <|> digit) <?> "identifier"
+ident = many1 (letter <|> digit) <?> "identifier"
+
+--key =
+--pair =
 
 item :: (Monad m) => ParsecT String u m (String, String)
 item = do key <- ident
@@ -38,13 +41,17 @@ item = do key <- ident
           return (key, fromMaybe "" value)
     where rstrip = reverse . dropWhile isSpace . reverse
 
-db :: ParsecT String String Identity String
-db = char '[' *> anyChar `manyTill` lookAhead (oneOf "]\r\n") <* char ']' <?> "db"
+header :: ParsecT String String Identity ()
+header = do
+    char '['
+    putState =<< anyChar `manyTill` lookAhead (oneOf "]\r\n")
+    char ']'
+    return () <?> "header"
 
 line :: ParsecT String String Identity (Maybe (String, (String, String)))
 line = do
     skipMany space
-    try (db >>= putState >> return Nothing) <|> try (comment >> return Nothing) <|> item'
+    try (header >> return Nothing) <|> try (comment >> return Nothing) <|> item'
   where
     item' = item >>= \pair -> getState >>= \s -> return $ Just (s, pair)
 
