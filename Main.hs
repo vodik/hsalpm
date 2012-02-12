@@ -15,18 +15,18 @@ import Pacman
 
 main = do
     args <- getArgs
-    -- pkgs <- runAlpm options $ do
-    --     db1 <- registerDB "testing"
-    --     db2 <- registerDB "core"
-    --     db3 <- registerDB "extra"
-    --     db4 <- registerDB "community-testing"
-    --     db5 <- registerDB "community"
-    --     db6 <- registerDB "haskell"
-    --     let func = filter (myFilter args) . packages
-    --         pkgs = map func [ db1, db2, db3, db4, db5, db6 ]
-    --     return $ concat pkgs
-    conf <- getPacman
-    pkgs <- runAlpm options $ concatMap (find args) <$> (pacmanDBs =<< liftIO getPacman)
+    pkgs <- runAlpm options $ do
+        db1 <- registerDB "testing"
+        db2 <- registerDB "core"
+        db3 <- registerDB "extra"
+        db4 <- registerDB "community-testing"
+        db5 <- registerDB "community"
+        db6 <- registerDB "haskell"
+        let func = filter (myFilter args) . packages
+            pkgs = map func [ db1, db2, db3, db4, db5, db6 ]
+        return $ concat pkgs
+    -- conf <- getPacman
+    -- pkgs <- runAlpm options $ concatMap (find args) <$> (pacmanDBs =<< liftIO getPacman)
     mapM_ ppPkgInfo pkgs
   where
     find args = filter (myFilter args) . packages
