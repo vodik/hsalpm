@@ -20,18 +20,13 @@ import Alpm.Database
 --     deriving (Show)
 
 comment :: (Monad m) => ParsecT String u m ()
-comment = char '#' *> skipMany (noneOf "\r\n") <?> "comment"
+comment = char '#' >> skipMany (noneOf "\r\n") <?> "comment"
 
 eol :: (Monad m) => ParsecT String u m ()
-eol = do oneOf "\n\r"
-         return ()
-    <?> "end of line"
+eol = oneOf "\n\r" >> return () <?> "end of line"
 
 ident :: (Monad m) => ParsecT String u m String
-ident = do c <- letter <|> char '_'
-           cs <- many (letter <|> digit <|> char '_')
-           return (c:cs)
-      <?> "identifier"
+ident = many (letter <|> digit) <?> "identifier"
 
 item :: (Monad m) => ParsecT String u m (String, String)
 item = do key <- ident
@@ -39,31 +34,19 @@ item = do key <- ident
           value <- optionMaybe $ rstrip <$> do
               char '='
               skipMany space
-              manyTill anyChar (try eol <|> try comment <|> eof) -- TODO: fix
+              anyChar `manyTill` (try eol <|> try comment <|> eof)
           return (key, fromMaybe "" value)
     where rstrip = reverse . dropWhile isSpace . reverse
 
-takeUntil :: (Monad m) => String -> ParsecT String u m String
-takeUntil s = anyChar `manyTill` lookAhead (oneOf s)
-
 db :: ParsecT String String Identity String
-db = char '[' *> takeUntil "]\r\n" <* char ']' <?> "db"
+db = char '[' *> anyChar `manyTill` lookAhead (oneOf "]\r\n") <* char ']' <?> "db"
 
 line :: ParsecT String String Identity (Maybe (String, (String, String)))
 line = do
     skipMany space
-    try db' <|> try (comment *> return Nothing) <|> item'
-
-db' :: ParsecT String String Identity (Maybe (String, (String, String)))
-db' = do
-    sec <- db
-    putState sec
-    return Nothing
-
-item' :: ParsecT String String Identity (Maybe (String, (String, String)))
-item' = do
-    pair <- item
-    getState >>= \s -> return $ Just (s, pair)
+    try (db >>= putState >> return Nothing) <|> try (comment >> return Nothing) <|> item'
+  where
+    item' = item >>= \pair -> getState >>= \s -> return $ Just (s, pair)
 
 file :: ParsecT String String Identity [(String, (String, String))]
 file = catMaybes <$> many line
