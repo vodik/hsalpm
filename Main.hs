@@ -22,8 +22,9 @@ main = do
         db4 <- registerDB "community-testing"
         db5 <- registerDB "community"
         db6 <- registerDB "haskell"
-        let pkgs = concatMap packages [ db1, db2, db3, db4, db5, db6 ]
-        return $ filter (myFilter args) pkgs
+        let func = filter (myFilter args) . packages
+            pkgs = map func [ db1, db2, db3, db4, db5, db6 ]
+        return $ concat pkgs
     mapM_ ppPkgInfo pkgs
   where
     options = defaultOptions
@@ -32,7 +33,7 @@ myFilter :: [String] -> Package -> Bool
 myFilter ts pkg =
     let ts' = map (map toLower) ts
         f1  = all (`isInfixOf` packageName pkg) ts'
-        f2  = all (`isInfixOf` map toLower $ packageDescription pkg) ts'
+        f2  = all (`isInfixOf` map toLower (packageDescription pkg)) ts'
         f3  = any (`elem` packageGroups pkg) ts'
     in f1 || f2 || f3
 
