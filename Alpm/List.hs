@@ -12,8 +12,12 @@ import Alpm.Util
 
 data AlpmList
 
-foreign import ccall "alpm_list_next"  c_alpm_list_next  :: Ptr AlpmList -> Ptr AlpmList
-integrate :: (Ptr AlpmList -> b) -> Ptr AlpmList -> [b]
+foreign import ccall "alpm_list_next"    c_alpm_list_next    :: Ptr AlpmList -> Ptr AlpmList
+foreign import ccall "alpm_list_getdata" c_alpm_list_getdata :: Ptr AlpmList -> Ptr a
+
+integrate :: (Ptr a -> b) -> Ptr AlpmList -> [b]
 integrate box ptr
     | isNull ptr = []
-    | otherwise  = box ptr : integrate box (c_alpm_list_next ptr)
+    | otherwise  = boxWith ptr : integrate box (c_alpm_list_next ptr)
+  where
+    boxWith = box . c_alpm_list_getdata

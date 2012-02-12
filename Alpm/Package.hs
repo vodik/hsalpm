@@ -95,8 +95,8 @@ foreign import ccall "alpm_pkg_get_groups"      c_alpm_pkg_get_groups      :: Pt
 -- TODO: sig
 
 foreign import ccall "alpm_list_getdata" c_alpm_list_getpkg :: Ptr AlpmList -> Ptr PkgHandle
-mkPackage :: Ptr AlpmList -> Package
-mkPackage node = let ptr = c_alpm_list_getpkg node in Package
+mkPackage :: Ptr PkgHandle -> Package
+mkPackage ptr = Package
     { packageFilename    = unsafeMaybeCString $ c_alpm_pkg_get_filename ptr
     , packageName        = unsafePeekCString $ c_alpm_pkg_get_name ptr
     , packageVersion     = unsafePeekCString $ c_alpm_pkg_get_version ptr
@@ -112,8 +112,8 @@ mkPackage node = let ptr = c_alpm_list_getpkg node in Package
     , packageSize        = maybeFromIntegral $ c_alpm_pkg_get_size ptr
     , packageInstallSize = fromIntegral $ c_alpm_pkg_get_isize ptr
     , packageReason      = toEnum . fromIntegral $ c_alpm_pkg_get_reason ptr
-    , packageLicenses    = integrate mkStringList $ c_alpm_pkg_get_licenses ptr
-    , packageGroups      = integrate mkStringList $ c_alpm_pkg_get_groups ptr
+    , packageLicenses    = integrate unsafePeekCString $ c_alpm_pkg_get_licenses ptr
+    , packageGroups      = integrate unsafePeekCString $ c_alpm_pkg_get_groups ptr
     }
 
 byInstallSize :: Package -> Package -> Ordering
