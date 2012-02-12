@@ -57,7 +57,7 @@ file = catMaybes <$> many line
 -- getPacman :: IO (Either ParseError Pacman)
 getPacman = do
     input <- readFile "/etc/pacman.conf"
-    return $ runParser file "poop" "/etc/pacman.conf" input
+    return $ runParser file "options" "/etc/pacman.conf" input
     -- return $ case result of
     --    Left err -> Left err
     --    Right xs -> Right $ M.fromList (reverse xs)
