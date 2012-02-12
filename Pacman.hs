@@ -31,15 +31,19 @@ equals = char '=' >> skipMany space <?> "equals"
 key :: (Monad m) => ParsecT String u m String
 key = many1 (letter <|> digit) <?> "identifier"
 
-pair :: (Monad m) => ParsecT String u m String
-pair = rstrip <$> do
+value :: (Monad m) => ParsecT String u m String
+value = rstrip <$> do
     equals
-    anyChar `manyTill` (try eol <|> try comment <|> eof) <?> "value"
+    -- anyChar `manyTill` (try eol <|> try comment <|> eof) <?> "value"
+    many1 (letter <|> char '/') <?> "value"
   where
     rstrip = reverse . dropWhile isSpace . reverse
 
 item :: (Monad m) => ParsecT String u m (String, String)
-item = (,) <$> (key <* skipMany space) <*> (fromMaybe "" <$> optionMaybe pair)
+item = do
+    pair <- (,) <$> (key <* skipMany space) <*> (fromMaybe "" <$> optionMaybe value)
+    anyChar `manyTill` (try eol <|> try comment <|> eof) <?> "item"
+    return pair
 
 header :: ParsecT String String Identity ()
 header = char '[' >> many1 (letter <|> char '-') >>= putState >> char ']' >> return () <?> "header"
@@ -63,4 +67,4 @@ getPacman = do
     --    Right xs -> Right $ M.fromList (reverse xs)
 
 -- pacmanDBs :: Pacman -> Alpm [DB]
-pacmanDBs pm = return []
+pacmanDBs pm = mapM registerDB [ "testing", "core", "extra", "community-testing", "community", "haskell" ]

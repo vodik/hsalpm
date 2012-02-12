@@ -3,7 +3,6 @@ module Main where
 import Control.Applicative
 import Control.Monad.Trans (liftIO)
 import Data.Char
-import Data.Foldable (forM_)
 import Data.List
 import System.Environment
 
@@ -13,24 +12,15 @@ import Alpm.Package
 import Alpm.Network
 import Pacman
 
+main :: IO ()
 main = do
     args <- getArgs
-    pkgs <- runAlpm options $ do
-        db1 <- registerDB "testing"
-        db2 <- registerDB "core"
-        db3 <- registerDB "extra"
-        db4 <- registerDB "community-testing"
-        db5 <- registerDB "community"
-        db6 <- registerDB "haskell"
+    conf <- getPacman
+    pkgs <- runAlpm defaultOptions $ do
+        dbs <- pacmanDBs conf
         let func = filter (myFilter args) . packages
-            pkgs = map func [ db1, db2, db3, db4, db5, db6 ]
-        return $ concat pkgs
-    -- conf <- getPacman
-    -- pkgs <- runAlpm options $ concatMap (find args) <$> (pacmanDBs =<< liftIO getPacman)
+        return $ concatMap func dbs
     mapM_ ppPkgInfo pkgs
-  where
-    find args = filter (myFilter args) . packages
-    options   = defaultOptions
 
 myFilter :: [String] -> Package -> Bool
 myFilter ts pkg =
