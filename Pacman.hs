@@ -42,11 +42,7 @@ item = do key <- ident
     where rstrip = reverse . dropWhile isSpace . reverse
 
 header :: ParsecT String String Identity ()
-header = do
-    char '['
-    putState =<< anyChar `manyTill` lookAhead (oneOf "]\r\n")
-    char ']'
-    return () <?> "header"
+header = char '[' >> many1 (letter <|> char '-') >>= putState >> char ']' >> return () <?> "header"
 
 line :: ParsecT String String Identity (Maybe (String, (String, String)))
 line = do
