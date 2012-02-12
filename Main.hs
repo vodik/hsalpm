@@ -2,7 +2,6 @@ module Main where
 
 import Control.Applicative
 import Control.Monad.Trans (liftIO)
-import Control.Parallel.Strategies
 import Data.Char
 import Data.Foldable (forM_)
 import Data.List
