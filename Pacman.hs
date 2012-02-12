@@ -39,10 +39,7 @@ pair = rstrip <$> do
     rstrip = reverse . dropWhile isSpace . reverse
 
 item :: (Monad m) => ParsecT String u m (String, String)
-item = do
-    k <- key
-    v <- fromMaybe "" <$> optionMaybe pair
-    return (k, v)
+item = (,) <$> key <*> (fromMaybe "" <$> optionMaybe pair)
 
 header :: ParsecT String String Identity ()
 header = char '[' >> many1 (letter <|> char '-') >>= putState >> char ']' >> return () <?> "header"
