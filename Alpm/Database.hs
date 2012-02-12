@@ -11,7 +11,6 @@ import Foreign.Ptr (Ptr, nullPtr)
 
 import Alpm.Base
 import Alpm.List
-import Alpm.Package
 import Alpm.Util
 
 data DBHandle
@@ -46,6 +45,3 @@ registerDB name = withAlpmPtr $ \alpm_ptr -> do
     if isNull db_ptr
         then fail $ "could not register '" ++ name ++ "' database"
         else return $ DB db_ptr
-
-foreign import ccall "alpm_db_get_pkgcache" c_alpm_db_get_pkgcache :: Ptr DBHandle -> Ptr AlpmList
-packages (DB db_ptr) = integrate mkPackage $ c_alpm_db_get_pkgcache db_ptr

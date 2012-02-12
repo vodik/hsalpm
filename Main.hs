@@ -11,14 +11,19 @@ import Alpm
 import Alpm.Database
 import Alpm.Package
 import Alpm.Network
+import Pacman
 
 main = do
     args <- getArgs
-    pkgs <- runAlpm options $ do
-        db1 <- registerDB "core"
-        db2 <- registerDB "extra"
-        return . filter (myFilter args) $ packages db1 ++ packages db2
-    forM_ pkgs ppPkgInfo
+    runAlpm options $ do
+        db1 <- registerDB "testing"
+        db2 <- registerDB "core"
+        db3 <- registerDB "extra"
+        db4 <- registerDB "community-testing"
+        db5 <- registerDB "community"
+        db6 <- registerDB "haskell"
+        let pkgs = concat $ map packages [ db1, db2, db3, db4, db5, db6 ]
+        mapM_ (liftIO . ppPkgInfo) $ filter (myFilter args) pkgs
   where
     options = defaultOptions
 
@@ -32,7 +37,7 @@ myFilter ts pkg =
 
 ppPkgInfo :: Package -> IO ()
 ppPkgInfo pkg = do
-    putStrLn $ "local/" ++ packageName pkg ++ " " ++ packageVersion pkg ++ groups (packageGroups pkg)
+    putStrLn $ packageDB pkg ++ "/" ++ packageName pkg ++ " " ++ packageVersion pkg ++ groups (packageGroups pkg)
     putStrLn $ "    " ++ packageDescription pkg
   where
     groups g | null g    = []

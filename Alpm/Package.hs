@@ -11,6 +11,7 @@ import System.IO.Unsafe
 import Foreign.C
 import Foreign.Ptr (Ptr, nullPtr)
 
+import Alpm.Database
 import Alpm.List
 import Alpm.Util
 
@@ -44,6 +45,7 @@ data Package = Package
     , packageReason      :: Reason
     , packageLicenses    :: [License]
     , packageGroups      :: [Group]
+    , packageDB          :: String
     }
     deriving (Eq, Show)
 
@@ -64,7 +66,11 @@ instance NFData Package where
       `seq` packageInstallSize p
       `seq` packageLicenses p
       `seq` packageGroups p
+      `seq` packageDB p
       `seq` ()
+
+foreign import ccall "alpm_db_get_pkgcache" c_alpm_db_get_pkgcache :: Ptr DBHandle -> Ptr AlpmList
+packages (DB db_ptr) = integrate mkPackage $ c_alpm_db_get_pkgcache db_ptr
 
 foreign import ccall "alpm_pkg_get_filename"    c_alpm_pkg_get_filename    :: Ptr PkgHandle -> CString
 foreign import ccall "alpm_pkg_get_name"        c_alpm_pkg_get_name        :: Ptr PkgHandle -> CString
@@ -91,7 +97,7 @@ foreign import ccall "alpm_pkg_get_groups"      c_alpm_pkg_get_groups      :: Pt
 -- TODO: replaces
 -- TODO: files
 -- TODO: backups
--- TODO: db
+foreign import ccall "alpm_pkg_get_db"          c_alpm_pkg_get_db          :: Ptr PkgHandle -> Ptr a
 -- TODO: sig
 
 mkPackage :: Ptr PkgHandle -> Package
@@ -113,6 +119,7 @@ mkPackage ptr = Package
     , packageReason      = toEnum . fromIntegral $ c_alpm_pkg_get_reason ptr
     , packageLicenses    = integrate unsafePeekCString $ c_alpm_pkg_get_licenses ptr
     , packageGroups      = integrate unsafePeekCString $ c_alpm_pkg_get_groups ptr
+    , packageDB          = dbName . DB $ c_alpm_pkg_get_db ptr
     }
 
 byInstallSize :: Package -> Package -> Ordering
