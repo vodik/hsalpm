@@ -16,18 +16,11 @@ import Pacman
 
 main = do
     args <- getArgs
-    pkgs <- runAlpm options $ do
-        db1 <- registerDB "testing"
-        db2 <- registerDB "core"
-        db3 <- registerDB "extra"
-        db4 <- registerDB "community-testing"
-        db5 <- registerDB "community"
-        db6 <- registerDB "haskell"
-        let func = filter (myFilter args) . packages
-        return $ concatMap func [ db1, db2, db3, db4, db5, db6 ]
+    pkgs <- runAlpm options $ concatMap (find args) <$> pacmanDBs
     mapM_ ppPkgInfo pkgs
   where
-    options = defaultOptions
+    find args = filter (myFilter args) . packages
+    options   = defaultOptions
 
 myFilter :: [String] -> Package -> Bool
 myFilter ts pkg =
