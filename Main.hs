@@ -15,15 +15,16 @@ import Pacman
 
 main = do
     args <- getArgs
-    runAlpm options $ do
+    pkgs <- runAlpm options $ do
         db1 <- registerDB "testing"
         db2 <- registerDB "core"
         db3 <- registerDB "extra"
         db4 <- registerDB "community-testing"
         db5 <- registerDB "community"
         db6 <- registerDB "haskell"
-        let pkgs = concat $ map packages [ db1, db2, db3, db4, db5, db6 ]
-        mapM_ (liftIO . ppPkgInfo) $ filter (myFilter args) pkgs
+        let pkgs = concatMap packages [ db1, db2, db3, db4, db5, db6 ]
+        return $ filter (myFilter args) pkgs
+    mapM_ ppPkgInfo pkgs
   where
     options = defaultOptions
 
@@ -31,7 +32,7 @@ myFilter :: [String] -> Package -> Bool
 myFilter ts pkg =
     let ts' = map (map toLower) ts
         f1  = all (`isInfixOf` packageName pkg) ts'
-        f2  = all (`isInfixOf` map toLower (packageDescription pkg)) ts'
+        f2  = all (`isInfixOf` map toLower $ packageDescription pkg) ts'
         f3  = any (`elem` packageGroups pkg) ts'
     in f1 || f2 || f3
 
