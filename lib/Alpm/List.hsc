@@ -8,6 +8,7 @@ import System.IO.Unsafe
 import Foreign.C
 import Foreign.Ptr
 import Foreign.Storable
+import GHC.Ptr
 
 import Alpm.Util
 #include <alpm_list.h>
@@ -26,5 +27,4 @@ instance Storable (AlpmList a) where
 
 integrate box ptr
     | isNull ptr = []
-    | otherwise  = let (AlpmList d n) = unsafePerformIO (peek ptr) in
-        box d : integrate box n
+    | otherwise  = let (AlpmList d n) = unsafePerformIO (peek ptr) in box d : integrate box n
