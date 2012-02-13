@@ -4,7 +4,9 @@ module Alpm.Database where
 
 import Control.Applicative
 import Control.DeepSeq
+import Control.Monad.Trans (liftIO)
 import Data.Bits
+import Text.Printf
 
 import Foreign.C
 import Foreign.Ptr (Ptr, nullPtr)
@@ -45,3 +47,13 @@ registerDB name = withAlpmPtr $ \alpm_ptr -> do
     if isNull db_ptr
         then fail $ "could not register '" ++ name ++ "' database"
         else return $ DB db_ptr
+
+foreign import ccall "alpm_db_update" c_alpm_db_update :: CInt -> Ptr DBHandle -> IO CInt
+updateDB :: Bool -> DB -> Alpm Int
+updateDB force (DB db_ptr) = do
+    let f = if force then 1 else 0
+    rst <- liftIO $ c_alpm_db_update f db_ptr
+    if rst < 0
+        -- then fail $ printf "Unable to update database: %s\n" alpmLastStrerror
+        then fail $ printf "Unable to update database"
+        else return $ fromIntegral rst
