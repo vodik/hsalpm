@@ -25,13 +25,13 @@ data AlpmList a = AlpmList
 
 {-# LINE 22 "Alpm/List.hsc" #-}
 instance Storable (AlpmList a) where
-    alignment _ = 8
+    alignment _ = 4
 {-# LINE 24 "Alpm/List.hsc" #-}
-    sizeOf _    = (24)
+    sizeOf _    = (12)
 {-# LINE 25 "Alpm/List.hsc" #-}
     peek ptr    = AlpmList <$> (\hsc_ptr -> peekByteOff hsc_ptr 0) ptr
 {-# LINE 26 "Alpm/List.hsc" #-}
-                           <*> (\hsc_ptr -> peekByteOff hsc_ptr 16) ptr
+                           <*> (\hsc_ptr -> peekByteOff hsc_ptr 8) ptr
 {-# LINE 27 "Alpm/List.hsc" #-}
 
 integrate box ptr

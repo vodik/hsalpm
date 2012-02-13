@@ -21,7 +21,7 @@ import Alpm.Util
 
 runAlpm :: AlpmOptions -> Alpm a -> IO a
 runAlpm opt (Alpm f) =
-    alpmInitialize opt >>= \alpm -> withForeignPtr (alpmPtr alpm) $ \alpm_ptr -> do
+    alpmInitialize opt >>= \alpm@(AlpmSession a) -> withForeignPtr a $ \alpm_ptr -> do
         whenJust (cachePath opt) $ setAlpmOptions alpm_option_add_cachedir alpm_ptr
         runReaderT f alpm
 
@@ -32,7 +32,7 @@ defaultOptions = AlpmOptions
     }
 
 foreign import ccall "alpm_initialize" c_alpm_initialize :: CString -> CString -> Ptr CInt -> IO (Ptr AlpmHandle)
-alpmInitialize :: AlpmOptions -> IO AlpmConf
+alpmInitialize :: AlpmOptions -> IO AlpmSession
 alpmInitialize opt = do
     root'   <- newCString $ root opt
     dbPath' <- newCString $ dbPath opt
@@ -40,6 +40,6 @@ alpmInitialize opt = do
         alpm_ptr <- c_alpm_initialize root' dbPath' errPtr
         if isNull alpm_ptr
             then peek errPtr >>= fail . printf "failed to initialize alpm library (%s)" . alpmStrerror
-            else flip AlpmConf opt <$> newForeignPtr c_alpm_release alpm_ptr
+            else AlpmSession <$> newForeignPtr c_alpm_release alpm_ptr
 
 foreign import ccall "&alpm_release" c_alpm_release :: FinalizerPtr AlpmHandle

@@ -8,7 +8,6 @@ import System.IO.Unsafe
 import Foreign.C
 import Foreign.Ptr
 import Foreign.Storable
-import GHC.Ptr
 
 import Alpm.Util
 #include <alpm_list.h>

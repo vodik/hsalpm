@@ -13,14 +13,10 @@ import Foreign.ForeignPtr
 import Alpm.Util
 
 data AlpmHandle
+data AlpmSession = AlpmSession !(ForeignPtr AlpmHandle)
 
-data AlpmConf = AlpmConf
-    { alpmPtr :: !(ForeignPtr AlpmHandle)
-    , options :: AlpmOptions
-    }
-
-newtype Alpm a = Alpm (ReaderT AlpmConf IO a)
-    deriving (Functor, Applicative, Monad, MonadIO, MonadReader AlpmConf)
+newtype Alpm a = Alpm (ReaderT AlpmSession IO a)
+    deriving (Functor, Applicative, Monad, MonadIO, MonadReader AlpmSession)
 
 data AlpmOptions = AlpmOptions
     { root      :: String
@@ -33,7 +29,7 @@ setAlpmOptions :: (Ptr AlpmHandle -> CString -> IO ()) -> Ptr AlpmHandle -> Stri
 setAlpmOptions f h v = newCString v >>= f h
 
 withAlpmPtr :: (Ptr AlpmHandle -> IO b) -> Alpm b
-withAlpmPtr f = asks alpmPtr >>= \a -> liftIO $ withForeignPtr a f
+withAlpmPtr f = ask >>= \(AlpmSession a) -> liftIO $ withForeignPtr a f
 
 foreign import ccall "alpm_strerror" c_alpm_strerror :: CInt -> CString
 alpmStrerror errno = unsafePeekCString $ c_alpm_strerror errno
