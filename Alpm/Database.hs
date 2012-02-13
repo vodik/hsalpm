@@ -54,6 +54,5 @@ updateDB force (DB db_ptr) = do
     let f = if force then 1 else 0
     rst <- liftIO $ c_alpm_db_update f db_ptr
     if rst < 0
-        -- then fail $ printf "Unable to update database: %s\n" alpmLastStrerror
-        then fail $ printf "Unable to update database"
+        then alpmLastStrerror >>= fail . printf "Unable to update database: %s\n"
         else return $ fromIntegral rst
