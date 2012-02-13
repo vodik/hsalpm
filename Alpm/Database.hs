@@ -16,6 +16,7 @@ import Alpm.List
 import Alpm.Util
 
 data DBHandle
+type DBList = AlpmList DBHandle
 
 data DB = DB !(Ptr DBHandle)
 
@@ -31,7 +32,7 @@ localDB = withAlpmPtr $ \alpm_ptr -> do
         then fail "could not register 'local' database"
         else return $ DB db_ptr
 
-foreign import ccall "alpm_option_get_syncdbs" c_alpm_option_get_syncdbs :: Ptr AlpmHandle -> IO (Ptr AlpmList)
+foreign import ccall "alpm_option_get_syncdbs" c_alpm_option_get_syncdbs :: Ptr AlpmHandle -> IO (Ptr DBList)
 syncDBs :: Alpm [DB]
 syncDBs = withAlpmPtr $ \alpm_ptr -> do
     list_ptr <- c_alpm_option_get_syncdbs alpm_ptr

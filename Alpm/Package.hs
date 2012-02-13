@@ -21,6 +21,7 @@ type Group = String
 type License = String
 
 data PkgHandle
+type PkgList = AlpmList PkgHandle
 
 data Origin = File | LocalDB | SyncDB
     deriving (Eq, Show, Read, Enum)
@@ -70,7 +71,7 @@ instance NFData Package where
       `seq` packageDB p
       `seq` ()
 
-foreign import ccall "alpm_db_get_pkgcache" c_alpm_db_get_pkgcache :: Ptr DBHandle -> Ptr AlpmList
+foreign import ccall "alpm_db_get_pkgcache" c_alpm_db_get_pkgcache :: Ptr DBHandle -> Ptr PkgList
 packages (DB db_ptr) = integrate mkPackage $ c_alpm_db_get_pkgcache db_ptr
 
 getFromPkgCache :: (NFData a) => ([Package] -> Alpm [a]) -> DB -> Alpm [a]
@@ -94,8 +95,8 @@ foreign import ccall "alpm_pkg_get_arch"        c_alpm_pkg_get_arch        :: Pt
 foreign import ccall "alpm_pkg_get_size"        c_alpm_pkg_get_size        :: Ptr PkgHandle -> CSize
 foreign import ccall "alpm_pkg_get_isize"       c_alpm_pkg_get_isize       :: Ptr PkgHandle -> CSize
 foreign import ccall "alpm_pkg_get_reason"      c_alpm_pkg_get_reason      :: Ptr PkgHandle -> CInt
-foreign import ccall "alpm_pkg_get_licenses"    c_alpm_pkg_get_licenses    :: Ptr PkgHandle -> Ptr AlpmList
-foreign import ccall "alpm_pkg_get_groups"      c_alpm_pkg_get_groups      :: Ptr PkgHandle -> Ptr AlpmList
+foreign import ccall "alpm_pkg_get_licenses"    c_alpm_pkg_get_licenses    :: Ptr PkgHandle -> Ptr (AlpmList CChar)
+foreign import ccall "alpm_pkg_get_groups"      c_alpm_pkg_get_groups      :: Ptr PkgHandle -> Ptr (AlpmList CChar)
 -- TODO: depends
 -- TODO: optdepends
 -- TODO: conflics

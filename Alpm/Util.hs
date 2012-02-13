@@ -1,5 +1,3 @@
-{-# LANGUAGE ForeignFunctionInterface #-}
-
 module Alpm.Util where
 
 import Control.Applicative
