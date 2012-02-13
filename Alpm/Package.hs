@@ -73,11 +73,11 @@ instance NFData Package where
 foreign import ccall "alpm_db_get_pkgcache" c_alpm_db_get_pkgcache :: Ptr DBHandle -> Ptr AlpmList
 packages (DB db_ptr) = integrate mkPackage $ c_alpm_db_get_pkgcache db_ptr
 
-getPackages :: (NFData a) => ([Package] -> Alpm [a]) -> DB -> Alpm [a]
-getPackages f db = f (packages db) >>= (return $!!)
+getFromPkgCache :: (NFData a) => ([Package] -> Alpm [a]) -> DB -> Alpm [a]
+getFromPkgCache f db = f (packages db) >>= (return $!!)
 
-withPackages :: ([Package] -> Alpm ()) -> DB -> Alpm ()
-withPackages f db = f $ packages db
+onPkgCache :: ([Package] -> Alpm ()) -> DB -> Alpm ()
+onPkgCache f db = f $ packages db
 
 foreign import ccall "alpm_pkg_get_filename"    c_alpm_pkg_get_filename    :: Ptr PkgHandle -> CString
 foreign import ccall "alpm_pkg_get_name"        c_alpm_pkg_get_name        :: Ptr PkgHandle -> CString
