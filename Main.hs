@@ -19,7 +19,7 @@ main = do
     conf <- getPacman
     pkgs <- runAlpm defaultOptions $ do
         dbs  <- pacmanDBs conf
-        pkgs <- forM dbs $ withPackages $ return . filter (myFilter args)
+        pkgs <- forM dbs $ getPackages $ return . filter (myFilter args)
         return $ concat pkgs
     mapM_ ppPkgInfo pkgs
 
