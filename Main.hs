@@ -1,6 +1,7 @@
 module Main where
 
 import Control.Applicative
+import Control.Monad
 import Control.Monad.Trans (liftIO)
 import Data.Char
 import Data.List
@@ -17,9 +18,9 @@ main = do
     args <- getArgs
     conf <- getPacman
     pkgs <- runAlpm defaultOptions $ do
-        dbs <- pacmanDBs conf
-        let func = filter (myFilter args) . packages
-        return $ concatMap func dbs
+        dbs  <- pacmanDBs conf
+        pkgs <- forM dbs $ withPackages $ return . filter (myFilter args)
+        return $ concat pkgs
     mapM_ ppPkgInfo pkgs
 
 myFilter :: [String] -> Package -> Bool
@@ -29,6 +30,9 @@ myFilter ts pkg =
         f2  = all (`isInfixOf` map toLower (packageDescription pkg)) ts'
         f3  = any (`elem` packageGroups pkg) ts'
     in f1 || f2 || f3
+
+ppPkgName :: Package -> IO ()
+ppPkgName pkg = putStrLn $ unwords [ packageName pkg, packageVersion pkg ]
 
 ppPkgInfo :: Package -> IO ()
 ppPkgInfo pkg = do

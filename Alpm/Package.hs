@@ -11,6 +11,7 @@ import System.IO.Unsafe
 import Foreign.C
 import Foreign.Ptr (Ptr, nullPtr)
 
+import Alpm.Base
 import Alpm.Database
 import Alpm.List
 import Alpm.Util
@@ -71,6 +72,12 @@ instance NFData Package where
 
 foreign import ccall "alpm_db_get_pkgcache" c_alpm_db_get_pkgcache :: Ptr DBHandle -> Ptr AlpmList
 packages (DB db_ptr) = integrate mkPackage $ c_alpm_db_get_pkgcache db_ptr
+
+withPackages :: (NFData a) => ([Package] -> Alpm [a]) -> DB -> Alpm [a]
+withPackages f db = f (packages db) >>= (return $!!)
+
+withPackages_ :: ([Package] -> Alpm ()) -> DB -> Alpm ()
+withPackages_ f db = f $ packages db
 
 foreign import ccall "alpm_pkg_get_filename"    c_alpm_pkg_get_filename    :: Ptr PkgHandle -> CString
 foreign import ccall "alpm_pkg_get_name"        c_alpm_pkg_get_name        :: Ptr PkgHandle -> CString

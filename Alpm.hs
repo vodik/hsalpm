@@ -19,12 +19,11 @@ import Alpm.Network
 import Alpm.Package
 import Alpm.Util
 
-runAlpm :: (NFData a) => AlpmOptions -> Alpm a -> IO a
+runAlpm :: AlpmOptions -> Alpm a -> IO a
 runAlpm opt (Alpm f) =
     alpmInitialize opt >>= \alpm -> withForeignPtr (alpmPtr alpm) $ \alpm_ptr -> do
         whenJust (cachePath opt) $ setAlpmOptions alpm_option_add_cachedir alpm_ptr
-        r <- runReaderT f alpm
-        return $!! r
+        runReaderT f alpm
 
 defaultOptions = AlpmOptions
     { root      = "/"
