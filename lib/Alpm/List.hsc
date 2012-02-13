@@ -27,5 +27,4 @@ instance Storable (AlpmList a) where
 
 integrate box ptr
     | isNull ptr = []
-    | otherwise  = let (AlpmList d n) = unsafePerformIO (peek ptr) in
-        box d : integrate box n
+    | otherwise  = let (AlpmList d n) = unsafePerformIO (peek ptr) in box d : integrate box n
