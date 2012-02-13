@@ -1,4 +1,7 @@
-{-# LANGUAGE ForeignFunctionInterface, EmptyDataDecls #-}
+{-# INCLUDE <alpm_list.h> #-}
+{-# LINE 1 "Alpm/List.hsc" #-}
+{-# LANGUAGE CPP #-}
+{-# LINE 2 "Alpm/List.hsc" #-}
 
 module Alpm.List where
 
@@ -6,18 +9,32 @@ import Control.Applicative
 import System.IO.Unsafe
 
 import Foreign.C
-import Foreign.Ptr (Ptr, nullPtr)
+import Foreign.Ptr
+import Foreign.Storable
+import GHC.Ptr
 
 import Alpm.Util
 
-data AlpmList
+{-# LINE 15 "Alpm/List.hsc" #-}
 
-foreign import ccall "alpm_list_next"    c_alpm_list_next    :: Ptr AlpmList -> Ptr AlpmList
-foreign import ccall "alpm_list_getdata" c_alpm_list_getdata :: Ptr AlpmList -> Ptr a
+data AlpmList a = AlpmList
+    { dataPtr :: Ptr a
+    , next    :: Ptr (AlpmList a)
+    }
 
-integrate :: (Ptr a -> b) -> Ptr AlpmList -> [b]
+
+{-# LINE 22 "Alpm/List.hsc" #-}
+instance Storable (AlpmList a) where
+    alignment _ = 8
+{-# LINE 24 "Alpm/List.hsc" #-}
+    sizeOf _    = (24)
+{-# LINE 25 "Alpm/List.hsc" #-}
+    peek ptr    = AlpmList <$> (\hsc_ptr -> peekByteOff hsc_ptr 0) ptr
+{-# LINE 26 "Alpm/List.hsc" #-}
+                           <*> (\hsc_ptr -> peekByteOff hsc_ptr 16) ptr
+{-# LINE 27 "Alpm/List.hsc" #-}
+
 integrate box ptr
     | isNull ptr = []
-    | otherwise  = boxWith ptr : integrate box (c_alpm_list_next ptr)
-  where
-    boxWith = box . c_alpm_list_getdata
+    | otherwise  = let (AlpmList d n) = unsafePerformIO (peek ptr) in
+        box d : integrate box n
