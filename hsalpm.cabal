@@ -9,38 +9,24 @@ Category:          System
 Build-type:        Simple
 Cabal-version:     >=1.8
 
--- Library
-  -- Exposed-modules:
-    -- Alpm
-    -- Alpm.Base
-    -- Alpm.Database
-    -- Alpm.Package
-    -- Pacman
-  -- Extra-libraries:
-    -- alpm
-  -- Build-depends:
-    -- base -any,
-    -- containers -any,
-    -- deepseq -any,
-    -- mtl -any,
-    -- parsec -any,
-    -- transformers -any,
-    -- time -any
-  -- Build-tools: hsc2hs
-  -- Hs-source-dirs: lib
-
-Executable:     Test
-Main-is:        Main.hs
-Buildable:      True
-Hs-source-dirs: src
-Extra-libraries:
-  alpm
-Build-depends:
-  base -any,
-  containers -any,
-  deepseq -any,
-  mtl -any,
-  parsec -any,
-  transformers -any,
-  time -any
-Ghc-options: -O2
+Library
+  Exposed-modules:
+    Alpm
+    Alpm.Base
+    Alpm.Database
+    Alpm.List
+    Alpm.Network
+    Alpm.Package
+    Pacman
+  Extra-libraries:
+    alpm
+  Build-depends:
+    base -any,
+    containers -any,
+    deepseq -any,
+    mtl -any,
+    parsec -any,
+    transformers -any,
+    time -any
+  Build-tools: hsc2hs
+  Hs-source-dirs: lib
