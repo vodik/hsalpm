@@ -10,7 +10,6 @@ import System.Environment
 import Alpm
 import Alpm.Database
 import Alpm.Package
-import Alpm.Network
 import Pacman
 
 main :: IO ()
