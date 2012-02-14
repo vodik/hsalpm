@@ -13,7 +13,8 @@ main :: IO ()
 main = do
     conf <- getPacman
     runAlpm defaultOptions $ do
-        setProgressCB $ \_ str _ _ _ -> do
-            peekCString str >>= putStrLn
+        setProgressCB $ \t str _ _ _ -> do
+            putStrLn $ "T: " ++ show t
+            peekCString str >>= putStrLn . ("STR: " ++)
 
         pacmanDBs conf >>= mapM_ (updateDB False)
