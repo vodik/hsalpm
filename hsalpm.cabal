@@ -17,6 +17,7 @@ Library
     Alpm.List
     Alpm.Network
     Alpm.Package
+    Alpm.Util
     Pacman
   Extra-libraries:
     alpm
