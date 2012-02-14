@@ -16,6 +16,7 @@ Library
     Alpm.Database
     Alpm.List
     Alpm.Network
+    Alpm.Option
     Alpm.Package
     Alpm.Util
     Pacman
