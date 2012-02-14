@@ -57,3 +57,19 @@ updateDB force (DB db_ptr) = do
     if rst < 0
         then alpmLastStrerror >>= fail . printf "Unable to update database: %s\n"
         else return $ fromIntegral rst
+
+foreign import ccall "alpm_db_get_servers" c_alpm_db_get_servers :: Ptr AlpmHandle -> IO (Ptr (AlpmList CChar))
+servers :: Alpm [String]
+servers = withAlpmPtr $ \alpm_ptr -> do
+    lst <- c_alpm_db_get_servers alpm_ptr
+    return $ integrate unsafePeekCString $ lst
+
+foreign import ccall "alpm_db_add_server" c_alpm_db_add_server :: Ptr AlpmHandle -> CString -> IO CInt
+addServer :: String -> Alpm ()
+addServer url = do
+    rst <- withAlpmPtr $ \alpm_ptr -> do
+        url' <- newCString url
+        c_alpm_db_add_server alpm_ptr url'
+    if rst < 0
+        then alpmLastStrerror >>= fail . printf "Unable to add server: %s\n"
+        else return ()

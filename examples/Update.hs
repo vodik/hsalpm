@@ -1,6 +1,7 @@
 module Main where
 
 import Control.Monad
+import Control.Monad.Trans (liftIO)
 import Foreign.C.String
 
 import Alpm
@@ -17,4 +18,7 @@ main = do
             putStrLn $ "T: " ++ show t
             peekCString str >>= putStrLn . ("STR: " ++)
 
-        pacmanDBs conf >>= mapM_ (updateDB False)
+        addServer "http://mirrors.kernel.org/archlinux/core/os/i686"
+        -- mapM_ (liftIO . putStrLn) =<< servers
+
+        -- pacmanDBs conf >>= mapM_ (updateDB False)
