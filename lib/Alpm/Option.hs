@@ -19,16 +19,27 @@ import Alpm.Network
 import Alpm.Package
 import Alpm.Util
 
-type CBFunc = CInt -> CString -> CInt -> CSize -> CSize -> IO ()
+type CBProgress = CInt -> CString -> CInt -> CSize -> CSize -> IO ()
+type CBLog = CInt -> CString -> IO ()
 
 foreign import ccall "wrapper"
-    cb_progress :: CBFunc
-                -> IO (FunPtr CBFunc)
+    cb_progress :: CBProgress -> IO (FunPtr CBProgress)
+foreign import ccall "wrapper"
+    cb_log :: CBLog -> IO (FunPtr CBLog)
 
 foreign import ccall "alpm_option_set_progresscb"
-    c_alpm_option_set_progresscb :: Ptr AlpmHandle -> FunPtr CBFunc -> IO CInt
+    c_alpm_option_set_progresscb :: Ptr AlpmHandle -> FunPtr CBProgress -> IO CInt
+foreign import ccall "alpm_option_set_logcb"
+    c_alpm_option_set_logcb :: Ptr AlpmHandle -> FunPtr CBLog -> IO CInt
 
 setProgressCB f = withAlpmPtr $ \alpm_ptr -> do
     cbW <- cb_progress f
     _ <- c_alpm_option_set_progresscb alpm_ptr cbW
-    freeHaskellFunPtr cbW
+    -- freeHaskellFunPtr cbW
+    return ()
+
+setLogCB f = withAlpmPtr $ \alpm_ptr -> do
+    cbW <- cb_log f
+    _ <- c_alpm_option_set_logcb alpm_ptr cbW
+    -- freeHaskellFunPtr cbW
+    return ()

@@ -16,9 +16,9 @@ main :: IO ()
 main = do
     conf <- getPacman
     runAlpm defaultOptions $ do
-        setProgressCB $ \t str _ _ _ -> do
-            putStrLn $ "T: " ++ show t
-            peekCString str >>= putStrLn . ("STR: " ++)
+        setLogCB $ \_ str -> do
+            msg <- peekCString str
+            putStr $ "Logged: " ++ msg
 
         core <- registerDB "core"
         addServer core "http://mirrors.kernel.org/archlinux/core/os/i686"
