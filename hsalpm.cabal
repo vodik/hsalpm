@@ -18,6 +18,7 @@ Library
     Alpm.Network
     Alpm.Option
     Alpm.Package
+    Alpm.Transaction
     Alpm.Util
     Pacman
   Extra-libraries:

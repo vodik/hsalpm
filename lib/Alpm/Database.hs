@@ -4,6 +4,7 @@ module Alpm.Database where
 
 import Control.Applicative
 import Control.DeepSeq
+import Control.Monad
 import Control.Monad.Trans (liftIO)
 import Data.Bits
 import Text.Printf
@@ -38,7 +39,7 @@ syncDBs = withAlpmPtr $ \alpm_ptr -> do
     list_ptr <- c_alpm_option_get_syncdbs alpm_ptr
     if isNull list_ptr
         then return []
-        else return . integrate DB $ list_ptr
+        else return $ integrate DB list_ptr
 
 foreign import ccall "alpm_db_register_sync" c_alpm_db_register_sync :: Ptr AlpmHandle -> CString -> CInt -> IO (Ptr DBHandle)
 registerDB :: String -> Alpm DB
@@ -58,18 +59,16 @@ updateDB force (DB db_ptr) = do
         then alpmLastStrerror >>= fail . printf "Unable to update database: %s\n"
         else return $ fromIntegral rst
 
-foreign import ccall "alpm_db_get_servers" c_alpm_db_get_servers :: Ptr AlpmHandle -> IO (Ptr (AlpmList CChar))
-servers :: Alpm [String]
-servers = withAlpmPtr $ \alpm_ptr -> do
-    lst <- c_alpm_db_get_servers alpm_ptr
+foreign import ccall "alpm_db_get_servers" c_alpm_db_get_servers :: Ptr DBHandle -> IO (Ptr (AlpmList CChar))
+servers :: DB -> Alpm [String]
+servers (DB db_ptr) = do
+    lst <- liftIO $ c_alpm_db_get_servers db_ptr
     return $ integrate unsafePeekCString $ lst
 
-foreign import ccall "alpm_db_add_server" c_alpm_db_add_server :: Ptr AlpmHandle -> CString -> IO CInt
-addServer :: String -> Alpm ()
-addServer url = do
-    rst <- withAlpmPtr $ \alpm_ptr -> do
-        url' <- newCString url
-        c_alpm_db_add_server alpm_ptr url'
-    if rst < 0
-        then alpmLastStrerror >>= fail . printf "Unable to add server: %s\n"
-        else return ()
+foreign import ccall "alpm_db_add_server" c_alpm_db_add_server :: Ptr DBHandle -> CString -> IO CInt
+addServer :: DB -> String -> Alpm ()
+addServer (DB db_ptr) url = do
+    url' <- liftIO $ newCString url
+    rst  <- liftIO $ c_alpm_db_add_server db_ptr url'
+    when (rst < 0) $
+        alpmLastStrerror >>= fail . printf "Unable to add server: %s\n"

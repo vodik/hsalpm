@@ -31,6 +31,9 @@ setAlpmOptions f h v = newCString v >>= f h
 withAlpmPtr :: (Ptr AlpmHandle -> IO b) -> Alpm b
 withAlpmPtr f = ask >>= \(AlpmSession a) -> liftIO $ withForeignPtr a f
 
+unsafeAlpmPtrToPtr :: Alpm (Ptr AlpmHandle)
+unsafeAlpmPtrToPtr = ask >>= \(AlpmSession a) -> return $ unsafeForeignPtrToPtr a
+
 foreign import ccall "alpm_strerror" c_alpm_strerror :: CInt -> CString
 alpmStrerror errno = unsafePeekCString $ c_alpm_strerror errno
 
