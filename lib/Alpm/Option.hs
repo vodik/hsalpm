@@ -34,12 +34,13 @@ foreign import ccall "alpm_option_set_logcb"
 
 setProgressCB f = withAlpmPtr $ \alpm_ptr -> do
     cbW <- cb_progress f
-    _ <- c_alpm_option_set_progresscb alpm_ptr cbW
+    _   <- c_alpm_option_set_progresscb alpm_ptr cbW
     -- freeHaskellFunPtr cbW
     return ()
 
+setLogCB :: (Int -> String -> IO ()) -> Alpm ()
 setLogCB f = withAlpmPtr $ \alpm_ptr -> do
-    cbW <- cb_log f
-    _ <- c_alpm_option_set_logcb alpm_ptr cbW
+    cbW <- cb_log $ \lvl str -> peekCString str >>= f (fromIntegral lvl)
+    _   <- c_alpm_option_set_logcb alpm_ptr cbW
     -- freeHaskellFunPtr cbW
     return ()

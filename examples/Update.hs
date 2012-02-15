@@ -16,9 +16,7 @@ main :: IO ()
 main = do
     conf <- getPacman
     runAlpm defaultOptions $ do
-        setLogCB $ \_ str -> do
-            msg <- peekCString str
-            putStr $ "Logged: " ++ msg
+        setLogCB $ \_ str -> putStr $ "Logged: " ++ str
 
         core <- registerDB "core"
         addServer core "http://mirrors.kernel.org/archlinux/core/os/i686"
