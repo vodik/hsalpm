@@ -63,7 +63,7 @@ foreign import ccall "alpm_db_get_servers" c_alpm_db_get_servers :: Ptr DBHandle
 servers :: DB -> Alpm [String]
 servers (DB db_ptr) = do
     lst <- liftIO $ c_alpm_db_get_servers db_ptr
-    return $ integrate unsafePeekCString $ lst
+    return $ integrate unsafePeekCString lst
 
 foreign import ccall "alpm_db_add_server" c_alpm_db_add_server :: Ptr DBHandle -> CString -> IO CInt
 addServer :: DB -> String -> Alpm ()

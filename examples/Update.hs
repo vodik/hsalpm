@@ -16,10 +16,9 @@ main :: IO ()
 main = do
     conf <- getPacman
     runAlpm defaultOptions $ do
-        setLogCB $ \_ str -> putStr $ "Logged: " ++ str
+        setLogCB $ \lvl str -> putStr $ "Logged [" ++ show lvl ++ "]: " ++ str
 
         core <- registerDB "core"
         addServer core "http://mirrors.kernel.org/archlinux/core/os/i686"
-        withTransaction $ do
-            updateDB False core
+        withTransaction $ updateDB False core
         return ()
