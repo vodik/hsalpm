@@ -10,9 +10,6 @@ import Foreign.Ptr (Ptr, nullPtr)
 isNull :: Ptr a -> Bool
 isNull = (== nullPtr)
 
-whenJust :: Monad m => Maybe a -> (a -> m ()) -> m ()
-whenJust p f = maybe (return ()) f p
-
 unsafePeekCString :: CString -> String
 unsafePeekCString = unsafePerformIO . peekCString
 

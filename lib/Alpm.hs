@@ -22,13 +22,12 @@ import Alpm.Util
 
 runAlpm :: AlpmOptions -> Alpm a -> IO a
 runAlpm opt (Alpm f) =
-    alpmInitialize opt >>= \alpm@(AlpmSession a) -> withForeignPtr a $ \alpm_ptr -> do
-        -- whenJust (cachePath opt) $ setAlpmOptions c_alpm_option_add_cachedir alpm_ptr
-        runReaderT f alpm
+    alpmInitialize opt >>= \alpm@(AlpmSession a) ->
+        withForeignPtr a $ \_ -> runReaderT f alpm
 
 defaultOptions = AlpmOptions
-    { root      = "/"
-    , dbPath    = "/var/lib/pacman"
+    { root   = "/"
+    , dbPath = "/var/lib/pacman"
     }
 
 foreign import ccall "alpm_initialize" c_alpm_initialize :: CString -> CString -> Ptr CInt -> IO (Ptr AlpmHandle)

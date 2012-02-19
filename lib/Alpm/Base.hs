@@ -22,8 +22,8 @@ newtype Transaction a = Transaction (Alpm a)
     deriving (Functor, Applicative, Monad, MonadIO, MonadReader AlpmSession)
 
 data AlpmOptions = AlpmOptions
-    { root      :: String
-    , dbPath    :: String
+    { root   :: String
+    , dbPath :: String
     }
 
 withAlpmPtr :: (Ptr AlpmHandle -> IO b) -> Alpm b
