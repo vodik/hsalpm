@@ -10,7 +10,6 @@ import Foreign.Ptr
 import Foreign.ForeignPtr
 import Foreign.Marshal.Alloc
 import Foreign.Storable
-import GHC.Ptr
 
 import Alpm.Util
 #include <alpm_list.h>
@@ -40,8 +39,9 @@ boxAlpmList box ptr | isNull ptr = []
 foreign import ccall "&alpm_list_free" c_alpm_list_free :: FinalizerPtr (AlpmList t)
 
 mkAlpmList :: (a -> Ptr t) -> [a] -> ForeignPtr (AlpmList t)
-mkAlpmList unbox x = unsafePerformIO . newForeignPtr c_alpm_list_free $ marshal unbox x nullPtr
+mkAlpmList unbox [] = unsafePerformIO . newForeignPtr c_alpm_list_free $ nullPtr
+mkAlpmList unbox x  = unsafePerformIO . newForeignPtr c_alpm_list_free $ marshal unbox x nullPtr
 
 marshal :: (a -> Ptr t) -> [a] -> Ptr (AlpmList t) -> Ptr (AlpmList t)
-marshal f []     p = unsafePerformIO $ malloc >>= \n -> poke n (AlpmList nullPtr nullPtr p)        >> return n
+marshal f (x:[]) p = unsafePerformIO $ malloc >>= \n -> poke n (AlpmList (f x) nullPtr p) >> return n
 marshal f (x:xs) p = unsafePerformIO $ malloc >>= \n -> poke n (AlpmList (f x) (marshal f xs n) p) >> return n
