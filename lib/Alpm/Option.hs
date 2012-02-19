@@ -24,48 +24,41 @@ import Alpm.Util
 data Attr a b = Attr     (Alpm a) (a -> Alpm ())
               | ListAttr (Alpm a) (a -> Alpm ()) (b -> Alpm ()) (b -> Alpm ())
 
-data AttrOp = forall a b. Attr a b :=  a
-            | forall a b. Attr a b :~  (a -> a)
-            | forall a b. Attr a b :++ b
-            | forall a b. Attr a b :-- b
+data AttrOp = forall a b. Attr a b := a
+            | forall a b. Attr a b :~ (a -> a)
 
 infixr 0 :=, :~
 
 get :: Attr a b -> Alpm a
-get (Attr     getter _    ) = getter
-get (ListAttr getter _ _ _) = getter
+get (Attr     get _    ) = get
+get (ListAttr get _ _ _) = get
 
 set :: [AttrOp] -> Alpm ()
 set = mapM_ app
   where
-    app (Attr getter setter := x) = setter x
-    app (Attr getter setter :~ f) = getter >>= setter . f
-
-    app (ListAttr getter setter adder remover :=  x) = setter x
-    app (ListAttr getter setter adder remover :~  f) = getter >>= setter . f
-    app (ListAttr getter setter adder remover :++ x) = adder x
-    app (ListAttr getter setter adder remover :-- x) = remover x
-
-    app _ = fail "Operation not supported"
+    app (Attr     get set := x)     = set x
+    app (Attr     get set :~ f)     = get >>= set . f
+    app (ListAttr get set _ _ := x) = set x
+    app (ListAttr get set _ _ :~ f) = get >>= set . f
 
 add :: Attr a b -> b -> Alpm ()
-add (ListAttr _ _ adder _) x = adder x
-add _                      _ = return ()
+add (ListAttr _ _ add _) x = add x
+add _                    _ = return ()
 
 remove :: Attr a b -> b -> Alpm ()
-remove (ListAttr _ _ _ remover) x = remover x
-remove _                        _ = return ()
+remove (ListAttr _ _ _ remove) x = remove x
+remove _                       _ = return ()
 
 --------------------------------------------------------------------------------
 
-newAlpmStringAttr getter setter = Attr alpmGetter alpmSetter
+newAlpmStringAttr get set = Attr alpmGetter alpmSetter
   where
     alpmGetter   = withAlpmPtr $ \ptr -> do
-        ret <- getter ptr
+        ret <- get ptr
         if isNull ret
             then return ""
             else peekCString ret
-    alpmSetter v = withAlpmPtr $ \ptr -> newCString v >>= setter ptr
+    alpmSetter v = withAlpmPtr $ \ptr -> newCString v >>= set ptr
 
 foreign import ccall "alpm_option_get_arch" c_alpm_option_get_arch :: Ptr AlpmHandle -> IO CString
 foreign import ccall "alpm_option_set_arch" c_alpm_option_set_arch :: Ptr AlpmHandle -> CString -> IO ()
@@ -84,11 +77,11 @@ gpgDirectory = newAlpmStringAttr c_alpm_option_get_gpgdir
 
 --------------------------------------------------------------------------------
 
-newAlpmListAttr getter setter adder remove = ListAttr alpmGetter alpmSetter alpmAdder alpmRemover
+newAlpmListAttr get set add remove = ListAttr alpmGetter alpmSetter alpmAdder alpmRemover
   where
-    alpmGetter    = withAlpmPtr $ \ptr -> boxAlpmList unsafePeekCString <$> getter ptr
+    alpmGetter    = withAlpmPtr $ \ptr -> boxAlpmList unsafePeekCString <$> get ptr
     alpmSetter  v = withAlpmPtr $ \ptr -> undefined
-    alpmAdder   v = withAlpmPtr $ \ptr -> newCString v >>= adder ptr
+    alpmAdder   v = withAlpmPtr $ \ptr -> newCString v >>= add ptr
     alpmRemover v = withAlpmPtr $ \ptr -> newCString v >>= remove ptr
 
 foo :: a -> Alpm ()

@@ -20,12 +20,12 @@ main = do
     runAlpm defaultOptions $ do
         setLogCB $ \lvl str -> putStr $ "Logged [" ++ show lvl ++ "]: " ++ str
 
-        set [ arch      :=  "x86_64"
-            , logFile   :=  "/tmp/hsalpm.log"
-            , cachePath :++ "/tmp/"
-            , cachePath :++ "/yes/"
-            , cachePath :-- "/tmp/"
-            ]
+        set [ arch    := "x86_64"
+            , logFile := "/tmp/hsalpm.log" ]
+
+        cachePath `add`    "/tmp/"
+        cachePath `add`    "/yes/"
+        cachePath `remove` "/tmp/"
 
         get arch    >>= liftIO . putStrLn . ("Arch set to: " ++)
         get logFile >>= liftIO . putStrLn . ("Logfile set to: " ++)
