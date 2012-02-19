@@ -20,8 +20,10 @@ main = do
     runAlpm defaultOptions $ do
         setLogCB $ \lvl str -> putStr $ "Logged [" ++ show lvl ++ "]: " ++ str
 
-        set [ arch    := "x86_64"
-            , logFile := "/tmp/hsalpm.log" ]
+        set [ arch      := "x86_64"
+            , logFile   := "/tmp/hsalpm.log"
+            , cachePath := [ "/foo" ]
+            ]
 
         cachePath `add`    "/tmp/"
         cachePath `add`    "/yes/"

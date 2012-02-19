@@ -84,9 +84,6 @@ newAlpmListAttr get set add remove = ListAttr alpmGetter alpmSetter alpmAdder al
     alpmAdder   v = withAlpmPtr $ \ptr -> newCString v >>= add ptr
     alpmRemover v = withAlpmPtr $ \ptr -> newCString v >>= remove ptr
 
-foo :: a -> Alpm ()
-foo a = return ()
-
 foreign import ccall "alpm_option_get_cachedirs"   c_alpm_option_get_cachedirs   :: Ptr AlpmHandle -> IO (Ptr (AlpmList CChar))
 foreign import ccall "alpm_option_set_cachedirs"   c_alpm_option_set_cachedirs   :: Ptr AlpmHandle -> Ptr (AlpmList CChar) -> IO ()
 foreign import ccall "alpm_option_add_cachedir"    c_alpm_option_add_cachedir    :: Ptr AlpmHandle -> CString -> IO ()
