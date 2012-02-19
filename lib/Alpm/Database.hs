@@ -39,7 +39,7 @@ syncDBs = withAlpmPtr $ \alpm_ptr -> do
     list_ptr <- c_alpm_option_get_syncdbs alpm_ptr
     if isNull list_ptr
         then return []
-        else return $ integrate DB list_ptr
+        else return $ boxAlpmList DB list_ptr
 
 foreign import ccall "alpm_db_register_sync" c_alpm_db_register_sync :: Ptr AlpmHandle -> CString -> CInt -> IO (Ptr DBHandle)
 registerDB :: String -> Alpm DB
@@ -54,7 +54,7 @@ foreign import ccall "alpm_db_get_servers" c_alpm_db_get_servers :: Ptr DBHandle
 servers :: DB -> Alpm [String]
 servers (DB db_ptr) = do
     lst <- liftIO $ c_alpm_db_get_servers db_ptr
-    return $ integrate unsafePeekCString lst
+    return $ boxAlpmList unsafePeekCString lst
 
 foreign import ccall "alpm_db_add_server" c_alpm_db_add_server :: Ptr DBHandle -> CString -> IO CInt
 addServer :: DB -> String -> Alpm ()

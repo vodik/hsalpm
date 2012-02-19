@@ -86,9 +86,7 @@ gpgDirectory = newAlpmStringAttr c_alpm_option_get_gpgdir
 
 newAlpmListAttr getter setter adder remove = ListAttr alpmGetter alpmSetter alpmAdder alpmRemover
   where
-    alpmGetter    = withAlpmPtr $ \ptr -> do
-        ret <- getter ptr
-        return $ integrate unsafePeekCString ret
+    alpmGetter    = withAlpmPtr $ \ptr -> boxAlpmList unsafePeekCString <$> getter ptr
     alpmSetter  v = withAlpmPtr $ \ptr -> undefined
     alpmAdder   v = withAlpmPtr $ \ptr -> newCString v >>= adder ptr
     alpmRemover v = withAlpmPtr $ \ptr -> newCString v >>= remove ptr

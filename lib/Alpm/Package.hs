@@ -72,7 +72,7 @@ instance NFData Package where
       `seq` ()
 
 foreign import ccall "alpm_db_get_pkgcache" c_alpm_db_get_pkgcache :: Ptr DBHandle -> Ptr PkgList
-packages (DB db_ptr) = integrate mkPackage $ c_alpm_db_get_pkgcache db_ptr
+packages (DB db_ptr) = boxAlpmList mkPackage $ c_alpm_db_get_pkgcache db_ptr
 
 getFromPkgCache :: (NFData a) => ([Package] -> Alpm [a]) -> DB -> Alpm [a]
 getFromPkgCache f db = f (packages db) >>= (return $!!)
@@ -125,8 +125,8 @@ mkPackage ptr = Package
     , packageSize        = maybeFromIntegral $ c_alpm_pkg_get_size ptr
     , packageInstallSize = fromIntegral $ c_alpm_pkg_get_isize ptr
     , packageReason      = toEnum . fromIntegral $ c_alpm_pkg_get_reason ptr
-    , packageLicenses    = integrate unsafePeekCString $ c_alpm_pkg_get_licenses ptr
-    , packageGroups      = integrate unsafePeekCString $ c_alpm_pkg_get_groups ptr
+    , packageLicenses    = boxAlpmList unsafePeekCString $ c_alpm_pkg_get_licenses ptr
+    , packageGroups      = boxAlpmList unsafePeekCString $ c_alpm_pkg_get_groups ptr
     , packageDB          = dbName . DB $ c_alpm_pkg_get_db ptr
     }
 

@@ -31,7 +31,7 @@ instance Storable (AlpmList a) where
                              >> #{poke alpm_list_t, next} ptr n
                              >> #{poke alpm_list_t, prev} ptr p
 
-integrate :: (Ptr t -> a) -> Ptr (AlpmList t) -> [a]
-integrate box ptr | isNull ptr = []
-                  | otherwise  = let (AlpmList d n _) = unsafePerformIO (peek ptr)
-                                 in box d : integrate box n
+boxAlpmList :: (Ptr t -> a) -> Ptr (AlpmList t) -> [a]
+boxAlpmList box ptr | isNull ptr = []
+                    | otherwise  = let (AlpmList d n _) = unsafePerformIO (peek ptr)
+                                   in box d : boxAlpmList box n
