@@ -25,8 +25,10 @@ import Alpm.Util
 data Attr a b = Attr     (Alpm a) (a -> Alpm ())
               | ListAttr (Alpm a) (a -> Alpm ()) (b -> Alpm ()) (b -> Alpm ())
 
-data AttrOp = forall a b. Attr a b := a
-            | forall a b. Attr a b :~ (a -> a)
+data AttrOp = forall a b. Attr a b :=  a
+            | forall a b. Attr a b :~  (a -> a)
+            | forall a b. Attr a b :=> (Alpm a)
+            | forall a b. Attr a b :~> (a -> Alpm a)
 
 infixr 0 :=, :~
 
@@ -37,10 +39,14 @@ get (ListAttr get _ _ _) = get
 set :: [AttrOp] -> Alpm ()
 set = mapM_ app
   where
-    app (Attr     get set := x)     = set x
-    app (Attr     get set :~ f)     = get >>= set . f
-    app (ListAttr get set _ _ := x) = set x
-    app (ListAttr get set _ _ :~ f) = get >>= set . f
+    app (Attr     get set     :=  x) = set x
+    app (Attr     get set     :~  f) = get >>= set . f
+    app (Attr     get set     :=> x) =   x >>= set
+    app (Attr     get set     :~> f) = get >>= f >>= set
+    app (ListAttr get set _ _ :=  x) = set x
+    app (ListAttr get set _ _ :~  f) = get >>= set . f
+    app (ListAttr get set _ _ :=> x) =   x >>= set
+    app (ListAttr get set _ _ :~> f) = get >>= f >>= set
 
 add :: Attr a b -> b -> Alpm ()
 add (ListAttr _ _ add _) x = add x
@@ -75,6 +81,28 @@ foreign import ccall "alpm_option_get_gpgdir" c_alpm_option_get_gpgdir :: Ptr Al
 foreign import ccall "alpm_option_set_gpgdir" c_alpm_option_set_gpgdir :: Ptr AlpmHandle -> CString -> IO ()
 gpgDirectory = newAlpmStringAttr c_alpm_option_get_gpgdir
                                  c_alpm_option_set_gpgdir
+
+--------------------------------------------------------------------------------
+
+newAlpmToggleAttr get set = Attr alpmGetter alpmSetter
+  where
+    alpmGetter   = (> 0) <$> withAlpmPtr get
+    alpmSetter v = withAlpmPtr $ \ptr -> if v then set ptr 1 else set ptr 0
+
+foreign import ccall "alpm_option_get_usesyslog" c_alpm_option_get_usesyslog :: Ptr AlpmHandle -> IO CInt
+foreign import ccall "alpm_option_set_usesyslog" c_alpm_option_set_usesyslog :: Ptr AlpmHandle -> CInt -> IO ()
+useSyslog = newAlpmToggleAttr c_alpm_option_get_usesyslog
+                              c_alpm_option_set_usesyslog
+
+foreign import ccall "alpm_option_get_usedelta" c_alpm_option_get_usedelta :: Ptr AlpmHandle -> IO CInt
+foreign import ccall "alpm_option_set_usedelta" c_alpm_option_set_usedelta :: Ptr AlpmHandle -> CInt -> IO ()
+useDelta = newAlpmToggleAttr c_alpm_option_get_usedelta
+                             c_alpm_option_set_usedelta
+
+foreign import ccall "alpm_option_get_checkspace" c_alpm_option_get_checkspace :: Ptr AlpmHandle -> IO CInt
+foreign import ccall "alpm_option_set_checkspace" c_alpm_option_set_checkspace :: Ptr AlpmHandle -> CInt -> IO ()
+checkSpace = newAlpmToggleAttr c_alpm_option_get_checkspace
+                               c_alpm_option_set_checkspace
 
 --------------------------------------------------------------------------------
 

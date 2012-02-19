@@ -25,12 +25,19 @@ main = do
             , logFile    := "/tmp/hsalpm.log"
             , cachePath  := [ "/tmp/" ]
             , ignorePkgs := [ "gnome", "xmonad" ]
+            , useSyslog  := True
+            , checkSpace :~ not
             ]
+
+        add ignorePkgs "kde"
 
         get arch       >>= liftIO . putStrLn . ("Arch:    " ++)
         get logFile    >>= liftIO . putStrLn . ("Logfile: " ++)
         get cachePath  >>= liftIO . putStrLn . ("Cache:   " ++) . unwords
         get ignorePkgs >>= liftIO . putStrLn . ("Ignore:  " ++) . unwords
+        get useSyslog  >>= liftIO . putStrLn . ("Syslog:  " ++) . show
+        get useDelta   >>= liftIO . putStrLn . ("Deltas:  " ++) . show
+        get checkSpace >>= liftIO . putStrLn . ("Space:   " ++) . show
 
         core <- registerDB arg
         addServer core $ "http://mirrors.kernel.org/archlinux/" ++ arg ++ "/os/x86_64"
