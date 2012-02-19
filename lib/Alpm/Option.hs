@@ -132,11 +132,6 @@ ignoreGroups = newAlpmListAttr c_alpm_option_get_ignoregroups
 
 --------------------------------------------------------------------------------
 
-setAlpmOptions :: (Ptr AlpmHandle -> CString -> IO ()) -> Ptr AlpmHandle -> String -> IO ()
-setAlpmOptions f h v = newCString v >>= f h
-
---------------------------------------------------------------------------------
-
 type CBProgress = CInt -> CString -> CInt -> CSize -> CSize -> IO ()
 type CBLog = CInt -> CString -> IO ()
 
