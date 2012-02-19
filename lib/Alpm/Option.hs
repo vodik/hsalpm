@@ -60,12 +60,9 @@ remove _                       _ = return ()
 
 newAlpmStringAttr get set = Attr alpmGetter alpmSetter
   where
-    alpmGetter   = withAlpmPtr $ \ptr -> do
-        ret <- get ptr
-        if isNull ret
-            then return ""
-            else peekCString ret
+    alpmGetter   = withAlpmPtr $ \ptr -> get ptr >>= nullStr ""
     alpmSetter v = withAlpmPtr $ \ptr -> newCString v >>= set ptr
+    nullStr s r  = if isNull r then return "" else peekCString r
 
 foreign import ccall "alpm_option_get_arch" c_alpm_option_get_arch :: Ptr AlpmHandle -> IO CString
 foreign import ccall "alpm_option_set_arch" c_alpm_option_set_arch :: Ptr AlpmHandle -> CString -> IO ()
