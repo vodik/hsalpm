@@ -18,22 +18,17 @@ main = do
     [arg] <- getArgs
     conf  <- getPacman
     runAlpm defaultOptions $ do
-        -- setLogCB $ \lvl str -> putStr $ "Logged [" ++ show lvl ++ "]: " ++ str
+        setLogCB $ \lvl str ->
+            putStr $ "Logged [" ++ show lvl ++ "]: " ++ str
 
         set [ arch      := "x86_64"
             , logFile   := "/tmp/hsalpm.log"
-            , cachePath := [ "/foo" ]
+            , cachePath := [ "/foo", "/bar" ]
             ]
 
-        cachePath `add`    "/tmp/"
-        cachePath `add`    "/yes/"
-        cachePath `remove` "/tmp/"
-
-        get arch    >>= liftIO . putStrLn . ("Arch set to: " ++)
-        get logFile >>= liftIO . putStrLn . ("Logfile set to: " ++)
-
-        cp <- get cachePath
-        mapM_ (liftIO . putStrLn) cp
+        get arch      >>= liftIO . putStrLn . ("Arch:       " ++)
+        get logFile   >>= liftIO . putStrLn . ("Logfile:    " ++)
+        get cachePath >>= liftIO . putStrLn . ("Cache path: " ++) . unwords
 
         core <- registerDB arg
         addServer core $ "http://mirrors.kernel.org/archlinux/" ++ arg ++ "/os/x86_64"

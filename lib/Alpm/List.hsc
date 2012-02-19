@@ -39,18 +39,9 @@ boxAlpmList box ptr | isNull ptr = []
 
 foreign import ccall "&alpm_list_free" c_alpm_list_free :: FinalizerPtr (AlpmList t)
 
--- pokeAlpmList :: (a -> Ptr t) -> [a] -> ForeignPtr (AlpmList t)
--- mkAlpmList :: (a -> IO (Ptr t)) -> [a] -> IO (Ptr (AlpmList t))
-mkAlpmList unbox x = unsafePerformIO $ do
-    node <- marshal unbox x nullPtr
-    return $ newForeignPtr c_alpm_list_free node
+mkAlpmList :: (a -> Ptr t) -> [a] -> ForeignPtr (AlpmList t)
+mkAlpmList unbox x = unsafePerformIO . newForeignPtr c_alpm_list_free $ marshal unbox x nullPtr
 
-marshal unbox [] prev = do
-    node <- malloc
-    poke node (AlpmList nullPtr nullPtr prev)
-    return node
-
-marshal unbox (x:xs) prev = do
-    node <- malloc
-    poke node (AlpmList (unsafePerformIO $ unbox x) (unsafePerformIO $ marshal unbox xs node) prev)
-    return node
+marshal :: (a -> Ptr t) -> [a] -> Ptr (AlpmList t) -> Ptr (AlpmList t)
+marshal f []     p = unsafePerformIO $ malloc >>= \n -> poke n (AlpmList nullPtr nullPtr p)        >> return n
+marshal f (x:xs) p = unsafePerformIO $ malloc >>= \n -> poke n (AlpmList (f x) (marshal f xs n) p) >> return n
