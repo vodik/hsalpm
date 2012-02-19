@@ -1,4 +1,4 @@
-{-# LANGUAGE CPP #-}
+{-# LANGUAGE CPP, ForeignFunctionInterface #-}
 
 module Alpm.List where
 
@@ -7,6 +7,7 @@ import System.IO.Unsafe
 
 import Foreign.C
 import Foreign.Ptr
+import Foreign.ForeignPtr
 import Foreign.Marshal.Alloc
 import Foreign.Storable
 import GHC.Ptr
@@ -35,3 +36,21 @@ boxAlpmList :: (Ptr t -> a) -> Ptr (AlpmList t) -> [a]
 boxAlpmList box ptr | isNull ptr = []
                     | otherwise  = let (AlpmList d n _) = unsafePerformIO (peek ptr)
                                    in box d : boxAlpmList box n
+
+foreign import ccall "&alpm_list_free" c_alpm_list_free :: FinalizerPtr (AlpmList t)
+
+-- pokeAlpmList :: (a -> Ptr t) -> [a] -> ForeignPtr (AlpmList t)
+-- mkAlpmList :: (a -> IO (Ptr t)) -> [a] -> IO (Ptr (AlpmList t))
+mkAlpmList unbox x = unsafePerformIO $ do
+    node <- marshal unbox x nullPtr
+    return $ newForeignPtr c_alpm_list_free node
+
+marshal unbox [] prev = do
+    node <- malloc
+    poke node (AlpmList nullPtr nullPtr prev)
+    return node
+
+marshal unbox (x:xs) prev = do
+    node <- malloc
+    poke node (AlpmList (unsafePerformIO $ unbox x) (unsafePerformIO $ marshal unbox xs node) prev)
+    return node

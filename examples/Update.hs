@@ -18,7 +18,7 @@ main = do
     [arg] <- getArgs
     conf  <- getPacman
     runAlpm defaultOptions $ do
-        setLogCB $ \lvl str -> putStr $ "Logged [" ++ show lvl ++ "]: " ++ str
+        -- setLogCB $ \lvl str -> putStr $ "Logged [" ++ show lvl ++ "]: " ++ str
 
         set [ arch      := "x86_64"
             , logFile   := "/tmp/hsalpm.log"
