@@ -2,6 +2,7 @@ module Main where
 
 import Control.Monad
 import Control.Monad.Trans (liftIO)
+import System.Environment
 import Foreign.C.String
 
 import Alpm
@@ -14,14 +15,22 @@ import Pacman
 
 main :: IO ()
 main = do
-    conf <- getPacman
+    [arg] <- getArgs
+    conf  <- getPacman
     runAlpm defaultOptions $ do
         setProgressCB $ \t str _ _ _ -> do
             putStrLn $ "T: " ++ show t
             peekCString str >>= putStrLn . ("STR: " ++)
 
-        core <- registerDB "core"
-        addServer core "http://mirrors.kernel.org/archlinux/core/os/i686"
+        set [ arch    := "x86_64"
+            , logFile := "/tmp/hsalpm.log" ]
+
+        get arch    >>= liftIO . putStrLn . ("Arch set to: " ++)
+        get logFile >>= liftIO . putStrLn . ("Logfile set to: " ++)
+
+        core <- registerDB arg
+        addServer core $ "http://mirrors.kernel.org/archlinux/" ++ arg ++ "/os/x86_64"
+
         withTransaction $ do
-            updateDB False core
+            updateDB True core
         return ()

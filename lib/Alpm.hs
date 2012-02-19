@@ -16,13 +16,14 @@ import Foreign.Storable
 import Alpm.Base
 import Alpm.Database
 import Alpm.Network
+import Alpm.Option
 import Alpm.Package
 import Alpm.Util
 
 runAlpm :: AlpmOptions -> Alpm a -> IO a
 runAlpm opt (Alpm f) =
     alpmInitialize opt >>= \alpm@(AlpmSession a) -> withForeignPtr a $ \alpm_ptr -> do
-        whenJust (cachePath opt) $ setAlpmOptions alpm_option_add_cachedir alpm_ptr
+        whenJust (cachePath opt) $ setAlpmOptions c_alpm_option_add_cachedir alpm_ptr
         runReaderT f alpm
 
 defaultOptions = AlpmOptions

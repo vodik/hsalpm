@@ -18,15 +18,14 @@ data AlpmSession = AlpmSession !(ForeignPtr AlpmHandle)
 newtype Alpm a = Alpm (ReaderT AlpmSession IO a)
     deriving (Functor, Applicative, Monad, MonadIO, MonadReader AlpmSession)
 
+newtype Transaction a = Transaction (Alpm a)
+    deriving (Functor, Applicative, Monad, MonadIO, MonadReader AlpmSession)
+
 data AlpmOptions = AlpmOptions
     { root      :: String
     , dbPath    :: String
     , cachePath :: Maybe String
     }
-
-foreign import ccall "alpm_option_add_cachedir" alpm_option_add_cachedir :: Ptr AlpmHandle -> CString -> IO ()
-setAlpmOptions :: (Ptr AlpmHandle -> CString -> IO ()) -> Ptr AlpmHandle -> String -> IO ()
-setAlpmOptions f h v = newCString v >>= f h
 
 withAlpmPtr :: (Ptr AlpmHandle -> IO b) -> Alpm b
 withAlpmPtr f = ask >>= \(AlpmSession a) -> liftIO $ withForeignPtr a f

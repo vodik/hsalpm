@@ -50,20 +50,11 @@ registerDB name = withAlpmPtr $ \alpm_ptr -> do
         then fail $ "could not register '" ++ name ++ "' database"
         else return $ DB db_ptr
 
-foreign import ccall "alpm_db_update" c_alpm_db_update :: CInt -> Ptr DBHandle -> IO CInt
-updateDB :: Bool -> DB -> Alpm Int
-updateDB force (DB db_ptr) = do
-    let f = if force then 1 else 0
-    rst <- liftIO $ c_alpm_db_update f db_ptr
-    if rst < 0
-        then alpmLastStrerror >>= fail . printf "Unable to update database: %s\n"
-        else return $ fromIntegral rst
-
 foreign import ccall "alpm_db_get_servers" c_alpm_db_get_servers :: Ptr DBHandle -> IO (Ptr (AlpmList CChar))
 servers :: DB -> Alpm [String]
 servers (DB db_ptr) = do
     lst <- liftIO $ c_alpm_db_get_servers db_ptr
-    return $ integrate unsafePeekCString $ lst
+    return $ integrate unsafePeekCString lst
 
 foreign import ccall "alpm_db_add_server" c_alpm_db_add_server :: Ptr DBHandle -> CString -> IO CInt
 addServer :: DB -> String -> Alpm ()
@@ -71,4 +62,13 @@ addServer (DB db_ptr) url = do
     url' <- liftIO $ newCString url
     rst  <- liftIO $ c_alpm_db_add_server db_ptr url'
     when (rst < 0) $
-        alpmLastStrerror >>= fail . printf "Unable to add server: %s\n"
+        alpmLastStrerror >>= fail . printf "Unable to add server: %s"
+
+foreign import ccall "alpm_db_update" c_alpm_db_update :: CInt -> Ptr DBHandle -> IO CInt
+updateDB :: Bool -> DB -> Transaction Int
+updateDB force (DB db_ptr) = Transaction $ do
+    let f = if force then 1 else 0
+    rst <- liftIO $ c_alpm_db_update f db_ptr
+    if rst < 0
+        then alpmLastStrerror >>= fail . printf "Unable to update database: %s"
+        else return $ fromIntegral rst
