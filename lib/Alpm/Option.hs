@@ -16,25 +16,47 @@ import Foreign.Storable
 
 import Alpm.Base
 import Alpm.Database
+import Alpm.List
 import Alpm.Network
 import Alpm.Package
 import Alpm.Util
 
-data Attr a = Attr (Alpm a) (a -> Alpm ())
+data Attr a b = Attr     (Alpm a) (a -> Alpm ())
+              | ListAttr (Alpm a) (a -> Alpm ()) (b -> Alpm ()) (b -> Alpm ())
 
-data AttrOp = forall a. Attr a := a
-            | forall a. Attr a :~ (a -> a)
+data AttrOp = forall a b. Attr a b :=  a
+            | forall a b. Attr a b :~  (a -> a)
+            | forall a b. Attr a b :++ b
+            | forall a b. Attr a b :-- b
 
 infixr 0 :=, :~
 
-get :: Attr a -> Alpm a
-get (Attr getter setter) = getter
+get :: Attr a b -> Alpm a
+get (Attr     getter _    ) = getter
+get (ListAttr getter _ _ _) = getter
 
 set :: [AttrOp] -> Alpm ()
 set = mapM_ app
   where
     app (Attr getter setter := x) = setter x
     app (Attr getter setter :~ f) = getter >>= setter . f
+
+    app (ListAttr getter setter adder remover :=  x) = setter x
+    app (ListAttr getter setter adder remover :~  f) = getter >>= setter . f
+    app (ListAttr getter setter adder remover :++ x) = adder x
+    app (ListAttr getter setter adder remover :-- x) = remover x
+
+    app _ = fail "Operation not supported"
+
+add :: Attr a b -> b -> Alpm ()
+add (ListAttr _ _ adder _) x = adder x
+add _                      _ = return ()
+
+remove :: Attr a b -> b -> Alpm ()
+remove (ListAttr _ _ _ remover) x = remover x
+remove _                        _ = return ()
+
+--------------------------------------------------------------------------------
 
 newAlpmStringAttr getter setter = Attr alpmGetter alpmSetter
   where
@@ -45,23 +67,46 @@ newAlpmStringAttr getter setter = Attr alpmGetter alpmSetter
             else peekCString ret
     alpmSetter v = withAlpmPtr $ \ptr -> newCString v >>= setter ptr
 
---------------------------------------------------------------------------------
-
 foreign import ccall "alpm_option_get_arch" c_alpm_option_get_arch :: Ptr AlpmHandle -> IO CString
 foreign import ccall "alpm_option_set_arch" c_alpm_option_set_arch :: Ptr AlpmHandle -> CString -> IO ()
-arch = newAlpmStringAttr c_alpm_option_get_arch c_alpm_option_set_arch
+arch = newAlpmStringAttr c_alpm_option_get_arch
+                         c_alpm_option_set_arch
 
 foreign import ccall "alpm_option_get_logfile" c_alpm_option_get_logfile :: Ptr AlpmHandle -> IO CString
 foreign import ccall "alpm_option_set_logfile" c_alpm_option_set_logfile :: Ptr AlpmHandle -> CString -> IO ()
-logFile = newAlpmStringAttr c_alpm_option_get_logfile c_alpm_option_set_logfile
+logFile = newAlpmStringAttr c_alpm_option_get_logfile
+                            c_alpm_option_set_logfile
 
 foreign import ccall "alpm_option_get_gpgdir" c_alpm_option_get_gpgdir :: Ptr AlpmHandle -> IO CString
 foreign import ccall "alpm_option_set_gpgdir" c_alpm_option_set_gpgdir :: Ptr AlpmHandle -> CString -> IO ()
-gpgDirectory = newAlpmStringAttr c_alpm_option_get_gpgdir c_alpm_option_set_gpgdir
+gpgDirectory = newAlpmStringAttr c_alpm_option_get_gpgdir
+                                 c_alpm_option_set_gpgdir
 
 --------------------------------------------------------------------------------
 
-foreign import ccall "alpm_option_add_cachedir" c_alpm_option_add_cachedir :: Ptr AlpmHandle -> CString -> IO ()
+newAlpmListAttr getter setter adder remove = ListAttr alpmGetter alpmSetter alpmAdder alpmRemover
+  where
+    alpmGetter    = withAlpmPtr $ \ptr -> do
+        ret <- getter ptr
+        return $ integrate unsafePeekCString ret
+    alpmSetter  v = withAlpmPtr $ \ptr -> undefined
+    alpmAdder   v = withAlpmPtr $ \ptr -> newCString v >>= adder ptr
+    alpmRemover v = withAlpmPtr $ \ptr -> newCString v >>= remove ptr
+
+foo :: a -> Alpm ()
+foo a = return ()
+
+foreign import ccall "alpm_option_get_cachedirs"   c_alpm_option_get_cachedirs   :: Ptr AlpmHandle -> IO (Ptr (AlpmList CChar))
+foreign import ccall "alpm_option_set_cachedirs"   c_alpm_option_set_cachedirs   :: Ptr AlpmHandle -> Ptr (AlpmList CChar) -> IO ()
+foreign import ccall "alpm_option_add_cachedir"    c_alpm_option_add_cachedir    :: Ptr AlpmHandle -> CString -> IO ()
+foreign import ccall "alpm_option_remove_cachedir" c_alpm_option_remove_cachedir :: Ptr AlpmHandle -> CString -> IO ()
+cachePath = newAlpmListAttr c_alpm_option_get_cachedirs
+                            c_alpm_option_set_cachedirs
+                            c_alpm_option_add_cachedir
+                            c_alpm_option_remove_cachedir
+
+--------------------------------------------------------------------------------
+
 setAlpmOptions :: (Ptr AlpmHandle -> CString -> IO ()) -> Ptr AlpmHandle -> String -> IO ()
 setAlpmOptions f h v = newCString v >>= f h
 

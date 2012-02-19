@@ -24,7 +24,6 @@ newtype Transaction a = Transaction (Alpm a)
 data AlpmOptions = AlpmOptions
     { root      :: String
     , dbPath    :: String
-    , cachePath :: Maybe String
     }
 
 withAlpmPtr :: (Ptr AlpmHandle -> IO b) -> Alpm b
