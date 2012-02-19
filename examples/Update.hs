@@ -18,9 +18,7 @@ main = do
     [arg] <- getArgs
     conf  <- getPacman
     runAlpm defaultOptions $ do
-        setProgressCB $ \t str _ _ _ -> do
-            putStrLn $ "T: " ++ show t
-            peekCString str >>= putStrLn . ("STR: " ++)
+        setLogCB $ \lvl str -> putStr $ "Logged [" ++ show lvl ++ "]: " ++ str
 
         set [ arch    := "x86_64"
             , logFile := "/tmp/hsalpm.log" ]
