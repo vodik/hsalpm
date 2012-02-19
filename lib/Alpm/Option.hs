@@ -7,6 +7,7 @@ import Control.DeepSeq
 import Control.Monad.Reader
 import Data.Word
 import System.IO.Unsafe
+import System.Posix.Unistd
 import Text.Printf
 
 import Foreign.C
@@ -154,6 +155,10 @@ ignoreGroups = newAlpmListAttr c_alpm_option_get_ignoregroups
                                c_alpm_option_set_ignoregroups
                                c_alpm_option_add_ignoregroup
                                c_alpm_option_remove_ignoregroup
+
+--------------------------------------------------------------------------------
+
+systemArch = arch :=> liftIO $ machine <$> getSystemID
 
 --------------------------------------------------------------------------------
 

@@ -30,6 +30,7 @@ Library
     mtl -any,
     parsec -any,
     transformers -any,
-    time -any
+    time -any,
+    unix -any
   Build-tools: hsc2hs
   Hs-source-dirs: lib

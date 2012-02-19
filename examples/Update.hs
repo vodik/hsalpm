@@ -3,7 +3,6 @@ module Main where
 import Control.Monad
 import Control.Monad.Trans (liftIO)
 import System.Environment
-import Foreign.C.String
 
 import Alpm
 import Alpm.Base
@@ -21,15 +20,11 @@ main = do
         setLogCB $ \lvl str ->
             putStr $ "Logged [" ++ show lvl ++ "]: " ++ str
 
-        set [ arch       := "x86_64"
+        set [ systemArch
             , logFile    := "/tmp/hsalpm.log"
             , cachePath  := [ "/tmp/" ]
-            , ignorePkgs := [ "gnome", "xmonad" ]
             , useSyslog  := True
-            , checkSpace :~ not
             ]
-
-        add ignorePkgs "kde"
 
         get arch       >>= liftIO . putStrLn . ("Arch:    " ++)
         get logFile    >>= liftIO . putStrLn . ("Logfile: " ++)
