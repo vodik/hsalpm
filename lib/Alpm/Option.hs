@@ -34,7 +34,7 @@ set :: [AttrOp] -> Alpm ()
 set = mapM_ app
   where
     app (Attr getter setter := x) = setter x
-    app (Attr getter setter :~ f) = getter >>= \v -> setter (f v)
+    app (Attr getter setter :~ f) = getter >>= setter . f
 
 newAlpmStringAttr getter setter = Attr alpmGetter alpmSetter
   where
