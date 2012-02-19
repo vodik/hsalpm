@@ -30,7 +30,7 @@ data AttrOp = forall a b. Attr a b :=  a
             | forall a b. Attr a b :=> (Alpm a)
             | forall a b. Attr a b :~> (a -> Alpm a)
 
-infixr 0 :=, :~
+infixr 0 :=, :~, :=>, :~>
 
 get :: Attr a b -> Alpm a
 get (Attr     get _    ) = get
