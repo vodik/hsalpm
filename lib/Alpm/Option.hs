@@ -94,6 +94,42 @@ cachePath = newAlpmListAttr c_alpm_option_get_cachedirs
                             c_alpm_option_add_cachedir
                             c_alpm_option_remove_cachedir
 
+foreign import ccall "alpm_option_get_noupgrades"   c_alpm_option_get_noupgrades   :: Ptr AlpmHandle -> IO (Ptr (AlpmList CChar))
+foreign import ccall "alpm_option_set_noupgrades"   c_alpm_option_set_noupgrades   :: Ptr AlpmHandle -> Ptr (AlpmList CChar) -> IO ()
+foreign import ccall "alpm_option_add_noupgrade"    c_alpm_option_add_noupgrade    :: Ptr AlpmHandle -> CString -> IO ()
+foreign import ccall "alpm_option_remove_noupgrade" c_alpm_option_remove_noupgrade :: Ptr AlpmHandle -> CString -> IO ()
+noUpgrades = newAlpmListAttr c_alpm_option_get_noupgrades
+                             c_alpm_option_set_noupgrades
+                             c_alpm_option_add_noupgrade
+                             c_alpm_option_remove_noupgrade
+
+foreign import ccall "alpm_option_get_noextracts"   c_alpm_option_get_noextracts   :: Ptr AlpmHandle -> IO (Ptr (AlpmList CChar))
+foreign import ccall "alpm_option_set_noextracts"   c_alpm_option_set_noextracts   :: Ptr AlpmHandle -> Ptr (AlpmList CChar) -> IO ()
+foreign import ccall "alpm_option_add_noextract"    c_alpm_option_add_noextract    :: Ptr AlpmHandle -> CString -> IO ()
+foreign import ccall "alpm_option_remove_noextract" c_alpm_option_remove_noextract :: Ptr AlpmHandle -> CString -> IO ()
+noExtracts = newAlpmListAttr c_alpm_option_get_noextracts
+                             c_alpm_option_set_noextracts
+                             c_alpm_option_add_noextract
+                             c_alpm_option_remove_noextract
+
+foreign import ccall "alpm_option_get_ignorepkgs"   c_alpm_option_get_ignorepkgs   :: Ptr AlpmHandle -> IO (Ptr (AlpmList CChar))
+foreign import ccall "alpm_option_set_ignorepkgs"   c_alpm_option_set_ignorepkgs   :: Ptr AlpmHandle -> Ptr (AlpmList CChar) -> IO ()
+foreign import ccall "alpm_option_add_ignorepkg"    c_alpm_option_add_ignorepkg    :: Ptr AlpmHandle -> CString -> IO ()
+foreign import ccall "alpm_option_remove_ignorepkg" c_alpm_option_remove_ignorepkg :: Ptr AlpmHandle -> CString -> IO ()
+ignorePkgs = newAlpmListAttr c_alpm_option_get_ignorepkgs
+                             c_alpm_option_set_ignorepkgs
+                             c_alpm_option_add_ignorepkg
+                             c_alpm_option_remove_ignorepkg
+
+foreign import ccall "alpm_option_get_ignoregroups"   c_alpm_option_get_ignoregroups   :: Ptr AlpmHandle -> IO (Ptr (AlpmList CChar))
+foreign import ccall "alpm_option_set_ignoregroups"   c_alpm_option_set_ignoregroups   :: Ptr AlpmHandle -> Ptr (AlpmList CChar) -> IO ()
+foreign import ccall "alpm_option_add_ignoregroup"    c_alpm_option_add_ignoregroup    :: Ptr AlpmHandle -> CString -> IO ()
+foreign import ccall "alpm_option_remove_ignoregroup" c_alpm_option_remove_ignoregroup :: Ptr AlpmHandle -> CString -> IO ()
+ignoreGroups = newAlpmListAttr c_alpm_option_get_ignoregroups
+                               c_alpm_option_set_ignoregroups
+                               c_alpm_option_add_ignoregroup
+                               c_alpm_option_remove_ignoregroup
+
 --------------------------------------------------------------------------------
 
 setAlpmOptions :: (Ptr AlpmHandle -> CString -> IO ()) -> Ptr AlpmHandle -> String -> IO ()
