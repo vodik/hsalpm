@@ -8,13 +8,14 @@ import Data.List
 import System.Environment
 
 import Alpm
+import Alpm.Base
 import Alpm.Database
 import Alpm.Package
 import Pacman
 
--- query :: Alpm ()
-query conf f = do
-    dbs  <- pacmanDBs conf
+queryPkgs :: t -> (Package -> Bool) -> Alpm [Package]
+queryPkgs conf f = do
+    dbs <- pacmanDBs conf
     withPkgCaches dbs $
         return . filter f
 
@@ -22,7 +23,7 @@ main :: IO ()
 main = do
     args <- getArgs
     conf <- getPacman
-    rslt <- runAlpm defaultOptions $ query conf (myFilter args)
+    rslt <- runAlpm defaultOptions $ queryPkgs conf (myFilter args)
     case rslt of
         Left  err  -> print err
         Right pkgs -> mapM_ ppPkgInfo pkgs
@@ -37,11 +38,3 @@ myFilter ts pkg =
 
 ppPkgName :: Package -> IO ()
 ppPkgName pkg = putStrLn $ unwords [ packageName pkg, packageVersion pkg ]
-
-ppPkgInfo :: Package -> IO ()
-ppPkgInfo pkg = do
-    putStrLn $ packageDB pkg ++ "/" ++ packageName pkg ++ " " ++ packageVersion pkg ++ groups (packageGroups pkg)
-    putStrLn $ "    " ++ packageDescription pkg
-  where
-    groups g | null g    = []
-             | otherwise = " (" ++ unwords g ++ ")"
