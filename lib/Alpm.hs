@@ -4,6 +4,7 @@ module Alpm where
 
 import Control.Applicative
 import Control.DeepSeq
+import Control.Monad.Error
 import Control.Monad.Reader
 import Text.Printf
 
@@ -20,10 +21,10 @@ import Alpm.Option
 import Alpm.Package
 import Alpm.Util
 
-runAlpm :: AlpmOptions -> Alpm a -> IO a
+runAlpm :: AlpmOptions -> Alpm a -> IO (Either AlpmException a)
 runAlpm opt (Alpm f) =
     alpmInitialize opt >>= \alpm@(AlpmSession a) ->
-        withForeignPtr a $ \_ -> runReaderT f alpm
+        withForeignPtr a . const $ runReaderT (runErrorT f) alpm
 
 defaultOptions = AlpmOptions
     { root   = "/"

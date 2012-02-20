@@ -4,6 +4,7 @@ module Alpm.Base where
 
 import Control.Applicative
 import Control.Monad
+import Control.Monad.Error
 import Control.Monad.Reader
 
 import Foreign.C
@@ -15,8 +16,15 @@ import Alpm.Util
 data AlpmHandle
 data AlpmSession = AlpmSession !(ForeignPtr AlpmHandle)
 
-newtype Alpm a = Alpm (ReaderT AlpmSession IO a)
-    deriving (Functor, Applicative, Monad, MonadIO, MonadReader AlpmSession)
+newtype Alpm a = Alpm (ErrorT AlpmException (ReaderT AlpmSession IO) a)
+    deriving (Functor, Applicative, Monad, MonadIO, MonadError AlpmException, MonadReader AlpmSession)
+
+data AlpmException = AlpmException Int
+    deriving (Eq, Read, Show)
+
+instance Error AlpmException where
+    noMsg    = undefined
+    strMsg _ = undefined
 
 newtype Transaction a = Transaction (Alpm a)
     deriving (Functor, Applicative, Monad, MonadIO, MonadReader AlpmSession)
