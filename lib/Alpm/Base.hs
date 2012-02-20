@@ -19,7 +19,7 @@ data AlpmSession = AlpmSession !(ForeignPtr AlpmHandle)
 newtype Alpm a = Alpm (ErrorT AlpmException (ReaderT AlpmSession IO) a)
     deriving (Functor, Applicative, Monad, MonadIO, MonadError AlpmException, MonadReader AlpmSession)
 
-data AlpmException = AlpmException Int
+data AlpmException = AlpmException String !String
     deriving (Eq, Read, Show)
 
 instance Error AlpmException where
@@ -46,3 +46,5 @@ alpmStrerror errno = unsafePeekCString $ c_alpm_strerror errno
 foreign import ccall "alpm_errno" c_alpm_errno :: Ptr AlpmHandle -> CInt
 alpmLastStrerror = withAlpmPtr $
     return . unsafePeekCString . c_alpm_strerror . c_alpm_errno
+
+throwAlpmException str = throwError =<< AlpmException str <$> alpmLastStrerror
