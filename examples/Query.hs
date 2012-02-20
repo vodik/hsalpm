@@ -13,17 +13,17 @@ import Alpm.Package
 import Pacman
 
 -- query :: Alpm ()
-query args conf = do
+query conf f = do
     dbs  <- pacmanDBs conf
-    pkgs <- forM dbs $ getFromPkgCache $ return . filter (myFilter args)
-    return $ concat pkgs
+    withPkgCaches dbs $
+        return . filter f
 
 main :: IO ()
 main = do
     args <- getArgs
     conf <- getPacman
-    result <- runAlpm defaultOptions $ query args conf
-    case result of
+    rslt <- runAlpm defaultOptions $ query conf (myFilter args)
+    case rslt of
         Left  err  -> print err
         Right pkgs -> mapM_ ppPkgInfo pkgs
 

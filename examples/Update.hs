@@ -14,8 +14,8 @@ import Pacman
 
 update :: String -> Alpm ()
 update repo = do
-    setLogCB $ \lvl str ->
-        putStr $ "Logged [" ++ show lvl ++ "]: " ++ str
+    -- setLogCB $ \lvl str ->
+    --     putStr $ "Logged [" ++ show lvl ++ "]: " ++ str
 
     set [ systemArch
         , logFile    := "/tmp/hsalpm.log"
@@ -25,6 +25,7 @@ update repo = do
 
     get arch       >>= liftIO . putStrLn . ("Arch:    " ++)
     get logFile    >>= liftIO . putStrLn . ("Logfile: " ++)
+    -- get gpgDirectory >>= liftIO . putStrLn . ("GPG: " ++)
     get cachePath  >>= liftIO . putStrLn . ("Cache:   " ++) . unwords
     get ignorePkgs >>= liftIO . putStrLn . ("Ignore:  " ++) . unwords
     get useSyslog  >>= liftIO . putStrLn . ("Syslog:  " ++) . show

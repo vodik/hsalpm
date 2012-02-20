@@ -19,12 +19,13 @@ data AlpmSession = AlpmSession !(ForeignPtr AlpmHandle)
 newtype Alpm a = Alpm (ErrorT AlpmException (ReaderT AlpmSession IO) a)
     deriving (Functor, Applicative, Monad, MonadIO, MonadError AlpmException, MonadReader AlpmSession)
 
-data AlpmException = AlpmException String !String
+data AlpmException = AlpmException String String
+                   | UnknownException
     deriving (Eq, Read, Show)
 
 instance Error AlpmException where
-    noMsg    = undefined
-    strMsg _ = undefined
+    noMsg    = UnknownException
+    strMsg _ = UnknownException
 
 newtype Transaction a = Transaction (Alpm a)
     deriving (Functor, Applicative, Monad, MonadIO, MonadReader AlpmSession)

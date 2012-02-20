@@ -28,7 +28,7 @@ dbName (DB db_ptr) = unsafePeekCString $ c_alpm_db_get_name db_ptr
 foreign import ccall "alpm_option_get_localdb" c_alpm_option_get_localdb :: Ptr AlpmHandle -> IO (Ptr DBHandle)
 localDB :: Alpm DB
 localDB = do
-    db_ptr <- withAlpmPtr $ c_alpm_option_get_localdb
+    db_ptr <- withAlpmPtr c_alpm_option_get_localdb
     if isNull db_ptr
         then throwAlpmException "could not register 'local' database"
         else return $ DB db_ptr
@@ -36,7 +36,7 @@ localDB = do
 foreign import ccall "alpm_option_get_syncdbs" c_alpm_option_get_syncdbs :: Ptr AlpmHandle -> IO (Ptr DBList)
 syncDBs :: Alpm [DB]
 syncDBs = do
-    list_ptr <- withAlpmPtr $ c_alpm_option_get_syncdbs
+    list_ptr <- withAlpmPtr c_alpm_option_get_syncdbs
     if isNull list_ptr
         then return []
         else return $ boxAlpmList DB list_ptr
@@ -45,10 +45,10 @@ foreign import ccall "alpm_db_register_sync" c_alpm_db_register_sync :: Ptr Alpm
 registerDB :: String -> Alpm DB
 registerDB name = do
     db_ptr <- withAlpmPtr $ \alpm_ptr -> do
-        name'  <- newCString name
+        name' <- newCString name
         c_alpm_db_register_sync alpm_ptr name' (1 `shiftL` 31)
     if isNull db_ptr
-        then throwAlpmException $ "could not register '" ++ name ++ "' database"
+        then throwAlpmException $ printf "could not register '%s' database" name
         else return $ DB db_ptr
 
 foreign import ccall "alpm_db_get_servers" c_alpm_db_get_servers :: Ptr DBHandle -> IO (Ptr (AlpmList CChar))
