@@ -175,8 +175,8 @@ foreign import ccall "alpm_option_set_progresscb"
 foreign import ccall "alpm_option_set_logcb"
     c_alpm_option_set_logcb :: Ptr AlpmHandle -> FunPtr CBLog -> IO CInt
 
-setProgressCB :: (Int -> String -> Int -> Word -> Word -> IO ()) -> Alpm ()
-setProgressCB f = withAlpmPtr $ \alpm_ptr -> do
+onProgress :: (Int -> String -> Int -> Word -> Word -> IO ()) -> Alpm ()
+onProgress f = withAlpmPtr $ \alpm_ptr -> do
     cbW <- wrap_cb_progress $ \a b c d e -> do
         let a' = fromIntegral a
             c' = fromIntegral c
@@ -188,8 +188,8 @@ setProgressCB f = withAlpmPtr $ \alpm_ptr -> do
     -- freeHaskellFunPtr cbW
     return ()
 
-setLogCB :: (Int -> String -> IO ()) -> Alpm ()
-setLogCB f = withAlpmPtr $ \alpm_ptr -> do
+onLog :: (Int -> String -> IO ()) -> Alpm ()
+onLog f = withAlpmPtr $ \alpm_ptr -> do
     cbW <- wrap_cb_log $ \lvl str ->
         peekCString str >>= f (fromIntegral lvl)
     c_alpm_option_set_logcb alpm_ptr cbW

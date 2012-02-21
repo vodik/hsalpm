@@ -12,20 +12,20 @@ import Alpm.Option
 import Alpm.Transaction
 import Pacman
 
+logMsg :: Int -> String -> IO ()
+logMsg lvl str = putStr $ "Logged [" ++ show lvl ++ "]: " ++ str
+
 update :: String -> Alpm ()
 update repo = do
-    -- setLogCB $ \lvl str ->
-    --     putStr $ "Logged [" ++ show lvl ++ "]: " ++ str
+    onLog logMsg
 
     set [ systemArch
         , logFile    := "/tmp/hsalpm.log"
         , cachePath  := [ "/tmp/" ]
-        , useSyslog  := True
-        ]
+        , useSyslog  := True ]
 
     get arch       >>= liftIO . putStrLn . ("Arch:    " ++)
     get logFile    >>= liftIO . putStrLn . ("Logfile: " ++)
-    -- get gpgDirectory >>= liftIO . putStrLn . ("GPG: " ++)
     get cachePath  >>= liftIO . putStrLn . ("Cache:   " ++) . unwords
     get ignorePkgs >>= liftIO . putStrLn . ("Ignore:  " ++) . unwords
     get useSyslog  >>= liftIO . putStrLn . ("Syslog:  " ++) . show
