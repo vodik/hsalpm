@@ -1,4 +1,4 @@
-{-# LANGUAGE ForeignFunctionInterface, EmptyDataDecls #-}
+{-# LANGUAGE ForeignFunctionInterface, EmptyDataDecls, MultiParamTypeClasses #-}
 
 module Alpm.Package where
 
@@ -22,6 +22,10 @@ type License = String
 
 data PkgHandle
 type PkgList = AlpmList PkgHandle
+
+instance AlpmType Package PkgHandle  where
+    unpack = undefined
+    pack   = mkPackage
 
 data Origin = File | LocalDB | SyncDB
     deriving (Eq, Show, Read, Enum)
@@ -72,7 +76,7 @@ instance NFData Package where
       `seq` ()
 
 foreign import ccall "alpm_db_get_pkgcache" c_alpm_db_get_pkgcache :: Ptr DBHandle -> Ptr PkgList
-packages (DB db_ptr) = boxAlpmList mkPackage $ c_alpm_db_get_pkgcache db_ptr
+packages (DB db_ptr) = packAlpmList $ c_alpm_db_get_pkgcache db_ptr
 
 withPkgCaches :: (NFData a) => [DB] -> ([Package] -> Alpm a) -> Alpm a
 withPkgCaches dbs f = f (dbs >>= packages) >>= (return $!!)
@@ -105,7 +109,7 @@ foreign import ccall "alpm_pkg_get_groups"      c_alpm_pkg_get_groups      :: Pt
 -- TODO: replaces
 -- TODO: files
 -- TODO: backups
-foreign import ccall "alpm_pkg_get_db"          c_alpm_pkg_get_db          :: Ptr PkgHandle -> Ptr a
+foreign import ccall "alpm_pkg_get_db"          c_alpm_pkg_get_db          :: Ptr PkgHandle -> Ptr DBHandle
 -- TODO: sig
 
 mkPackage :: Ptr PkgHandle -> Package
@@ -125,9 +129,9 @@ mkPackage ptr = Package
     , packageSize        = maybeFromIntegral $ c_alpm_pkg_get_size ptr
     , packageInstallSize = fromIntegral $ c_alpm_pkg_get_isize ptr
     , packageReason      = toEnum . fromIntegral $ c_alpm_pkg_get_reason ptr
-    , packageLicenses    = boxAlpmList unsafePeekCString $ c_alpm_pkg_get_licenses ptr
-    , packageGroups      = boxAlpmList unsafePeekCString $ c_alpm_pkg_get_groups ptr
-    , packageDB          = dbName . DB $ c_alpm_pkg_get_db ptr
+    , packageLicenses    = packAlpmList $ c_alpm_pkg_get_licenses ptr
+    , packageGroups      = packAlpmList $ c_alpm_pkg_get_groups ptr
+    , packageDB          = dbName . pack $ c_alpm_pkg_get_db ptr
     }
 
 byInstallSize :: Package -> Package -> Ordering

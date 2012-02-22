@@ -36,5 +36,7 @@ myFilter ts pkg =
         f3  = any (`elem` packageGroups pkg) ts'
     in f1 || f2 || f3
 
-ppPkgName :: Package -> IO ()
-ppPkgName pkg = putStrLn $ unwords [ packageName pkg, packageVersion pkg ]
+ppPkgInfo :: Package -> IO ()
+ppPkgInfo pkg = do
+    putStrLn $ unwords [ packageName pkg, packageVersion pkg ]
+    putStrLn $ "    " ++ packageDescription pkg

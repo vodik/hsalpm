@@ -1,4 +1,4 @@
-{-# LANGUAGE ForeignFunctionInterface, EmptyDataDecls, GeneralizedNewtypeDeriving #-}
+{-# LANGUAGE ForeignFunctionInterface, EmptyDataDecls, MultiParamTypeClasses, TypeSynonymInstances, GeneralizedNewtypeDeriving #-}
 
 module Alpm.Base where
 
@@ -6,6 +6,7 @@ import Control.Applicative
 import Control.Monad
 import Control.Monad.Error
 import Control.Monad.Reader
+import System.IO.Unsafe
 
 import Foreign.C
 import Foreign.Ptr (Ptr, nullPtr)
@@ -34,6 +35,14 @@ data AlpmOptions = AlpmOptions
     { root   :: String
     , dbPath :: String
     }
+
+class AlpmType a t where
+    unpack :: a -> Ptr t
+    pack   :: Ptr t -> a
+
+instance AlpmType String CChar where
+    unpack = unsafePerformIO . newCString
+    pack   = unsafePerformIO . peekCString
 
 withAlpmPtr :: (Ptr AlpmHandle -> IO b) -> Alpm b
 withAlpmPtr f = ask >>= \(AlpmSession a) -> liftIO $ withForeignPtr a f

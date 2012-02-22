@@ -1,4 +1,4 @@
-{-# LANGUAGE EmptyDataDecls, ForeignFunctionInterface #-}
+{-# LANGUAGE ForeignFunctionInterface, EmptyDataDecls, MultiParamTypeClasses #-}
 
 module Alpm.Database where
 
@@ -21,6 +21,10 @@ type DBList = AlpmList DBHandle
 
 data DB = DB !(Ptr DBHandle)
 
+instance AlpmType DB DBHandle  where
+    unpack (DB ptr) = ptr
+    pack            = DB
+
 foreign import ccall "alpm_db_get_name" c_alpm_db_get_name :: Ptr DBHandle -> CString
 dbName :: DB -> String
 dbName (DB db_ptr) = unsafePeekCString $ c_alpm_db_get_name db_ptr
@@ -39,7 +43,7 @@ syncDBs = do
     list_ptr <- withAlpmPtr c_alpm_option_get_syncdbs
     if isNull list_ptr
         then return []
-        else return $ boxAlpmList DB list_ptr
+        else return $ packAlpmList list_ptr
 
 foreign import ccall "alpm_db_register_sync" c_alpm_db_register_sync :: Ptr AlpmHandle -> CString -> CInt -> IO (Ptr DBHandle)
 registerDB :: String -> Alpm DB
@@ -55,7 +59,7 @@ foreign import ccall "alpm_db_get_servers" c_alpm_db_get_servers :: Ptr DBHandle
 servers :: DB -> Alpm [String]
 servers (DB db_ptr) = do
     lst <- liftIO $ c_alpm_db_get_servers db_ptr
-    return $ boxAlpmList unsafePeekCString lst
+    return $ packAlpmList lst
 
 foreign import ccall "alpm_db_add_server" c_alpm_db_add_server :: Ptr DBHandle -> CString -> IO CInt
 addServer :: DB -> String -> Alpm ()

@@ -106,8 +106,8 @@ checkSpace = newAlpmToggleAttr c_alpm_option_get_checkspace
 
 newAlpmListAttr get set add remove = ListAttr alpmGetter alpmSetter alpmAdder alpmRemover
   where
-    alpmGetter    = withAlpmPtr $ \ptr -> boxAlpmList unsafePeekCString <$> get ptr
-    alpmSetter  v = withAlpmPtr $ \ptr -> withForeignPtr (mkAlpmList (unsafePerformIO . newCString) v) $ set ptr
+    alpmGetter    = withAlpmPtr $ \ptr -> packAlpmList <$> get ptr :: IO [String]
+    alpmSetter  v = withAlpmPtr $ \ptr -> withForeignPtr (unpackAlpmList v) $ set ptr
     alpmAdder   v = withAlpmPtr $ \ptr -> newCString v >>= add ptr
     alpmRemover v = withAlpmPtr $ \ptr -> newCString v >>= remove ptr
 
@@ -176,22 +176,22 @@ foreign import ccall "alpm_option_set_logcb"
     c_alpm_option_set_logcb :: Ptr AlpmHandle -> FunPtr CBLog -> IO CInt
 
 onProgress :: (Int -> String -> Int -> Word -> Word -> IO ()) -> Alpm ()
-onProgress f = withAlpmPtr $ \alpm_ptr -> do
-    cbW <- wrap_cb_progress $ \a b c d e -> do
+onProgress f = do
+    cbW <- liftIO $ wrap_cb_progress $ \a b c d e -> do
         let a' = fromIntegral a
             c' = fromIntegral c
             d' = fromIntegral d
             e' = fromIntegral e
         b' <- peekCString b
         f a' b' c' d' e'
-    c_alpm_option_set_progresscb alpm_ptr cbW
+    withAlpmPtr $ flip c_alpm_option_set_progresscb cbW
     -- freeHaskellFunPtr cbW
     return ()
 
 onLog :: (Int -> String -> IO ()) -> Alpm ()
-onLog f = withAlpmPtr $ \alpm_ptr -> do
-    cbW <- wrap_cb_log $ \lvl str ->
+onLog f = do
+    cbW <- liftIO $ wrap_cb_log $ \lvl str ->
         peekCString str >>= f (fromIntegral lvl)
-    c_alpm_option_set_logcb alpm_ptr cbW
+    withAlpmPtr $ flip c_alpm_option_set_logcb cbW
     -- freeHaskellFunPtr cbW
     return ()
