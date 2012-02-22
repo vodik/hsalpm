@@ -106,8 +106,8 @@ checkSpace = newAlpmToggleAttr c_alpm_option_get_checkspace
 
 newAlpmListAttr get set add remove = ListAttr alpmGetter alpmSetter alpmAdder alpmRemover
   where
-    alpmGetter    = withAlpmPtr $ \ptr -> packAlpmList <$> get ptr :: IO [String]
-    alpmSetter  v = withAlpmPtr $ \ptr -> withForeignPtr (unpackAlpmList v) $ set ptr
+    alpmGetter    = withAlpmPtr $ \ptr -> unpackAlpmList <$> get ptr :: IO [String]
+    alpmSetter  v = withAlpmPtr $ \ptr -> withForeignPtr (packAlpmList v) $ set ptr
     alpmAdder   v = withAlpmPtr $ \ptr -> newCString v >>= add ptr
     alpmRemover v = withAlpmPtr $ \ptr -> newCString v >>= remove ptr
 

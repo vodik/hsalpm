@@ -24,5 +24,5 @@ ppList ptr = do
 
 main :: IO ()
 main = do
-    let list = unpackAlpmList $ map show [1..9]
+    let list = packAlpmList $ map show [1..9]
     withForeignPtr list ppList

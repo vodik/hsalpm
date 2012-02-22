@@ -32,16 +32,16 @@ instance Storable (AlpmList a) where
                              >> #{poke alpm_list_t, next} ptr n
                              >> #{poke alpm_list_t, prev} ptr p
 
-packAlpmList :: (AlpmType a t) => Ptr (AlpmList t) -> [a]
-packAlpmList ptr | isNull ptr = []
-                 | otherwise  = let (AlpmList d n _) = unsafePerformIO (peek ptr)
-                                in pack d : packAlpmList n
+unpackAlpmList :: (AlpmType a t) => Ptr (AlpmList t) -> [a]
+unpackAlpmList ptr | isNull ptr = []
+                   | otherwise  = let (AlpmList d n _) = unsafePerformIO (peek ptr)
+                                  in unpack d : unpackAlpmList n
 
 foreign import ccall "&alpm_list_free" c_alpm_list_free :: FinalizerPtr (AlpmList t)
 
-unpackAlpmList :: (AlpmType a t) => [a] -> ForeignPtr (AlpmList t)
-unpackAlpmList [] = unsafePerformIO . newForeignPtr c_alpm_list_free $ nullPtr
-unpackAlpmList x  = unsafePerformIO . newForeignPtr c_alpm_list_free $ marshal x nullPtr
+packAlpmList :: (AlpmType a t) => [a] -> ForeignPtr (AlpmList t)
+packAlpmList [] = unsafePerformIO . newForeignPtr c_alpm_list_free $ nullPtr
+packAlpmList x  = unsafePerformIO . newForeignPtr c_alpm_list_free $ marshal x nullPtr
   where
-    marshal (x:[]) p = unsafePerformIO $ malloc >>= \n -> poke n (AlpmList (unpack x) nullPtr p)        >> return n
-    marshal (x:xs) p = unsafePerformIO $ malloc >>= \n -> poke n (AlpmList (unpack x) (marshal xs n) p) >> return n
+    marshal (x:[]) p = unsafePerformIO $ malloc >>= \n -> poke n (AlpmList (pack x) nullPtr p)        >> return n
+    marshal (x:xs) p = unsafePerformIO $ malloc >>= \n -> poke n (AlpmList (pack x) (marshal xs n) p) >> return n

@@ -37,12 +37,12 @@ data AlpmOptions = AlpmOptions
     }
 
 class AlpmType a t where
-    unpack :: a -> Ptr t
-    pack   :: Ptr t -> a
+    pack   :: a -> Ptr t
+    unpack :: Ptr t -> a
 
 instance AlpmType String CChar where
-    unpack = unsafePerformIO . newCString
-    pack   = unsafePerformIO . peekCString
+    pack   = unsafePerformIO . newCString
+    unpack = unsafePerformIO . peekCString
 
 withAlpmPtr :: (Ptr AlpmHandle -> IO b) -> Alpm b
 withAlpmPtr f = ask >>= \(AlpmSession a) -> liftIO $ withForeignPtr a f
