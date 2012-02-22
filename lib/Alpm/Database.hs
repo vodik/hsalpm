@@ -11,6 +11,7 @@ import Text.Printf
 
 import Foreign.C
 import Foreign.Ptr (Ptr, nullPtr)
+import Foreign.Marshal.Utils
 
 import Alpm.Base
 import Alpm.List
@@ -71,8 +72,7 @@ addServer (DB db_ptr) url = do
 foreign import ccall "alpm_db_update" c_alpm_db_update :: CInt -> Ptr DBHandle -> IO CInt
 updateDB :: Bool -> DB -> Transaction Int
 updateDB force (DB db_ptr) = Transaction $ do
-    let f = if force then 1 else 0
-    rst <- liftIO $ c_alpm_db_update f db_ptr
+    rst <- liftIO $ c_alpm_db_update (fromBool force) db_ptr
     if rst < 0
         then throwAlpmException "Unable to update database"
         else return $ fromIntegral rst

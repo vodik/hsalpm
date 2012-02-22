@@ -14,6 +14,7 @@ import Foreign.C
 import Foreign.Ptr
 import Foreign.ForeignPtr
 import Foreign.Marshal.Alloc
+import Foreign.Marshal.Utils
 import Foreign.Storable
 
 import Alpm.Base
@@ -84,8 +85,8 @@ gpgDirectory = newAlpmStringAttr c_alpm_option_get_gpgdir
 
 newAlpmToggleAttr get set = Attr alpmGetter alpmSetter
   where
-    alpmGetter   = (> 0) <$> withAlpmPtr get
-    alpmSetter v = withAlpmPtr $ \ptr -> if v then set ptr 1 else set ptr 0
+    alpmGetter   = toBool <$> withAlpmPtr get
+    alpmSetter v = withAlpmPtr $ flip set $ fromBool v
 
 foreign import ccall "alpm_option_get_usesyslog" c_alpm_option_get_usesyslog :: Ptr AlpmHandle -> IO CInt
 foreign import ccall "alpm_option_set_usesyslog" c_alpm_option_set_usesyslog :: Ptr AlpmHandle -> CInt -> IO ()
@@ -180,6 +181,10 @@ foreign import ccall "wrapper" wrap_cb_progress :: AlpmProgressCB -> IO (FunPtr 
 
 foreign import ccall "alpm_option_set_logcb"
     c_alpm_option_set_logcb :: Ptr AlpmHandle -> FunPtr AlpmLogCB -> IO CInt
+foreign import ccall "alpm_option_set_fetchcb"
+    c_alpm_option_set_fetchcb :: Ptr AlpmHandle -> FunPtr AlpmFetchCB -> IO CInt
+foreign import ccall "alpm_option_set_totalcb"
+    c_alpm_option_set_totalcb :: Ptr AlpmHandle -> FunPtr AlpmTotalCB -> IO CInt
 foreign import ccall "alpm_option_set_progresscb"
     c_alpm_option_set_progresscb :: Ptr AlpmHandle -> FunPtr AlpmProgressCB -> IO CInt
 
@@ -188,7 +193,22 @@ onLog f = do
     cbW <- liftIO . wrap_cb_log $ \lvl str ->
         peekCString str >>= f (fromIntegral lvl)
     withAlpmPtr $ flip c_alpm_option_set_logcb cbW
-    -- freeHaskellFunPtr cbW
+    return ()
+
+onFetch :: (String -> String -> Bool -> IO Int) -> Alpm ()
+onFetch f = do
+    cbW <- liftIO . wrap_cb_fetch $ \a b c -> do
+        a' <- peekCString a
+        b' <- peekCString b
+        fromIntegral <$> f a' b' (toBool c)
+    withAlpmPtr $ flip c_alpm_option_set_fetchcb cbW
+    return ()
+
+onTotal :: (Int -> IO ()) -> Alpm ()
+onTotal f = do
+    cbW <- liftIO . wrap_cb_total $ \a ->
+        f $ fromIntegral a
+    withAlpmPtr $ flip c_alpm_option_set_totalcb cbW
     return ()
 
 onProgress :: (Int -> String -> Int -> Word -> Word -> IO ()) -> Alpm ()
@@ -201,5 +221,4 @@ onProgress f = do
         b' <- peekCString b
         f a' b' c' d' e'
     withAlpmPtr $ flip c_alpm_option_set_progresscb cbW
-    -- freeHaskellFunPtr cbW
     return ()
