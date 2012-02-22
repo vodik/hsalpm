@@ -21,5 +21,6 @@ unsafeMaybeCString cstr
 maybeFromIntegral :: (Integral a, Num b) => a -> Maybe b
 maybeFromIntegral x = if x > 0 then Just $ fromIntegral x else Nothing
 
+infixr 0 $!!
 ($!!) :: (NFData a) => (a -> b) -> a -> b
 f $!! x = x `deepseq` f x

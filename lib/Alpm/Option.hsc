@@ -194,6 +194,62 @@ foreign import ccall "alpm_option_set_questioncb"
 foreign import ccall "alpm_option_set_progresscb"
     c_alpm_option_set_progresscb :: Ptr AlpmHandle -> FunPtr AlpmProgressCB -> IO CInt
 
+data AlpmQuestion = AlpmQuestion String
+type AlpmEventCode = Int
+
+#include <alpm.h>
+#{enum AlpmEventCode,
+    , event_checkdeps_start = ALPM_EVENT_CHECKDEPS_START
+    , event_checkdeps_done = ALPM_EVENT_CHECKDEPS_DONE
+    , event_fileconflicts_start = ALPM_EVENT_FILECONFLICTS_START
+    , event_fileconflicts_done = ALPM_EVENT_FILECONFLICTS_DONE
+    , event_resolvedeps_start = ALPM_EVENT_RESOLVEDEPS_START
+    , event_resolvedeps_done = ALPM_EVENT_RESOLVEDEPS_DONE
+    , event_interconflicts_start = ALPM_EVENT_INTERCONFLICTS_START
+    , event_interconflicts_done = ALPM_EVENT_INTERCONFLICTS_DONE
+    , event_add_start = ALPM_EVENT_ADD_START
+    , event_add_done = ALPM_EVENT_ADD_DONE
+    , event_remove_start = ALPM_EVENT_REMOVE_START
+    , event_remove_done = ALPM_EVENT_REMOVE_DONE
+    , event_upgrade_start = ALPM_EVENT_UPGRADE_START
+    , event_upgrade_done = ALPM_EVENT_UPGRADE_DONE
+    , event_integrity_start = ALPM_EVENT_INTEGRITY_START
+    , event_integrity_done = ALPM_EVENT_INTEGRITY_DONE
+    , event_load_start = ALPM_EVENT_LOAD_START
+    , event_load_done = ALPM_EVENT_LOAD_DONE
+    , event_delta_integrity_start = ALPM_EVENT_DELTA_INTEGRITY_START
+    , event_delta_integrity_done = ALPM_EVENT_DELTA_INTEGRITY_DONE
+    , event_delta_patches_start = ALPM_EVENT_DELTA_PATCHES_START
+    , event_delta_patches_done = ALPM_EVENT_DELTA_PATCHES_DONE
+    , event_delta_patch_start = ALPM_EVENT_DELTA_PATCH_START
+    , event_delta_patch_done = ALPM_EVENT_DELTA_PATCH_DONE
+    , event_delta_patch_failed = ALPM_EVENT_DELTA_PATCH_FAILED
+    , event_scriptlet_info = ALPM_EVENT_SCRIPTLET_INFO
+    , event_retrieve_start = ALPM_EVENT_RETRIEVE_START
+    , event_diskspace_start = ALPM_EVENT_DISKSPACE_START
+    , event_diskspace_done = ALPM_EVENT_DISKSPACE_DONE
+}
+
+data EventType = CheckDepends
+               | FileConflicts
+               | ResolveDependancies
+               | InterConflicts
+               | Add Package
+               | Remove Package
+               | Upgrade Package
+               | IntegrityCheck
+               | Loading
+               | DeltaIntegrityCheck
+               | DeltaPatches
+               | Retreive
+               | Diskspace
+
+data Event = Start EventType
+           | Done EventType
+           | Failed EventType
+           | Info String
+           | Unknown
+
 onLog :: (Int -> String -> IO ()) -> Alpm ()
 onLog f = do
     cbW <- liftIO . wrap_cb_log $ \lvl str ->
@@ -227,15 +283,50 @@ onTotal f = do
     withAlpmPtr $ flip c_alpm_option_set_totalcb cbW
     return ()
 
-onEvent :: (IO ()) -> Alpm ()
+onEvent :: (Event -> IO ()) -> Alpm ()
 onEvent f = do
-    cbW <- liftIO . wrap_cb_event $ \a b c -> f
+    cbW <- liftIO . wrap_cb_event $ \event d1 d2 ->
+        let pkg = unpack (castPtr d1 :: Ptr PkgHandle)
+            msg = case event of
+                event_checkdeps_start       -> Start CheckDepends
+                event_checkdeps_done        -> Done  CheckDepends
+                event_fileconflicts_start   -> Start FileConflicts
+                event_fileconflicts_done    -> Done  FileConflicts
+                event_resolvedeps_start     -> Start ResolveDependancies
+                event_resolvedeps_done      -> Done  ResolveDependancies
+                event_interconflicts_start  -> Start InterConflicts
+                event_interconflicts_done   -> Done  InterConflicts
+                event_add_start             -> Start $ Add $!! pkg
+                event_add_done              -> Done  $ Add $!! pkg
+                event_remove_start          -> Start $ Remove $!! pkg
+                event_remove_done           -> Done  $ Remove $!! pkg
+                event_upgrade_start         -> Start $ Upgrade $!! pkg
+                event_upgrade_done          -> Done  $ Upgrade $!! pkg
+                event_integrity_start       -> Start IntegrityCheck
+                event_integrity_done        -> Done  IntegrityCheck
+                event_load_start            -> Start Loading
+                event_load_done             -> Done  Loading
+                event_delta_integrity_start -> Start DeltaIntegrityCheck
+                event_delta_integrity_done  -> Done  DeltaIntegrityCheck
+                -- event_delta_patches_start   -> undefined
+                -- event_delta_patches_done    -> undefined
+                -- event_delta_patch_start     -> undefined
+                -- event_delta_patch_done      -> undefined
+                -- event_delta_patch_failed    -> undefined
+                -- event_scriptlet_info        -> undefined
+                event_retrieve_start        -> Start Retreive
+                event_diskspace_start       -> Start Diskspace
+                event_diskspace_done        -> Done  Diskspace
+                otherwise                   -> Unknown
+        in f msg
     withAlpmPtr $ flip c_alpm_option_set_eventcb cbW
     return()
 
-onQuestion :: (IO ()) -> Alpm ()
+onQuestion :: (AlpmQuestion -> IO Bool) -> Alpm ()
 onQuestion f = do
-    cbW <- liftIO . wrap_cb_question $ \a b c d e -> f
+    cbW <- liftIO . wrap_cb_question $ \a b c d e -> do
+        f $ AlpmQuestion "foo"
+        return ()
     withAlpmPtr $ flip c_alpm_option_set_questioncb cbW
     return()
 
