@@ -181,10 +181,16 @@ foreign import ccall "wrapper" wrap_cb_progress :: AlpmProgressCB -> IO (FunPtr 
 
 foreign import ccall "alpm_option_set_logcb"
     c_alpm_option_set_logcb :: Ptr AlpmHandle -> FunPtr AlpmLogCB -> IO CInt
+foreign import ccall "alpm_option_set_dlcb"
+    c_alpm_option_set_dlcb :: Ptr AlpmHandle -> FunPtr AlpmDownloadCB -> IO CInt
 foreign import ccall "alpm_option_set_fetchcb"
     c_alpm_option_set_fetchcb :: Ptr AlpmHandle -> FunPtr AlpmFetchCB -> IO CInt
 foreign import ccall "alpm_option_set_totalcb"
     c_alpm_option_set_totalcb :: Ptr AlpmHandle -> FunPtr AlpmTotalCB -> IO CInt
+foreign import ccall "alpm_option_set_eventcb"
+    c_alpm_option_set_eventcb :: Ptr AlpmHandle -> FunPtr (AlpmEventCB a) -> IO CInt
+foreign import ccall "alpm_option_set_questioncb"
+    c_alpm_option_set_questioncb :: Ptr AlpmHandle -> FunPtr (AlpmQuestionCB a) -> IO CInt
 foreign import ccall "alpm_option_set_progresscb"
     c_alpm_option_set_progresscb :: Ptr AlpmHandle -> FunPtr AlpmProgressCB -> IO CInt
 
@@ -193,6 +199,16 @@ onLog f = do
     cbW <- liftIO . wrap_cb_log $ \lvl str ->
         peekCString str >>= f (fromIntegral lvl)
     withAlpmPtr $ flip c_alpm_option_set_logcb cbW
+    return ()
+
+onDownload :: (String -> Int -> Int -> IO ()) -> Alpm ()
+onDownload f = do
+    cbW <- liftIO . wrap_cb_download $ \a b c -> do
+        let b' = fromIntegral b
+            c' = fromIntegral c
+        a' <- peekCString a
+        f a' b' c'
+    withAlpmPtr $ flip c_alpm_option_set_dlcb cbW
     return ()
 
 onFetch :: (String -> String -> Bool -> IO Int) -> Alpm ()
@@ -210,6 +226,18 @@ onTotal f = do
         f $ fromIntegral a
     withAlpmPtr $ flip c_alpm_option_set_totalcb cbW
     return ()
+
+onEvent :: (IO ()) -> Alpm ()
+onEvent f = do
+    cbW <- liftIO . wrap_cb_event $ \a b c -> f
+    withAlpmPtr $ flip c_alpm_option_set_eventcb cbW
+    return()
+
+onQuestion :: (IO ()) -> Alpm ()
+onQuestion f = do
+    cbW <- liftIO . wrap_cb_question $ \a b c d e -> f
+    withAlpmPtr $ flip c_alpm_option_set_questioncb cbW
+    return()
 
 onProgress :: (Int -> String -> Int -> Word -> Word -> IO ()) -> Alpm ()
 onProgress f = do
