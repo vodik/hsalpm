@@ -162,22 +162,38 @@ systemArch = arch :=> liftIO $ machine <$> getSystemID
 
 --------------------------------------------------------------------------------
 
-type CBProgress = CInt -> CString -> CInt -> CSize -> CSize -> IO ()
-type CBLog = CInt -> CString -> IO ()
+type AlpmLogCB        = CInt -> CString -> IO ()
+type AlpmDownloadCB   = CString -> CLong -> CLong -> IO ()
+type AlpmFetchCB      = CString -> CString -> CInt -> IO CInt
+type AlpmTotalCB      = CLong -> IO ()
+type AlpmEventCB a    = CInt -> Ptr a -> Ptr a -> IO ()
+type AlpmQuestionCB a = CInt -> Ptr a -> Ptr a -> Ptr a -> Ptr CInt -> IO ()
+type AlpmProgressCB   = CInt -> CString -> CInt -> CSize -> CSize -> IO ()
 
-foreign import ccall "wrapper"
-    wrap_cb_progress :: CBProgress -> IO (FunPtr CBProgress)
-foreign import ccall "wrapper"
-    wrap_cb_log :: CBLog -> IO (FunPtr CBLog)
+foreign import ccall "wrapper" wrap_cb_log      :: AlpmLogCB -> IO (FunPtr AlpmLogCB)
+foreign import ccall "wrapper" wrap_cb_download :: AlpmDownloadCB -> IO (FunPtr AlpmDownloadCB)
+foreign import ccall "wrapper" wrap_cb_fetch    :: AlpmFetchCB -> IO (FunPtr AlpmFetchCB)
+foreign import ccall "wrapper" wrap_cb_total    :: AlpmTotalCB -> IO (FunPtr AlpmTotalCB)
+foreign import ccall "wrapper" wrap_cb_event    :: AlpmEventCB a -> IO (FunPtr (AlpmEventCB a))
+foreign import ccall "wrapper" wrap_cb_question :: AlpmQuestionCB a -> IO (FunPtr (AlpmQuestionCB a))
+foreign import ccall "wrapper" wrap_cb_progress :: AlpmProgressCB -> IO (FunPtr AlpmProgressCB)
 
-foreign import ccall "alpm_option_set_progresscb"
-    c_alpm_option_set_progresscb :: Ptr AlpmHandle -> FunPtr CBProgress -> IO CInt
 foreign import ccall "alpm_option_set_logcb"
-    c_alpm_option_set_logcb :: Ptr AlpmHandle -> FunPtr CBLog -> IO CInt
+    c_alpm_option_set_logcb :: Ptr AlpmHandle -> FunPtr AlpmLogCB -> IO CInt
+foreign import ccall "alpm_option_set_progresscb"
+    c_alpm_option_set_progresscb :: Ptr AlpmHandle -> FunPtr AlpmProgressCB -> IO CInt
+
+onLog :: (Int -> String -> IO ()) -> Alpm ()
+onLog f = do
+    cbW <- liftIO . wrap_cb_log $ \lvl str ->
+        peekCString str >>= f (fromIntegral lvl)
+    withAlpmPtr $ flip c_alpm_option_set_logcb cbW
+    -- freeHaskellFunPtr cbW
+    return ()
 
 onProgress :: (Int -> String -> Int -> Word -> Word -> IO ()) -> Alpm ()
 onProgress f = do
-    cbW <- liftIO $ wrap_cb_progress $ \a b c d e -> do
+    cbW <- liftIO . wrap_cb_progress $ \a b c d e -> do
         let a' = fromIntegral a
             c' = fromIntegral c
             d' = fromIntegral d
@@ -185,13 +201,5 @@ onProgress f = do
         b' <- peekCString b
         f a' b' c' d' e'
     withAlpmPtr $ flip c_alpm_option_set_progresscb cbW
-    -- freeHaskellFunPtr cbW
-    return ()
-
-onLog :: (Int -> String -> IO ()) -> Alpm ()
-onLog f = do
-    cbW <- liftIO $ wrap_cb_log $ \lvl str ->
-        peekCString str >>= f (fromIntegral lvl)
-    withAlpmPtr $ flip c_alpm_option_set_logcb cbW
     -- freeHaskellFunPtr cbW
     return ()
