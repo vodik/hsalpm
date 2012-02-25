@@ -202,7 +202,7 @@ data AlpmQuestion = InstallIgnorePkg
                   | LocalNewer
                   | CorruptedPkg
                   | ImportKey
-                  deriving (Enum, Eq, Read, Show)
+                  deriving (Enum, Eq, Show)
 
 data Question = InstallIgnored Package
               | ReplacePackage Package Package
@@ -212,7 +212,7 @@ data Question = InstallIgnored Package
               -- | LocalNewer String
               -- | CorruptedPkg String
               -- | ImportKey String
-              deriving (Eq, Read, Show)
+              deriving (Eq, Show)
 
 data AlpmEvent = CheckDepsStart
                | CheckDepsDone
@@ -243,7 +243,7 @@ data AlpmEvent = CheckDepsStart
                | RetrieveStart
                | DiskspaceStart
                | DiskspaceDone
-               deriving (Enum, Eq, Read, Show)
+               deriving (Enum, Eq, Show)
 
 data EventType = CheckDepends
                | FileConflicts
@@ -258,14 +258,14 @@ data EventType = CheckDepends
                | DeltaPatches
                | Retreive
                | Diskspace
-               deriving (Eq, Read, Show)
+               deriving (Eq, Show)
 
 data Event = Start EventType
            | Done EventType
            | Failed EventType
            | Info String
            | Unknown
-            deriving (Eq, Read, Show)
+            deriving (Eq, Show)
 
 onLog :: (Int -> String -> IO ()) -> Alpm ()
 onLog f = do
@@ -276,7 +276,7 @@ onLog f = do
 
 onDownload :: (String -> Int -> Int -> IO ()) -> Alpm ()
 onDownload f = do
-    cbW <- liftIO . wrap_cb_download $ \name xfer total ->
+    cbW <- liftIO . wrap_cb_download $ \name xfer total -> do
         let xfer'  = fromIntegral xfer
             total' = fromIntegral total
         name' <- peekCString name
