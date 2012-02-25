@@ -60,7 +60,6 @@ registerDB name = do
         then throwAlpmException $ printf "could not register '%s' database" name
         else return $ DB db_ptr
 
-
 foreign import ccall "alpm_db_unregister" c_alpm_db_unregister :: Ptr DBHandle -> IO CInt
 unregisterDB :: DB -> Alpm ()
 unregisterDB (DB db_ptr) = do
