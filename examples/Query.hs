@@ -16,8 +16,7 @@ import Pacman
 queryPkgs :: t -> (Package -> Bool) -> Alpm [Package]
 queryPkgs conf f = do
     dbs <- pacmanDBs conf
-    withPkgCaches dbs $
-        return . filter f
+    withPkgCaches dbs $ filter f
 
 main :: IO ()
 main = do
