@@ -3,6 +3,7 @@ module Main where
 import Control.Monad
 import Control.Monad.Trans (liftIO)
 import System.Environment
+import System.IO
 
 import Alpm
 import Alpm.Base
@@ -13,31 +14,27 @@ import Alpm.Transaction
 import Pacman
 
 logMsg :: Int -> String -> IO ()
-logMsg lvl str = putStr $ "Logged [" ++ show lvl ++ "]: " ++ str
+logMsg lvl str = hPutStrLn stderr $ concat [ "Logged [", show lvl, "]: ", str ]
+
+printErr :: AlpmException -> IO ()
+printErr (AlpmException m a) = hPutStrLn stderr $ concat [ "ERROR: ", m, ": ", a ]
+printErr UnknownException    = hPutStrLn stderr "UNKNOWN ERROR!"
 
 update :: String -> Alpm ()
 update repo = do
     onLog logMsg
-    onEvent showEvent
 
     set [ systemArch
         , logFile    := "/tmp/hsalpm.log"
         , cachePath  := [ "/tmp/" ]
         , useSyslog  := True ]
 
-    get arch       >>= liftIO . putStrLn . ("Arch:    " ++)
-    get logFile    >>= liftIO . putStrLn . ("Logfile: " ++)
-    get cachePath  >>= liftIO . putStrLn . ("Cache:   " ++) . unwords
-    get ignorePkgs >>= liftIO . putStrLn . ("Ignore:  " ++) . unwords
-    get useSyslog  >>= liftIO . putStrLn . ("Syslog:  " ++) . show
-    get useDelta   >>= liftIO . putStrLn . ("Deltas:  " ++) . show
-    get checkSpace >>= liftIO . putStrLn . ("Space:   " ++) . show
-
-    core <- registerDB repo
-    get arch >>= \a -> addServer core $ "http://mirrors.kernel.org/archlinux/" ++ repo ++ "/os/" ++ a
+    db   <- registerDB repo
+    arch <- get arch
+    addServer db $ "http://mirrors.kernel.org/archlinux/" ++ repo ++ "/os/" ++ arch
 
     withTransaction $
-        updateDB True core
+        updateDB True db
     return ()
 
 main :: IO ()
@@ -45,5 +42,5 @@ main = do
     [arg]  <- getArgs
     result <- runAlpm defaultOptions $ update arg
     case result of
-        Left err -> print err
+        Left err -> printErr err
         Right _  -> return ()

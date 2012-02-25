@@ -185,8 +185,8 @@ foreign import ccall "alpm_option_set_dlcb"
     c_alpm_option_set_dlcb :: Ptr AlpmHandle -> FunPtr AlpmDownloadCB -> IO CInt
 foreign import ccall "alpm_option_set_fetchcb"
     c_alpm_option_set_fetchcb :: Ptr AlpmHandle -> FunPtr AlpmFetchCB -> IO CInt
-foreign import ccall "alpm_option_set_totalcb"
-    c_alpm_option_set_totalcb :: Ptr AlpmHandle -> FunPtr AlpmTotalCB -> IO CInt
+foreign import ccall "alpm_option_set_totaldlcb"
+    c_alpm_option_set_totaldlcb :: Ptr AlpmHandle -> FunPtr AlpmTotalCB -> IO CInt
 foreign import ccall "alpm_option_set_eventcb"
     c_alpm_option_set_eventcb :: Ptr AlpmHandle -> FunPtr (AlpmEventCB a) -> IO CInt
 foreign import ccall "alpm_option_set_questioncb"
@@ -270,7 +270,7 @@ data Event = Start EventType
 onLog :: (Int -> String -> IO ()) -> Alpm ()
 onLog f = do
     cbW <- liftIO . wrap_cb_log $ \lvl str ->
-        peekCString str >>= f (fromIntegral lvl)
+        peekCString str >>= f (fromIntegral lvl) . reverse . drop 1 . reverse
     withAlpmPtr $ flip c_alpm_option_set_logcb cbW
     return ()
 
@@ -293,11 +293,11 @@ onFetch f = do
     withAlpmPtr $ flip c_alpm_option_set_fetchcb cbW
     return ()
 
-onTotal :: (Int -> IO ()) -> Alpm ()
-onTotal f = do
+onTotalDownload :: (Int -> IO ()) -> Alpm ()
+onTotalDownload f = do
     cbW <- liftIO . wrap_cb_total $ \a ->
         f $ fromIntegral a
-    withAlpmPtr $ flip c_alpm_option_set_totalcb cbW
+    withAlpmPtr $ flip c_alpm_option_set_totaldlcb cbW
     return ()
 
 onEvent :: (Event -> IO ()) -> Alpm ()
