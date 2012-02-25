@@ -86,7 +86,7 @@ gpgDirectory = newAlpmStringAttr c_alpm_option_get_gpgdir
 newAlpmToggleAttr get set = Attr alpmGetter alpmSetter
   where
     alpmGetter   = toBool <$> withAlpmPtr get
-    alpmSetter v = withAlpmPtr $ flip set $ fromBool v
+    alpmSetter v = withAlpmPtr . flip set $ fromBool v
 
 foreign import ccall "alpm_option_get_usesyslog" c_alpm_option_get_usesyslog :: Ptr AlpmHandle -> IO CInt
 foreign import ccall "alpm_option_set_usesyslog" c_alpm_option_set_usesyslog :: Ptr AlpmHandle -> CInt -> IO ()
