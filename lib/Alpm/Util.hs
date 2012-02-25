@@ -21,6 +21,12 @@ unsafeMaybeCString cstr
 maybeFromIntegral :: (Integral a, Num b) => a -> Maybe b
 maybeFromIntegral x = if x > 0 then Just $ fromIntegral x else Nothing
 
+toAlpmEnum :: (Enum a) => Int -> a
+toAlpmEnum = toEnum . subtract 1
+
+fromAlpmEnum :: (Enum a) => a -> Int
+fromAlpmEnum = (+ 1) . fromEnum
+
 infixr 0 $!!
 ($!!) :: (NFData a) => (a -> b) -> a -> b
 f $!! x = x `deepseq` f x

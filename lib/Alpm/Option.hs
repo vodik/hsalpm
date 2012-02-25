@@ -305,7 +305,7 @@ onEvent f = do
     cbW <- liftIO . wrap_cb_event $ \event d1 d2 ->
         let pkg = unpack (castPtr d1 :: Ptr PkgHandle)
             msg = unpack (castPtr d1 :: CString)
-            evt = case toEnum . subtract 1 $ fromIntegral event of
+            evt = case toAlpmEnum $ fromIntegral event of
                 CheckDepsStart      -> Start CheckDepends
                 CheckDepsDone       -> Done  CheckDepends
                 FileConflictsStart  -> Start FileConflicts
@@ -344,7 +344,7 @@ onQuestion f = do
     cbW <- liftIO . wrap_cb_question $ \event d1 d2 d3 r ->
         let pkg1 = unpack (castPtr d1 :: Ptr PkgHandle)
             pkg2 = unpack (castPtr d2 :: Ptr PkgHandle)
-            ques = case toEnum . subtract 1 $ fromIntegral event of
+            ques = case toAlpmEnum $ fromIntegral event of
                 InstallIgnorePkg -> InstallIgnored pkg1
                 ReplacePkg       -> ReplacePackage pkg1 pkg2
                 ConflictPkg      -> undefined

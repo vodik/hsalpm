@@ -31,7 +31,7 @@ update repo = do
 
     db   <- registerDB repo
     arch <- get arch
-    addServer db $ "http://mirrors.kernel.org/archlinux/" ++ repo ++ "/os/" ++ arch
+    addServer db $ "isdf://mirrors.kernel.org/archlinux/" ++ repo ++ "/os/" ++ arch
 
     withTransaction $
         updateDB True db
