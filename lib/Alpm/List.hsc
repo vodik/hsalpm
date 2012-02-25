@@ -15,18 +15,22 @@ import Alpm.Base
 import Alpm.Util
 #include <alpm_list.h>
 
-data AlpmList a = AlpmList (Ptr a) (Ptr (AlpmList a)) (Ptr (AlpmList a))
+data AlpmList a = AlpmList
+    { dataPtr :: Ptr a
+    , next    :: Ptr (AlpmList a)
+    , prev    :: Ptr (AlpmList a)
+    }
 
+#let alignment t = "%lu", (unsigned long)offsetof(struct { char x__; t (y__); }, y__)
 instance Storable (AlpmList a) where
-    alignment _ = {# alignof alpm_list_t #}
-    sizeOf _    = {# sizeof  alpm_list_t #}
-    peek ptr    = AlpmList <$> {# get alpm_list_t->data #} ptr
-                           <*> {# get alpm_list_t->prev #} ptr
-                           <*> {# get alpm_list_t->next #} ptr
-    poke ptr (AlpmList d p n) = do
-        {# set alpm_list_t->data #} ptr d
-        {# set alpm_list_t->prev #} ptr p
-        {# set alpm_list_t->next #} ptr n
+    alignment _ = #{alignment alpm_list_t}
+    sizeOf _    = #{size alpm_list_t}
+    peek ptr    = AlpmList <$> #{peek alpm_list_t, data} ptr
+                           <*> #{peek alpm_list_t, next} ptr
+                           <*> #{peek alpm_list_t, prev} ptr
+    poke ptr (AlpmList d n p) = #{poke alpm_list_t, data} ptr d
+                             >> #{poke alpm_list_t, next} ptr n
+                             >> #{poke alpm_list_t, prev} ptr p
 
 unpackAlpmList :: (AlpmType a t) => Ptr (AlpmList t) -> [a]
 unpackAlpmList ptr | isNull ptr = []

@@ -32,5 +32,5 @@ Library
     transformers -any,
     time -any,
     unix -any
-  Build-tools: c2hs
+  Build-tools: hsc2hs
   Hs-source-dirs: lib

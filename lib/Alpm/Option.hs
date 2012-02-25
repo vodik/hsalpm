@@ -197,8 +197,36 @@ foreign import ccall "alpm_option_set_progresscb"
 data AlpmQuestion = AlpmQuestion String
 type AlpmEventCode = Int
 
-#include <alpm.h>
-{# enum alpm_event_t as AlpmEvent {underscoreToCase} with prefix = "ALPM_EVENT_" deriving (Eq,Read,Show) #}
+data AlpmEvent = CheckdepsStart
+               | CheckdepsDone
+               | FileconflictsStart
+               | FileconflictsDone
+               | ResolvedepsStart
+               | ResolvedepsDone
+               | InterconflictsStart
+               | InterconflictsDone
+               | AddStart
+               | AddDone
+               | RemoveStart
+               | RemoveDone
+               | UpgradeStart
+               | UpgradeDone
+               | IntegrityStart
+               | IntegrityDone
+               | LoadStart
+               | LoadDone
+               | DeltaIntegrityStart
+               | DeltaIntegrityDone
+               | DeltaPatchesStart
+               | DeltaPatchesDone
+               | DeltaPatchStart
+               | DeltaPatchDone
+               | DeltaPatchFailed
+               | ScriptletInfo
+               | RetrieveStart
+               | DiskspaceStart
+               | DiskspaceDone
+               deriving (Enum, Eq, Read, Show)
 
 data EventType = CheckDepends
                | FileConflicts
@@ -257,7 +285,7 @@ onEvent :: (Event -> IO ()) -> Alpm ()
 onEvent f = do
     cbW <- liftIO . wrap_cb_event $ \event d1 d2 ->
         let pkg = unpack (castPtr d1 :: Ptr PkgHandle)
-            msg = case toEnum $ fromIntegral event of
+            msg = case toEnum . subtract 1 $ fromIntegral event of
                 CheckdepsStart      -> Start CheckDepends
                 CheckdepsDone       -> Done  CheckDepends
                 FileconflictsStart  -> Start FileConflicts
@@ -287,7 +315,6 @@ onEvent f = do
                 RetrieveStart       -> Start Retreive
                 DiskspaceStart      -> Start Diskspace
                 DiskspaceDone       -> Done  Diskspace
-                otherwise           -> Unknown
         in f msg
     withAlpmPtr $ flip c_alpm_option_set_eventcb cbW
     return()
