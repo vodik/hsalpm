@@ -60,6 +60,19 @@ registerDB name = do
         then throwAlpmException $ printf "could not register '%s' database" name
         else return $ DB db_ptr
 
+
+foreign import ccall "alpm_db_unregister" c_alpm_db_unregister :: Ptr DBHandle -> IO CInt
+unregisterDB :: DB -> Alpm ()
+unregisterDB (DB db_ptr) = do
+    rst <- liftIO $ toBool <$> c_alpm_db_unregister db_ptr
+    when rst . throwAlpmException $ printf "could not unregister database"
+
+foreign import ccall "alpm_db_unregister_all" c_alpm_db_unregister_all :: IO CInt
+unregisterDBs :: Alpm ()
+unregisterDBs = do
+    rst <- liftIO $ toBool <$> c_alpm_db_unregister_all
+    when rst . throwAlpmException $ printf "could not unregister all databases"
+
 foreign import ccall "alpm_db_get_servers" c_alpm_db_get_servers :: Ptr DBHandle -> IO (Ptr (AlpmList CChar))
 servers :: DB -> Alpm [String]
 servers (DB db_ptr) = do
@@ -71,7 +84,14 @@ addServer :: DB -> String -> Alpm ()
 addServer (DB db_ptr) url = do
     url' <- liftIO $ newCString url
     rst  <- liftIO $ toBool <$> c_alpm_db_add_server db_ptr url'
-    when rst $ throwAlpmException "Unable to add server"
+    when rst $ throwAlpmException "unable to add server"
+
+foreign import ccall "alpm_db_remove_server" c_alpm_db_remove_server :: Ptr DBHandle -> CString -> IO CInt
+removeServer :: DB -> String -> Alpm ()
+removeServer (DB db_ptr) url = do
+    url' <- liftIO $ newCString url
+    rst  <- liftIO $ toBool <$> c_alpm_db_remove_server db_ptr url'
+    when rst $ throwAlpmException "unable to remove server"
 
 foreign import ccall "alpm_db_update" c_alpm_db_update :: CInt -> Ptr DBHandle -> IO CInt
 updateDB :: Bool -> DB -> Transaction UpdateStatus
@@ -79,5 +99,11 @@ updateDB force (DB db_ptr) = Transaction $ do
     rst <- liftIO $ fromIntegral <$> c_alpm_db_update (fromBool $ not force) db_ptr
     case rst of
         0 -> return UpToDate
-        n | n < 0     -> throwAlpmException "Unable to update database"
+        n | n < 0     -> throwAlpmException "unable to update database"
           | otherwise -> return Updated
+
+foreign import ccall "alpm_db_get_valid" c_alpm_db_get_valid :: Ptr DBHandle -> IO CInt
+validateDB :: DB -> Alpm ()
+validateDB (DB db_ptr) = do
+    rst <- liftIO $ toBool <$> c_alpm_db_get_valid db_ptr
+    when rst $ throwAlpmException "database is not valid"
