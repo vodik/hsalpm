@@ -37,5 +37,5 @@ myFilter ts pkg =
 
 ppPkgInfo :: Package -> IO ()
 ppPkgInfo pkg = do
-    putStrLn $ unwords [ packageName pkg, packageVersion pkg ]
+    putStrLn $ unwords [ packageDB pkg ++ "/" ++ packageName pkg, packageVersion pkg ]
     putStrLn $ "    " ++ packageDescription pkg
