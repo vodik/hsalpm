@@ -26,16 +26,17 @@ update repo = do
 
     set [ systemArch
         , logFile    := "/tmp/hsalpm.log"
-        , cachePath  := [ "/tmp/" ]
+        , cachePath  := [ "/var/cache/pacman/pkg/" ]
         , useSyslog  := True ]
 
     db   <- registerDB repo
     arch <- get arch
-    addServer db $ "isdf://mirrors.kernel.org/archlinux/" ++ repo ++ "/os/" ++ arch
+    addServer db $ "http://mirrors.kernel.org/archlinux/" ++ repo ++ "/os/" ++ arch
 
-    withTransaction $
-        updateDB True db
-    return ()
+    rst <- withTransaction $ updateDB False db
+    case rst of
+        Updated  -> io . putStrLn $ "RESULT: " ++ repo ++ " was successfully updated!"
+        UpToDate -> io . putStrLn $ "RESULT: " ++ repo ++ " is already up to date!"
 
 main :: IO ()
 main = do
@@ -44,3 +45,5 @@ main = do
     case result of
         Left err -> printErr err
         Right _  -> return ()
+
+io = liftIO

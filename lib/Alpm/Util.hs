@@ -6,6 +6,7 @@ import System.IO.Unsafe
 
 import Foreign.C
 import Foreign.Ptr (Ptr, nullPtr)
+import Foreign.Marshal.Utils
 
 isNull :: Ptr a -> Bool
 isNull = (== nullPtr)
@@ -19,7 +20,7 @@ unsafeMaybeCString cstr
     | otherwise   = unsafePerformIO $ Just <$> peekCString cstr
 
 maybeFromIntegral :: (Integral a, Num b) => a -> Maybe b
-maybeFromIntegral x = if x > 0 then Just $ fromIntegral x else Nothing
+maybeFromIntegral x = if toBool x then Just $ fromIntegral x else Nothing
 
 toAlpmEnum :: (Enum a) => Int -> a
 toAlpmEnum = toEnum . subtract 1

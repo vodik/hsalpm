@@ -26,6 +26,10 @@ instance AlpmType DB DBHandle  where
     pack (DB ptr) = ptr
     unpack        = DB
 
+data UpdateStatus = Updated
+                  | UpToDate
+                  deriving (Eq, Show)
+
 foreign import ccall "alpm_db_get_name" c_alpm_db_get_name :: Ptr DBHandle -> CString
 dbName :: DB -> String
 dbName (DB db_ptr) = unsafePeekCString $ c_alpm_db_get_name db_ptr
@@ -66,13 +70,14 @@ foreign import ccall "alpm_db_add_server" c_alpm_db_add_server :: Ptr DBHandle -
 addServer :: DB -> String -> Alpm ()
 addServer (DB db_ptr) url = do
     url' <- liftIO $ newCString url
-    rst  <- liftIO $ c_alpm_db_add_server db_ptr url'
-    when (rst < 0) $ throwAlpmException "Unable to add server"
+    rst  <- liftIO $ toBool <$> c_alpm_db_add_server db_ptr url'
+    when rst $ throwAlpmException "Unable to add server"
 
 foreign import ccall "alpm_db_update" c_alpm_db_update :: CInt -> Ptr DBHandle -> IO CInt
-updateDB :: Bool -> DB -> Transaction Int
+updateDB :: Bool -> DB -> Transaction UpdateStatus
 updateDB force (DB db_ptr) = Transaction $ do
-    rst <- liftIO $ c_alpm_db_update (fromBool force) db_ptr
-    if rst < 0
-        then throwAlpmException "Unable to update database"
-        else return $ fromIntegral rst
+    rst <- liftIO $ fromIntegral <$> c_alpm_db_update (fromBool $ not force) db_ptr
+    case rst of
+        0 -> return UpToDate
+        n | n < 0     -> throwAlpmException "Unable to update database"
+          | otherwise -> return Updated
