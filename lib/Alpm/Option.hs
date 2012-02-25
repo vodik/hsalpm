@@ -194,17 +194,34 @@ foreign import ccall "alpm_option_set_questioncb"
 foreign import ccall "alpm_option_set_progresscb"
     c_alpm_option_set_progresscb :: Ptr AlpmHandle -> FunPtr AlpmProgressCB -> IO CInt
 
-data AlpmQuestion = AlpmQuestion String
-type AlpmEventCode = Int
+data AlpmQuestion = InstallIgnorePkg
+                  | ReplacePkg
+                  | ConflictPkg
+                  | RemovePkgs
+                  | SelectProvide
+                  | LocalNewer
+                  | CorruptedPkg
+                  | ImportKey
+                  deriving (Enum, Eq, Read, Show)
 
-data AlpmEvent = CheckdepsStart
-               | CheckdepsDone
-               | FileconflictsStart
-               | FileconflictsDone
-               | ResolvedepsStart
-               | ResolvedepsDone
-               | InterconflictsStart
-               | InterconflictsDone
+data Question = InstallIgnored Package
+              | ReplacePackage Package Package
+              -- | ConflictPkg String
+              -- | RemovePkgs String
+              -- | SelectProvide String
+              -- | LocalNewer String
+              -- | CorruptedPkg String
+              -- | ImportKey String
+              deriving (Eq, Read, Show)
+
+data AlpmEvent = CheckDepsStart
+               | CheckDepsDone
+               | FileConflictsStart
+               | FileConflictsDone
+               | ResolveDepsStart
+               | ResolveDepsDone
+               | InterConflictsStart
+               | InterConflictsDone
                | AddStart
                | AddDone
                | RemoveStart
@@ -241,12 +258,14 @@ data EventType = CheckDepends
                | DeltaPatches
                | Retreive
                | Diskspace
+               deriving (Eq, Read, Show)
 
 data Event = Start EventType
            | Done EventType
            | Failed EventType
            | Info String
            | Unknown
+            deriving (Eq, Read, Show)
 
 onLog :: (Int -> String -> IO ()) -> Alpm ()
 onLog f = do
@@ -257,11 +276,11 @@ onLog f = do
 
 onDownload :: (String -> Int -> Int -> IO ()) -> Alpm ()
 onDownload f = do
-    cbW <- liftIO . wrap_cb_download $ \a b c -> do
-        let b' = fromIntegral b
-            c' = fromIntegral c
-        a' <- peekCString a
-        f a' b' c'
+    cbW <- liftIO . wrap_cb_download $ \name xfer total ->
+        let xfer'  = fromIntegral xfer
+            total' = fromIntegral total
+        name' <- peekCString name
+        f name' xfer' total'
     withAlpmPtr $ flip c_alpm_option_set_dlcb cbW
     return ()
 
@@ -285,21 +304,22 @@ onEvent :: (Event -> IO ()) -> Alpm ()
 onEvent f = do
     cbW <- liftIO . wrap_cb_event $ \event d1 d2 ->
         let pkg = unpack (castPtr d1 :: Ptr PkgHandle)
-            msg = case toEnum . subtract 1 $ fromIntegral event of
-                CheckdepsStart      -> Start CheckDepends
-                CheckdepsDone       -> Done  CheckDepends
-                FileconflictsStart  -> Start FileConflicts
-                FileconflictsDone   -> Done  FileConflicts
-                ResolvedepsStart    -> Start ResolveDependancies
-                ResolvedepsDone     -> Done  ResolveDependancies
-                InterconflictsStart -> Start InterConflicts
-                InterconflictsDone  -> Done  InterConflicts
-                AddStart            -> Start $ Add $!! pkg
-                AddDone             -> Done  $ Add $!! pkg
-                RemoveStart         -> Start $ Remove $!! pkg
-                RemoveDone          -> Done  $ Remove $!! pkg
-                UpgradeStart        -> Start $ Upgrade $!! pkg
-                UpgradeDone         -> Done  $ Upgrade $!! pkg
+            msg = unpack (castPtr d1 :: CString)
+            evt = case toEnum . subtract 1 $ fromIntegral event of
+                CheckDepsStart      -> Start CheckDepends
+                CheckDepsDone       -> Done  CheckDepends
+                FileConflictsStart  -> Start FileConflicts
+                FileConflictsDone   -> Done  FileConflicts
+                ResolveDepsStart    -> Start ResolveDependancies
+                ResolveDepsDone     -> Done  ResolveDependancies
+                InterConflictsStart -> Start InterConflicts
+                InterConflictsDone  -> Done  InterConflicts
+                AddStart            -> Start $ Add pkg
+                AddDone             -> Done  $ Add pkg
+                RemoveStart         -> Start $ Remove pkg
+                RemoveDone          -> Done  $ Remove pkg
+                UpgradeStart        -> Start $ Upgrade pkg
+                UpgradeDone         -> Done  $ Upgrade pkg
                 IntegrityStart      -> Start IntegrityCheck
                 IntegrityDone       -> Done  IntegrityCheck
                 LoadStart           -> Start Loading
@@ -311,19 +331,29 @@ onEvent f = do
                 DeltaPatchStart     -> undefined
                 DeltaPatchDone      -> undefined
                 DeltaPatchFailed    -> undefined
-                ScriptletInfo       -> undefined
+                ScriptletInfo       -> Info msg
                 RetrieveStart       -> Start Retreive
                 DiskspaceStart      -> Start Diskspace
                 DiskspaceDone       -> Done  Diskspace
-        in f msg
+        in f evt
     withAlpmPtr $ flip c_alpm_option_set_eventcb cbW
     return()
 
-onQuestion :: (AlpmQuestion -> IO Bool) -> Alpm ()
+onQuestion :: (Question -> IO Bool) -> Alpm ()
 onQuestion f = do
-    cbW <- liftIO . wrap_cb_question $ \a b c d e -> do
-        f $ AlpmQuestion "foo"
-        return ()
+    cbW <- liftIO . wrap_cb_question $ \event d1 d2 d3 r ->
+        let pkg1 = unpack (castPtr d1 :: Ptr PkgHandle)
+            pkg2 = unpack (castPtr d2 :: Ptr PkgHandle)
+            ques = case toEnum . subtract 1 $ fromIntegral event of
+                InstallIgnorePkg -> InstallIgnored pkg1
+                ReplacePkg       -> ReplacePackage pkg1 pkg2
+                ConflictPkg      -> undefined
+                RemovePkgs       -> undefined
+                SelectProvide    -> undefined
+                LocalNewer       -> undefined
+                CorruptedPkg     -> undefined
+                ImportKey        -> undefined
+        in f ques >>= poke r . fromBool
     withAlpmPtr $ flip c_alpm_option_set_questioncb cbW
     return()
 

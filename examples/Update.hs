@@ -18,6 +18,7 @@ logMsg lvl str = putStr $ "Logged [" ++ show lvl ++ "]: " ++ str
 update :: String -> Alpm ()
 update repo = do
     onLog logMsg
+    onEvent showEvent
 
     set [ systemArch
         , logFile    := "/tmp/hsalpm.log"
