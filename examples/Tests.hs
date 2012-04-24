@@ -26,7 +26,7 @@ test4 = runAlpm defaultOptions $ do
 test5 = runAlpm defaultOptions $ do
     db <- registerDB "core" [SigUseDefault]
     withPkgCache db $
-        asks (!! 29) >>= pkgName
+        ask >>= mapM pkgName
 
 -- Playing with options
 test6 = runAlpm defaultOptions $ do

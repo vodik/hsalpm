@@ -1,5 +1,6 @@
 module Alpm.Utils where
 
+import Control.Applicative
 import Control.Monad
 import Control.Monad.Trans
 import Data.Time
@@ -13,8 +14,8 @@ toString = liftIO . (peekCString =<<)
 maybeString :: MonadIO m => IO CString -> m (Maybe String)
 maybeString str = liftIO $ do
     ptr <- str
-    if (ptr == nullPtr)
-        then liftM Just $ peekCString ptr
+    if ptr == nullPtr
+        then Just <$> peekCString ptr
         else return Nothing
 
 toDate :: MonadIO m => IO CLong -> m UTCTime

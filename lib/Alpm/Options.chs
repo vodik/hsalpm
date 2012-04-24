@@ -1,6 +1,6 @@
 {-# LANGUAGE ExistentialQuantification, ForeignFunctionInterface #-}
 
-{# context lib="alpm" prefix="alpm" #}
+{# context lib="alpm" prefix="alpm_option" #}
 
 module Alpm.Options where
 
@@ -10,6 +10,7 @@ import Control.Monad.Trans
 import System.Posix.Unistd
 import Foreign.C
 import Foreign.Ptr
+import Foreign.Marshal.Utils (toBool, fromBool)
 
 import Alpm.Core
 import Alpm.Utils
@@ -43,16 +44,25 @@ mkStringAttr get set = Attr getter setter
         setter v = void . withHandle $ (newCString v >>=) . set
 
 arch :: Attr String
-arch = mkStringAttr {# call option_get_arch #}
-                    {# call option_set_arch #}
+arch = mkStringAttr {# call get_arch #} {# call set_arch #}
 
 logFile :: Attr FilePath
-logFile = mkStringAttr {# call option_get_logfile #}
-                       {# call option_set_logfile #}
+logFile = mkStringAttr {# call get_logfile #} {# call set_logfile #}
 
 gpgDirectory :: Attr FilePath
-gpgDirectory = mkStringAttr {# call option_get_gpgdir #}
-                            {# call option_set_gpgdir #}
+gpgDirectory = mkStringAttr {# call get_gpgdir #} {# call set_gpgdir #}
+
+---------------------------------------------------------------------
+
+mkBoolAttr get set = Attr getter setter
+  where getter   = withHandle $ (toBool <$>) . get
+        setter v = void $ withHandle (`set` fromBool v)
+
+useSyslog :: Attr Bool
+useSyslog = mkBoolAttr {# call get_usesyslog #} {# call set_usesyslog #}
+
+checkSpace :: Attr Bool
+checkSpace = mkBoolAttr {# call get_checkspace #} {# call set_checkspace #}
 
 ---------------------------------------------------------------------
 

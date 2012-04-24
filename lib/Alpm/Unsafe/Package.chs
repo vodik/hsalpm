@@ -7,10 +7,11 @@ module Alpm.Unsafe.Package where
 import Control.Applicative
 import Control.Monad
 import Control.Monad.Trans
+import Control.Monad.Reader
 import Data.Time
 import Foreign.C
 import Foreign.Ptr
-import Control.Monad.Reader
+import System.IO.Unsafe
 
 import Alpm.Internal.List
 import Alpm.Internal.Types
@@ -24,40 +25,40 @@ instance AlpmType Package where
     unpack (Package ptr) = return ptr
     pack = return . Package
 
-pkgFilename :: MonadIO m => Package -> m (Maybe String)
-pkgFilename = maybeString . {# call pkg_get_filename #}
+pkgFilename :: Package -> (Maybe String)
+pkgFilename = unsafePerformIO . maybeString . {# call pkg_get_filename #}
 
-pkgName :: MonadIO m => Package -> m String
-pkgName = toString . {# call pkg_get_name #}
+pkgName :: Package -> String
+pkgName = unsafePerformIO . toString . {# call pkg_get_name #}
 
-pkgVersion :: MonadIO m => Package -> m String
-pkgVersion = toString . {# call pkg_get_version #}
+pkgVersion :: Package -> String
+pkgVersion = unsafePerformIO . toString . {# call pkg_get_version #}
 
 pkgOrigin = undefined
 
-pkgDescription :: MonadIO m => Package -> m String
-pkgDescription = toString . {# call pkg_get_desc #}
+pkgDescription :: Package -> String
+pkgDescription = unsafePerformIO . toString . {# call pkg_get_desc #}
 
-pkgURL :: MonadIO m => Package -> m String
-pkgURL = toString . {# call pkg_get_url #}
+pkgURL :: Package -> String
+pkgURL = unsafePerformIO . toString . {# call pkg_get_url #}
 
-pkgBuildDate :: MonadIO m => Package -> m UTCTime
-pkgBuildDate = toDate . {# call pkg_get_builddate #}
+pkgBuildDate :: Package -> UTCTime
+pkgBuildDate = unsafePerformIO . toDate . {# call pkg_get_builddate #}
 
-pkgInstallDate :: MonadIO m => Package -> m UTCTime
-pkgInstallDate = toDate . {# call pkg_get_installdate #}
+pkgInstallDate :: Package -> UTCTime
+pkgInstallDate = unsafePerformIO . toDate . {# call pkg_get_installdate #}
 
-pkgPackager :: MonadIO m => Package -> m String
-pkgPackager = toString . {# call pkg_get_packager #}
+pkgPackager :: Package -> String
+pkgPackager = unsafePerformIO . toString . {# call pkg_get_packager #}
 
-pkgMD5Sum :: MonadIO m => Package -> m (Maybe String)
-pkgMD5Sum = maybeString . {# call pkg_get_md5sum #}
+pkgMD5Sum :: Package -> (Maybe String)
+pkgMD5Sum = unsafePerformIO . maybeString . {# call pkg_get_md5sum #}
 
-pkgSHA256Sum :: MonadIO m => Package -> m (Maybe String)
-pkgSHA256Sum = maybeString . {# call pkg_get_sha256sum #}
+pkgSHA256Sum :: Package -> (Maybe String)
+pkgSHA256Sum = unsafePerformIO . maybeString . {# call pkg_get_sha256sum #}
 
-pkgArch :: MonadIO m => Package -> m String
-pkgArch = toString . {# call pkg_get_arch #}
+pkgArch :: Package -> String
+pkgArch = unsafePerformIO . toString . {# call pkg_get_arch #}
 
 pkgSize = undefined
 

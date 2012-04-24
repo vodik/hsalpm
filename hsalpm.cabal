@@ -12,13 +12,13 @@ Cabal-version:     >=1.8
 Library
   Exposed-modules:
     Alpm.Core
+    Alpm.Unsafe.Package
+    Alpm.Unsafe.Database
     Alpm.Database
     Alpm.Options
     Alpm.Internal.Alpm
     Alpm.Internal.List
     Alpm.Internal.Types
-    Alpm.Unsafe.Database
-    Alpm.Unsafe.Package
     Alpm.PkgCache
     Alpm.Utils
   Extra-libraries:

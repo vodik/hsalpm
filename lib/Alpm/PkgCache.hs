@@ -25,42 +25,45 @@ newtype PkgCache a = PkgCache (ReaderT [Package] Alpm a)
 withPkgCache :: Database -> PkgCache a -> Alpm a
 withPkgCache db (PkgCache f) = UD.pkgCache db >>= runReaderT f
 
+withPkgCaches :: [Database] -> PkgCache a -> Alpm a
+withPkgCaches dbs (PkgCache f) = concat <$> mapM UD.pkgCache dbs >>= runReaderT f
+
 ---------------------------------------------------------------------
 
 pkgFilename :: Package -> PkgCache (Maybe String)
-pkgFilename = U.pkgFilename
+pkgFilename = return . U.pkgFilename
 
 pkgName :: Package -> PkgCache String
-pkgName = U.pkgName
+pkgName = return . U.pkgName
 
 pkgVersion :: Package -> PkgCache String
-pkgVersion = U.pkgVersion
+pkgVersion = return . U.pkgVersion
 
 pkgOrigin = undefined
 
 pkgDescription :: Package -> PkgCache String
-pkgDescription = U.pkgDescription
+pkgDescription = return . U.pkgDescription
 
 pkgURL :: Package -> PkgCache String
-pkgURL = U.pkgURL
+pkgURL = return . U.pkgURL
 
 pkgBuildDate :: Package -> PkgCache UTCTime
-pkgBuildDate = U.pkgBuildDate
+pkgBuildDate = return . U.pkgBuildDate
 
 pkgInstallDate :: Package -> PkgCache UTCTime
-pkgInstallDate = U.pkgInstallDate
+pkgInstallDate = return . U.pkgInstallDate
 
 pkgPackager :: Package -> PkgCache String
-pkgPackager = U.pkgPackager
+pkgPackager = return . U.pkgPackager
 
 pkgMD5Sum :: Package -> PkgCache (Maybe String)
-pkgMD5Sum = U.pkgMD5Sum
+pkgMD5Sum = return . U.pkgMD5Sum
 
 pkgSHA256Sum :: Package -> PkgCache (Maybe String)
-pkgSHA256Sum = U.pkgSHA256Sum
+pkgSHA256Sum = return . U.pkgSHA256Sum
 
 pkgArch :: Package -> PkgCache String
-pkgArch = U.pkgArch
+pkgArch = return . U.pkgArch
 
 pkgSize = undefined
 
