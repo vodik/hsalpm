@@ -16,9 +16,13 @@ module Alpm.Internal.Types
     , SignatureResult
     , Trans
 
+    , SignatureLevel(..)
+    , sigLevel
     ) where
 
 import Control.Applicative
+import Data.Bits
+
 import Foreign.C
 import Foreign.Ptr
 
@@ -98,3 +102,9 @@ instance AlpmType SignatureResult where
 instance AlpmType Trans where
     unpack (Trans ptr) = return ptr
     pack = return . Trans
+
+{# enum _alpm_siglevel_t as SignatureLevel {underscoreToCase}
+    with prefix = "ALPM_" deriving (Eq, Read, Show) #}
+
+sigLevel :: [SignatureLevel] -> CInt
+sigLevel = fromIntegral . foldr ((.|.) . fromEnum) 0

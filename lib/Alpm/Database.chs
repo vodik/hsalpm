@@ -36,11 +36,11 @@ localDB = withHandle {# call get_localdb #}
 syncDBs :: Alpm [Database]
 syncDBs = withHandle $ (toList =<<) . (castPtr <$>) . {# call get_syncdbs #}
 
-registerDB :: String -> Alpm Database
-registerDB name = do
+registerDB :: String -> [SignatureLevel] -> Alpm Database
+registerDB name sig = do
     withHandle $ \h -> do
         name' <- newCString name
-        {# call register_syncdb #} h name' (1 `shiftL` 31)
+        {# call register_syncdb #} h name' (sigLevel sig)
 
 unregisterDB :: Database -> Alpm ()
 unregisterDB = liftIO . void . {# call db_unregister #}
