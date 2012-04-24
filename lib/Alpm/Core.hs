@@ -4,6 +4,7 @@ module Alpm.Core
     ( Alpm
     , AlpmOptions(..)
     , defaultOptions
+    , withHandle
 
     , runAlpm
     ) where
@@ -45,7 +46,9 @@ defaultOptions = AlpmOptions
 
 runAlpm :: AlpmOptions -> Alpm a -> IO (Either AlpmException a)
 runAlpm opt (Alpm f) =
-    alpmInitialize (root opt) (dbPath opt) >>= either err run
+    alpmInitialize (root opt) (dbPath opt) >>= either failed run
   where
-    err     = return . Left . AlpmException "failed to initialize alpm library"
+    failed  = return . Left . AlpmException "failed to initialize alpm library"
     run env = withForeignPtr env . const $ runReaderT (runErrorT f) (AlpmEnv env)
+
+withHandle f = ask >>= liftIO . flip withForeignPtr f . handle

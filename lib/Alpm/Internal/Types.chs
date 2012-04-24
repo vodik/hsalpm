@@ -3,9 +3,6 @@
 module Alpm.Internal.Types
     ( AlpmType(..)
 
-    , Backup
-    , Conflict
-    , Database
     , Delta
     , Depend
     , DepMissing
@@ -37,7 +34,6 @@ instance AlpmType String where
 
 {# pointer *alpm_backup_t       as Backup newtype #}
 {# pointer *alpm_conflict_t     as Conflict newtype #}
-{# pointer *alpm_db_t           as Database newtype #}
 {# pointer *alpm_delta_t        as Delta newtype #}
 {# pointer *alpm_depend_t       as Depend newtype #}
 {# pointer *alpm_depmissing_t   as DepMissing newtype #}
@@ -58,10 +54,6 @@ instance AlpmType Backup where
 instance AlpmType Conflict where
     unpack (Conflict ptr) = return ptr
     pack = return . Conflict
-
-instance AlpmType Database where
-    unpack (Database ptr) = return ptr
-    pack = return . Database
 
 instance AlpmType Delta where
     unpack (Delta ptr) = return ptr
