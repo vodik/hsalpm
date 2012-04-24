@@ -11,16 +11,10 @@ Cabal-version:     >=1.8
 
 Library
   Exposed-modules:
-    Alpm
-    Alpm.Base
-    Alpm.Database
-    Alpm.List
-    Alpm.Network
-    Alpm.Option
-    Alpm.Package
-    Alpm.Transaction
-    Alpm.Util
-    Pacman
+    Alpm.Core
+    Alpm.Internal.Alpm
+    Alpm.Internal.List
+    Alpm.Internal.Types
   Extra-libraries:
     alpm
   Build-depends:
@@ -28,9 +22,7 @@ Library
     containers -any,
     deepseq -any,
     mtl -any,
-    parsec -any,
-    transformers -any,
     time -any,
     unix -any
-  Build-tools: hsc2hs
+  Build-tools: c2hs
   Hs-source-dirs: lib
