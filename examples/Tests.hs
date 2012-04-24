@@ -2,6 +2,7 @@ import Alpm.Core
 import Alpm.Database
 import Alpm.PkgCache
 import Alpm.Internal.Types
+import Alpm.Options
 import Control.Monad.Reader
 import qualified Alpm.Unsafe.Database as UD
 import qualified Alpm.Unsafe.Package as UP
@@ -27,9 +28,15 @@ test5 = runAlpm defaultOptions $ do
     withPkgCache db $
         asks (!! 29) >>= pkgName
 
+-- Playing with options
+test6 = runAlpm defaultOptions $ do
+    set [ systemArch ]
+    get arch
+
 main = do
     test1 >>= either print print
     test2 >>= either print print
     test3 >>= either print print
     test4 >>= either print print
     test5 >>= either print print
+    test6 >>= either print print

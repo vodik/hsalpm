@@ -13,6 +13,7 @@ Library
   Exposed-modules:
     Alpm.Core
     Alpm.Database
+    Alpm.Options
     Alpm.Internal.Alpm
     Alpm.Internal.List
     Alpm.Internal.Types
