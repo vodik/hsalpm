@@ -2,7 +2,7 @@
 
 {# context lib="alpm" prefix="alpm" #}
 
-module Alpm.Package where
+module Alpm.Unsafe.Package where
 
 import Control.Applicative
 import Control.Monad
@@ -10,8 +10,8 @@ import Control.Monad.Trans
 import Data.Time
 import Foreign.C
 import Foreign.Ptr
+import Control.Monad.Reader
 
-import Alpm.Core
 import Alpm.Internal.List
 import Alpm.Internal.Types
 import Alpm.Utils
@@ -24,39 +24,39 @@ instance AlpmType Package where
     unpack (Package ptr) = return ptr
     pack = return . Package
 
-pkgFilename :: Package -> Alpm (Maybe String)
+pkgFilename :: MonadIO m => Package -> m (Maybe String)
 pkgFilename = maybeString . {# call pkg_get_filename #}
 
-pkgName :: Package -> Alpm String
+pkgName :: MonadIO m => Package -> m String
 pkgName = toString . {# call pkg_get_name #}
 
-pkgVersion :: Package -> Alpm String
+pkgVersion :: MonadIO m => Package -> m String
 pkgVersion = toString . {# call pkg_get_version #}
 
 pkgOrigin = undefined
 
-pkgDescription :: Package -> Alpm String
+pkgDescription :: MonadIO m => Package -> m String
 pkgDescription = toString . {# call pkg_get_desc #}
 
-pkgURL :: Package -> Alpm String
+pkgURL :: MonadIO m => Package -> m String
 pkgURL = toString . {# call pkg_get_url #}
 
-pkgBuildDate :: Package -> Alpm UTCTime
+pkgBuildDate :: MonadIO m => Package -> m UTCTime
 pkgBuildDate = toDate . {# call pkg_get_builddate #}
 
-pkgInstallDate :: Package -> Alpm UTCTime
+pkgInstallDate :: MonadIO m => Package -> m UTCTime
 pkgInstallDate = toDate . {# call pkg_get_installdate #}
 
-pkgPackager :: Package -> Alpm String
+pkgPackager :: MonadIO m => Package -> m String
 pkgPackager = toString . {# call pkg_get_packager #}
 
-pkgMD5Sum :: Package -> Alpm (Maybe String)
+pkgMD5Sum :: MonadIO m => Package -> m (Maybe String)
 pkgMD5Sum = maybeString . {# call pkg_get_md5sum #}
 
-pkgSHA256Sum :: Package -> Alpm (Maybe String)
+pkgSHA256Sum :: MonadIO m => Package -> m (Maybe String)
 pkgSHA256Sum = maybeString . {# call pkg_get_sha256sum #}
 
-pkgArch :: Package -> Alpm String
+pkgArch :: MonadIO m => Package -> m String
 pkgArch = toString . {# call pkg_get_arch #}
 
 pkgSize = undefined

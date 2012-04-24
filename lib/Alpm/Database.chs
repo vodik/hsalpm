@@ -6,6 +6,7 @@ module Alpm.Database where
 
 import Control.Applicative
 import Control.Monad
+import Control.Monad.Reader
 import Control.Monad.Trans
 import Foreign.C
 import Foreign.Ptr
@@ -65,7 +66,6 @@ removeServer :: String -> Database -> Alpm ()
 removeServer url = void . liftIO . (newCString url >>=) . {# call db_remove_server #}
 
 -- TODO: db_update
--- TODO: db_get_pkg
--- TODO: db_get_pkgcache
+
 -- TODO: db_get_group
 -- TODO: db_get_groupcache

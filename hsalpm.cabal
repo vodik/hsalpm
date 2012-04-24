@@ -16,7 +16,9 @@ Library
     Alpm.Internal.Alpm
     Alpm.Internal.List
     Alpm.Internal.Types
-    Alpm.Package
+    Alpm.Unsafe.Database
+    Alpm.Unsafe.Package
+    Alpm.PkgCache
     Alpm.Utils
   Extra-libraries:
     alpm
