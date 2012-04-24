@@ -13,9 +13,8 @@ import Control.Applicative
 import Control.Monad
 import Control.Monad.Error
 import Control.Monad.Reader
-import System.IO.Unsafe
-
 import Foreign.ForeignPtr
+import System.IO.Unsafe
 
 import Alpm.Internal.Alpm
 

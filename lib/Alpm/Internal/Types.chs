@@ -11,7 +11,6 @@ module Alpm.Internal.Types
     , FileList
     , Group
     , PGPKey
-    , Package
     , SignatureList
     , SignatureResult
     , Trans
@@ -22,7 +21,6 @@ module Alpm.Internal.Types
 
 import Control.Applicative
 import Data.Bits
-
 import Foreign.C
 import Foreign.Ptr
 
@@ -46,7 +44,6 @@ instance AlpmType String where
 {# pointer *alpm_filelist_t     as FileList newtype #}
 {# pointer *alpm_group_t        as Group newtype #}
 {# pointer *alpm_pgpkey_t       as PGPKey newtype #}
-{# pointer *alpm_pkg_t          as Package newtype #}
 {# pointer *alpm_siglist_t      as SignatureList newtype #}
 {# pointer *alpm_sigresult_t    as SignatureResult newtype #}
 {# pointer *alpm_trans_t        as Trans newtype #}
@@ -86,10 +83,6 @@ instance AlpmType Group where
 instance AlpmType PGPKey where
     unpack (PGPKey ptr) = return ptr
     pack = return . PGPKey
-
-instance AlpmType Package where
-    unpack (Package ptr) = return ptr
-    pack = return . Package
 
 instance AlpmType SignatureList where
     unpack (SignatureList ptr) = return ptr

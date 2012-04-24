@@ -7,17 +7,13 @@ module Alpm.Database where
 import Control.Applicative
 import Control.Monad
 import Control.Monad.Trans
-import Data.Bits
-
 import Foreign.C
 import Foreign.Ptr
-import Foreign.ForeignPtr
-import Foreign.Marshal.Alloc
-import Foreign.Storable
 
 import Alpm.Core
 import Alpm.Internal.List
 import Alpm.Internal.Types
+import Alpm.Utils
 
 #include <alpm.h>
 
@@ -28,11 +24,12 @@ instance AlpmType Database where
     pack = return . Database
 
 dbName :: Database -> Alpm String
-dbName = valueToString . {# call db_get_name #}
+dbName = toString . {# call db_get_name #}
 
 localDB :: Alpm Database
 localDB = withHandle {# call get_localdb #}
 
+-- TODO: Low level API: toList doesn't belong here just yet.
 syncDBs :: Alpm [Database]
 syncDBs = withHandle $ (toList =<<) . (castPtr <$>) . {# call get_syncdbs #}
 
@@ -42,11 +39,33 @@ registerDB name sig = do
         name' <- newCString name
         {# call register_syncdb #} h name' (sigLevel sig)
 
-unregisterDB :: Database -> Alpm ()
-unregisterDB = liftIO . void . {# call db_unregister #}
-
+-- TODO: replace void with error handling
 unregisterDBs :: Alpm ()
 unregisterDBs = void $ withHandle {# call unregister_all_syncdbs #}
 
-valueToString :: IO CString -> Alpm String
-valueToString = liftIO . (peekCString =<<)
+-- TODO: replace void with error handling
+unregisterDB :: Database -> Alpm ()
+unregisterDB = void . liftIO . {# call db_unregister #}
+
+-- TODO: db_get_siglevel
+
+-- TODO: replace void with error handling
+validDB :: Database -> Alpm ()
+validDB = void . liftIO . {# call db_get_valid #}
+
+-- TODO: db_get_servers
+-- TODO: db_set_servers
+
+-- TODO: replace void with error handling
+addServer :: String -> Database -> Alpm ()
+addServer url = void . liftIO . (newCString url >>=) . {# call db_add_server #}
+
+-- TODO: replace void with error handling
+removeServer :: String -> Database -> Alpm ()
+removeServer url = void . liftIO . (newCString url >>=) . {# call db_remove_server #}
+
+-- TODO: db_update
+-- TODO: db_get_pkg
+-- TODO: db_get_pkgcache
+-- TODO: db_get_group
+-- TODO: db_get_groupcache

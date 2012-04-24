@@ -16,6 +16,8 @@ Library
     Alpm.Internal.Alpm
     Alpm.Internal.List
     Alpm.Internal.Types
+    Alpm.Package
+    Alpm.Utils
   Extra-libraries:
     alpm
   Build-depends:
