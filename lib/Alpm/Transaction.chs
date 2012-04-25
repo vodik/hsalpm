@@ -25,9 +25,9 @@ import Alpm.Utils
 newtype Transaction a = Transaction { transaction :: Alpm a }
     deriving (Functor, Applicative, Monad, MonadIO, MonadReader AlpmEnv)
 
-withTransaction :: Transaction a -> Alpm a
-withTransaction trans = do
-    withHandle $ flip {# call trans_init #} (1 `shiftL` 6)
+withTransaction :: [TransactionFlags] -> Transaction a -> Alpm a
+withTransaction flags trans = do
+    withHandle $ flip {# call trans_init #} (toBitmap flags)
     rst <- transaction trans
     withHandle $ {# call trans_release #}
     return rst

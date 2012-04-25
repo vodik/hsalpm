@@ -34,7 +34,7 @@ registerDB :: String -> [SignatureLevel] -> Alpm Database
 registerDB name sig = do
     withHandle $ \h -> do
         name' <- newCString name
-        {# call register_syncdb #} h name' (sigLevel sig)
+        {# call register_syncdb #} h name' (toBitmap sig)
 
 -- TODO: replace void with error handling
 unregisterDBs :: Alpm ()

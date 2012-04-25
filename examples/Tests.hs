@@ -39,7 +39,7 @@ test6 repo = runAlpm defaultOptions $ do
     arch <- get arch
     addServer ("http://mirrors.kernel.org/archlinux/" ++ repo ++ "/os/" ++ arch) db
 
-    withTransaction $
+    withTransaction [TransFlagDbonly] $
         updateDB True db
 
 main = do
