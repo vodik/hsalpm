@@ -6,6 +6,7 @@ import Alpm.Internal.Types
 import Alpm.Options
 import Control.Applicative
 import Control.Monad.Reader
+import Data.List
 import qualified Alpm.Unsafe.Database as UD
 import qualified Alpm.Unsafe.Package as UP
 
@@ -13,22 +14,22 @@ test1 = runAlpm defaultOptions $ do
     liftM dbName localDB
 
 test2 = runAlpm defaultOptions $ do
-    liftM (map dbName) syncDBs
+    map dbName <$> syncDBs
 
 test3 = runAlpm defaultOptions $ do
     registerDB "core" [SigUseDefault]
-    liftM (map dbName) syncDBs
+    map dbName <$> syncDBs
 
 -- Unsafe package cache manipulation
 test4 = runAlpm defaultOptions $ do
     db <- registerDB "core" [SigUseDefault]
-    liftM UP.pkgName $ UD.package "linux" db
+    UP.pkgName <$> UD.package "linux" db
 
 -- Using the PkgCache monad
 test5 = runAlpm defaultOptions $ do
     db <- registerDB "core" [SigUseDefault]
-    withPkgCache db $
-        ask >>= mapM pkgName
+    withPkgCache db $ ask >>= \lst ->
+        sort <$> mapM pkgName lst
 
 -- Start an update/transaction
 test6 repo = runAlpm defaultOptions $ do

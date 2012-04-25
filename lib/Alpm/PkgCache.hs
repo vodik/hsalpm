@@ -29,39 +29,39 @@ withPkgCaches dbs (PkgCache f) = concat <$> mapM UD.pkgCache dbs >>= runReaderT 
 ---------------------------------------------------------------------
 
 pkgFilename :: Package -> PkgCache (Maybe String)
-pkgFilename = return . U.pkgFilename
+pkgFilename = (return $!) . U.pkgFilename
 
 pkgName :: Package -> PkgCache String
-pkgName = return . U.pkgName
+pkgName = (return $!) . U.pkgName
 
 pkgVersion :: Package -> PkgCache String
-pkgVersion = return . U.pkgVersion
+pkgVersion = (return $!) . U.pkgVersion
 
 pkgOrigin = undefined
 
 pkgDescription :: Package -> PkgCache String
-pkgDescription = return . U.pkgDescription
+pkgDescription = (return $!) . U.pkgDescription
 
 pkgURL :: Package -> PkgCache String
-pkgURL = return . U.pkgURL
+pkgURL = (return $!) . U.pkgURL
 
 pkgBuildDate :: Package -> PkgCache UTCTime
-pkgBuildDate = return . U.pkgBuildDate
+pkgBuildDate = (return $!) . U.pkgBuildDate
 
 pkgInstallDate :: Package -> PkgCache UTCTime
-pkgInstallDate = return . U.pkgInstallDate
+pkgInstallDate = (return $!) . U.pkgInstallDate
 
 pkgPackager :: Package -> PkgCache String
-pkgPackager = return . U.pkgPackager
+pkgPackager = (return $!) . U.pkgPackager
 
 pkgMD5Sum :: Package -> PkgCache (Maybe String)
-pkgMD5Sum = return . U.pkgMD5Sum
+pkgMD5Sum = (return $!) . U.pkgMD5Sum
 
 pkgSHA256Sum :: Package -> PkgCache (Maybe String)
-pkgSHA256Sum = return . U.pkgSHA256Sum
+pkgSHA256Sum = (return $!) . U.pkgSHA256Sum
 
 pkgArch :: Package -> PkgCache String
-pkgArch = return . U.pkgArch
+pkgArch = (return $!) . U.pkgArch
 
 pkgSize = undefined
 
@@ -72,7 +72,7 @@ pkgReason = undefined
 pkgLicenses = undefined
 
 pkgGroups :: Package -> PkgCache [String]
-pkgGroups = return . U.pkgGroups
+pkgGroups = (return $!) . U.pkgGroups
 
 pkgDatabase :: Package -> PkgCache Database
-pkgDatabase = return . U.pkgDatabase
+pkgDatabase = (return $!) . U.pkgDatabase
