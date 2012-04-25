@@ -23,7 +23,7 @@ import Alpm.Utils
 #include <alpm.h>
 
 newtype Transaction a = Transaction { transaction :: Alpm a }
-    deriving (Functor, Applicative, Monad, MonadIO, MonadReader AlpmEnv)
+    deriving (Functor, Applicative, Monad, MonadIO, MonadReader AlpmHandle)
 
 withTransaction :: [TransactionFlags] -> Transaction a -> Alpm a
 withTransaction flags trans = do
@@ -31,6 +31,12 @@ withTransaction flags trans = do
     rst <- transaction trans
     withHandle $ {# call trans_release #}
     return rst
+
+----------------------------------------------------------------------
+
+-- loadPkg filename full level = do
+    -- alloca $ \pkg -> do
+		-- rst <- withHandle $ \h -> {# call pkg_load #} h filename full (toBitmap level) pkg
 
 ----------------------------------------------------------------------
 

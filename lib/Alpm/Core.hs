@@ -2,7 +2,8 @@
 
 module Alpm.Core
     ( Alpm
-    , AlpmEnv(..)
+    -- , AlpmEnv(..)
+    , AlpmHandle(..)
     , AlpmOptions(..)
     , defaultOptions
     , withHandle
@@ -15,13 +16,16 @@ import Control.Applicative
 import Control.Monad
 import Control.Monad.Error
 import Control.Monad.Reader
+import Control.Monad.State
+import Data.IORef
 import Foreign.ForeignPtr
 import Foreign.Ptr
 
 import Alpm.Internal.Alpm
 
-data AlpmEnv = AlpmEnv
-    { handle :: Handle
+type AlpmEnv = IORef Env
+data Env = Env
+    { handle :: Int
     }
 
 data AlpmOptions = AlpmOptions
@@ -33,8 +37,8 @@ data AlpmException = AlpmException String String
                    | UnknownException
                    deriving (Eq, Read, Show)
 
-newtype Alpm a = Alpm (ErrorT AlpmException (ReaderT AlpmEnv IO) a)
-    deriving (Functor, Applicative, Monad, MonadIO, MonadError AlpmException, MonadReader AlpmEnv)
+newtype Alpm a = Alpm (ErrorT AlpmException (ReaderT AlpmHandle (StateT AlpmEnv IO)) a)
+    deriving (Functor, Applicative, Monad, MonadIO, MonadError AlpmException, MonadState AlpmEnv, MonadReader AlpmHandle)
 
 instance Error AlpmException where
     noMsg    = UnknownException
@@ -46,7 +50,7 @@ defaultOptions = AlpmOptions
     }
 
 withHandle :: (Ptr () -> IO a) -> Alpm a
-withHandle f = ask >>= liftIO . flip withForeignPtr f . handle
+withHandle f = ask >>= liftIO . flip withForeignPtr f
 
 lastStrerror :: Alpm String
 lastStrerror = withHandle $ (strerror =<<) . errno
@@ -55,8 +59,9 @@ throwAlpmException :: String -> Alpm a
 throwAlpmException = (throwError =<<) . (<$> lastStrerror) . AlpmException
 
 runAlpm :: AlpmOptions -> Alpm a -> IO (Either AlpmException a)
-runAlpm opt (Alpm f) =
-    alpmInitialize (root opt) (dbPath opt) >>= either failed run
+runAlpm opt (Alpm f) = do
+    r <- newIORef $ Env 0
+    alpmInitialize (root opt) (dbPath opt) >>= either failed (run r)
   where
-    failed  = return . Left . AlpmException "failed to initialize alpm library"
-    run env = withForeignPtr env . const $ runReaderT (runErrorT f) (AlpmEnv env)
+    failed    = return . Left . AlpmException "failed to initialize alpm library"
+    run r env = withForeignPtr env . const $ evalStateT (runReaderT (runErrorT f) env) r

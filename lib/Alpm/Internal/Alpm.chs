@@ -1,7 +1,7 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
 
 module Alpm.Internal.Alpm
-    ( Handle
+    ( AlpmHandle
     , alpmInitialize
     , strerror, errno
     ) where
@@ -19,11 +19,11 @@ import Alpm.Internal.Types
 
 #include <alpm.h>
 
-type Handle = ForeignPtr ()
+type AlpmHandle = ForeignPtr ()
 
 foreign import ccall "&alpm_release" c_alpm_release :: FinalizerPtr ()
 
-alpmInitialize :: FilePath -> FilePath -> IO (Either String Handle)
+alpmInitialize :: FilePath -> FilePath -> IO (Either String AlpmHandle)
 alpmInitialize root dbPath = do
     root'   <- newCString root
     dbPath' <- newCString dbPath
