@@ -13,6 +13,7 @@ import Foreign.Ptr
 import Foreign.Marshal.Utils (toBool, fromBool)
 
 import Alpm.Core
+import Alpm.Internal.Callbacks
 import Alpm.Utils
 
 #include <alpm.h>
@@ -67,3 +68,19 @@ checkSpace = mkBoolAttr {# call get_checkspace #} {# call set_checkspace #}
 ---------------------------------------------------------------------
 
 systemArch = arch :=> liftIO $ machine <$> getSystemID
+
+---------------------------------------------------------------------
+
+-- onLog :: (Int -> String -> IO ()) -> Alpm ()
+-- onLog f = do
+    -- ptr <- liftIO $ logFunc f
+    -- withHandle $ flip {# call set_logcb #} ptr
+    -- -- TODO: store ptr
+    -- return ()
+
+onDownload :: (String -> Int -> Int -> IO ()) -> Alpm ()
+onDownload f = do
+    ptr <- liftIO $ downloadFunc f
+    withHandle $ flip {# call set_dlcb #} ptr
+    -- TODO: store ptr
+    return ()

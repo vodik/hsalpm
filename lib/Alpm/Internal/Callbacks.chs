@@ -26,3 +26,10 @@ type ProgressFunc   = CInt -> CString -> CInt -> CSize -> CSize -> IO ()
 logFunc :: (Int -> String -> IO ()) -> IO (FunPtr LogFunc)
 logFunc f = mkLogFunc $ \lvl str ->
     peekCString str >>= f (fromIntegral lvl) . reverse . drop 1 . reverse
+
+downloadFunc :: (String -> Int -> Int -> IO ()) -> IO (FunPtr DownloadFunc)
+downloadFunc f = mkDownloadFunc $ \name xfer total -> do
+    let xfer'  = fromIntegral xfer
+        total' = fromIntegral total
+    name' <- peekCString name
+    f name' xfer' total'

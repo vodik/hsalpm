@@ -12,8 +12,9 @@ Cabal-version:     >=1.8
 Library
   Exposed-modules:
     Alpm.Internal.Alpm
-    Alpm.Internal.List
     Alpm.Internal.Types
+    Alpm.Internal.List
+    Alpm.Internal.Callbacks
     Alpm.Core
     Alpm.Database
     Alpm.Unsafe.Database

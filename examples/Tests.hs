@@ -11,7 +11,7 @@ import qualified Alpm.Unsafe.Database as UD
 import qualified Alpm.Unsafe.Package as UP
 
 test1 = runAlpm defaultOptions $ do
-    liftM dbName localDB
+    dbName <$> localDB
 
 test2 = runAlpm defaultOptions $ do
     map dbName <$> syncDBs
