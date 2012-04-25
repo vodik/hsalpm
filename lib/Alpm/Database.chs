@@ -9,6 +9,7 @@ import Control.Monad
 import Control.Monad.Trans
 import Foreign.C
 import Foreign.Ptr
+import System.IO.Unsafe
 
 import Alpm.Core
 import Alpm.Internal.List
@@ -19,8 +20,8 @@ import Alpm.Utils
 
 #include <alpm.h>
 
-dbName :: Database -> Alpm String
-dbName = toString . {# call db_get_name #}
+dbName :: Database -> String
+dbName = unsafePerformIO . toString . {# call db_get_name #}
 
 localDB :: Alpm Database
 localDB = withHandle {# call get_localdb #}

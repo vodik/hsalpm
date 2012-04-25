@@ -9,17 +9,14 @@ import Data.List
 import System.Environment
 
 import Alpm.Core
-import Alpm.Internal.Types
-import Alpm.Unsafe.Package (Package)
 import Alpm.Database
 import Alpm.PkgCache
+import Alpm.Internal.Types
 
 queryPkgs :: (Package -> PkgCache Bool) -> Alpm ()
-queryPkgs f = do
-    dbs <- syncDBs
-    withPkgCaches dbs $ do
-        pkgs <- ask >>= filterM f
-        mapM_ ppPkgInfo pkgs
+queryPkgs f = syncDBs >>= \dbs -> forM_ dbs $ \db -> do
+    withPkgCache db $
+        ask >>= filterM f >>= mapM_ (ppPkgInfo $ dbName db)
 
 register :: Alpm ()
 register = void $ do
@@ -33,26 +30,29 @@ register = void $ do
 main :: IO ()
 main = do
     args <- getArgs
-    rslt <- runAlpm defaultOptions $
-        register >> queryPkgs (myFilter args)
+    rslt <- runAlpm defaultOptions $ do
+        register
+        queryPkgs $ myFilter args
     case rslt of
         Left  err  -> print err
         Right pkgs -> return ()
 
 myFilter :: [String] -> Package -> PkgCache Bool
 myFilter ts pkg = do
-    name <- pkgName pkg
-    desc <- pkgDescription pkg
+    name   <- pkgName pkg
+    desc   <- map toLower <$> pkgDescription pkg
+    groups <- pkgGroups pkg
+
     let ts' = map (map toLower) ts
         f1  = all (`isInfixOf` name) ts'
-        f2  = all (`isInfixOf` map toLower desc) ts'
-        -- f3  = any (`elem` pkgGroups pkg) ts'
-    return $ f1 || f2 -- || f3
+        f2  = all (`isInfixOf` desc) ts'
+        f3  = any (`elem` groups) ts'
+    return $ f1 || f2 || f3
 
-ppPkgInfo :: Package -> PkgCache ()
-ppPkgInfo pkg = do
+ppPkgInfo :: String -> Package -> PkgCache ()
+ppPkgInfo db pkg = do
     name    <- pkgName pkg
     desc    <- pkgDescription pkg
     version <- pkgVersion pkg
-    liftIO . putStrLn $ unwords [ "local" ++ "/" ++ name, version ]
+    liftIO . putStrLn $ unwords [ db ++ "/" ++ name, version ]
     liftIO . putStrLn $ "    " ++ desc

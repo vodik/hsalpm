@@ -71,4 +71,8 @@ pkgReason = undefined
 
 pkgLicenses = undefined
 
-pkgGroups = undefined
+pkgGroups :: Package -> PkgCache [String]
+pkgGroups = return . U.pkgGroups
+
+pkgDatabase :: Package -> PkgCache Database
+pkgDatabase = return . U.pkgDatabase
