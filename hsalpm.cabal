@@ -19,6 +19,7 @@ Library
     Alpm.Unsafe.Database
     Alpm.Unsafe.Package
     Alpm.PkgCache
+    Alpm.Transaction
     Alpm.Options
     Alpm.Utils
   Extra-libraries:

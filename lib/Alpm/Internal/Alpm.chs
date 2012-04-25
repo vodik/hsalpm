@@ -3,6 +3,7 @@
 module Alpm.Internal.Alpm
     ( Handle
     , alpmInitialize
+    , strerror, errno
     ) where
 
 {# context lib="alpm" prefix="alpm" #}
@@ -34,3 +35,6 @@ alpmInitialize root dbPath = do
 
 strerror :: CInt -> IO String
 strerror err = {# call strerror #} err >>= peekCString
+
+errno :: Ptr () -> IO CInt
+errno = {# call errno #}
