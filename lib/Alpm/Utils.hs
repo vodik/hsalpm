@@ -14,7 +14,7 @@ toString = liftIO . (peekCString =<<)
 maybeString :: MonadIO m => IO CString -> m (Maybe String)
 maybeString str = liftIO $ do
     ptr <- str
-    if ptr == nullPtr
+    if ptr /= nullPtr
         then Just <$> peekCString ptr
         else return Nothing
 
