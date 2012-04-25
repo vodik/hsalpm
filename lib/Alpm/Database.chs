@@ -6,7 +6,6 @@ module Alpm.Database where
 
 import Control.Applicative
 import Control.Monad
-import Control.Monad.Reader
 import Control.Monad.Trans
 import Foreign.C
 import Foreign.Ptr
@@ -16,13 +15,9 @@ import Alpm.Internal.List
 import Alpm.Internal.Types
 import Alpm.Utils
 
+{# import Alpm.Internal.Types #}
+
 #include <alpm.h>
-
-{# pointer *alpm_db_t as Database newtype #}
-
-instance AlpmType Database where
-    unpack (Database ptr) = return ptr
-    pack = return . Database
 
 dbName :: Database -> Alpm String
 dbName = toString . {# call db_get_name #}

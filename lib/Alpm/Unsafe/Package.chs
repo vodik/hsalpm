@@ -4,10 +4,7 @@
 
 module Alpm.Unsafe.Package where
 
-import Control.Applicative
-import Control.Monad
 import Control.Monad.Trans
-import Control.Monad.Reader
 import Data.Time
 import Foreign.C
 import Foreign.Ptr
@@ -17,13 +14,9 @@ import Alpm.Internal.List
 import Alpm.Internal.Types
 import Alpm.Utils
 
+{# import Alpm.Internal.Types #}
+
 #include <alpm.h>
-
-{# pointer *alpm_pkg_t as Package newtype #}
-
-instance AlpmType Package where
-    unpack (Package ptr) = return ptr
-    pack = return . Package
 
 pkgFilename :: Package -> (Maybe String)
 pkgFilename = unsafePerformIO . maybeString . {# call pkg_get_filename #}

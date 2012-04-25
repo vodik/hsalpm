@@ -3,6 +3,7 @@
 module Alpm.Internal.Types
     ( AlpmType(..)
 
+    , Database(..)
     , Delta
     , Depend
     , DepMissing
@@ -10,6 +11,7 @@ module Alpm.Internal.Types
     , FileConflict
     , FileList
     , Group
+    , Package(..)
     , PGPKey
     , SignatureList
     , SignatureResult
@@ -35,6 +37,7 @@ instance AlpmType String where
     pack   = peekCString . castPtr
 
 {# pointer *alpm_backup_t       as Backup newtype #}
+{# pointer *alpm_db_t           as Database newtype #}
 {# pointer *alpm_conflict_t     as Conflict newtype #}
 {# pointer *alpm_delta_t        as Delta newtype #}
 {# pointer *alpm_depend_t       as Depend newtype #}
@@ -43,6 +46,7 @@ instance AlpmType String where
 {# pointer *alpm_fileconflict_t as FileConflict newtype #}
 {# pointer *alpm_filelist_t     as FileList newtype #}
 {# pointer *alpm_group_t        as Group newtype #}
+{# pointer *alpm_pkg_t          as Package newtype #}
 {# pointer *alpm_pgpkey_t       as PGPKey newtype #}
 {# pointer *alpm_siglist_t      as SignatureList newtype #}
 {# pointer *alpm_sigresult_t    as SignatureResult newtype #}
@@ -51,6 +55,10 @@ instance AlpmType String where
 instance AlpmType Backup where
     unpack (Backup ptr) = return ptr
     pack = return . Backup
+
+instance AlpmType Database where
+    unpack (Database ptr) = return ptr
+    pack = return . Database
 
 instance AlpmType Conflict where
     unpack (Conflict ptr) = return ptr
@@ -79,6 +87,10 @@ instance AlpmType FileList where
 instance AlpmType Group where
     unpack (Group ptr) = return ptr
     pack = return . Group
+
+instance AlpmType Package where
+    unpack (Package ptr) = return ptr
+    pack = return . Package
 
 instance AlpmType PGPKey where
     unpack (PGPKey ptr) = return ptr

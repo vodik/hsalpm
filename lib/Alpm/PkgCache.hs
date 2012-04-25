@@ -3,19 +3,17 @@
 module Alpm.PkgCache where
 
 import Control.Applicative
-import Control.Monad
-import Control.Monad.Trans
+import Control.Monad.Reader
 import Data.Time
 import Foreign.C
 import Foreign.Ptr
-import Control.Monad.Reader
 
 import Alpm.Core
 import Alpm.Database
 import Alpm.Internal.List
 import Alpm.Internal.Types
-import Alpm.Unsafe.Package (Package)
 import Alpm.Utils
+
 import qualified Alpm.Unsafe.Database as UD
 import qualified Alpm.Unsafe.Package as U
 
