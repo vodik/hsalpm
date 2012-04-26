@@ -19,7 +19,7 @@ maybeString str = liftIO $ do
         then Just <$> peekCString ptr
         else return Nothing
 
-toDate :: MonadIO m => IO CLong -> m UTCTime
+toDate :: (MonadIO m, Real a) => IO a -> m UTCTime
 toDate = liftIO . fmap (posixSecondsToUTCTime . realToFrac)
 
 toBitmap :: Enum a => [a] -> CInt
