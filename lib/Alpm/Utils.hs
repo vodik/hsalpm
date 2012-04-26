@@ -9,18 +9,23 @@ import Data.Time.Clock.POSIX
 import Foreign.C
 import Foreign.Ptr
 
-toString :: MonadIO m => IO CString -> m String
-toString = liftIO . (peekCString =<<)
+import Alpm.StringLike
 
-maybeString :: MonadIO m => IO CString -> m (Maybe String)
+readString :: (MonadIO m, StringLike a) => IO CString -> m a
+readString = liftIO . (fromC =<<)
+
+maybeString :: (MonadIO m, StringLike a) => IO CString -> m (Maybe a)
 maybeString str = liftIO $ do
     ptr <- str
     if ptr /= nullPtr
-        then Just <$> peekCString ptr
+        then Just <$> fromC ptr
         else return Nothing
 
 toDate :: (MonadIO m, Real a) => IO a -> m UTCTime
 toDate = liftIO . fmap (posixSecondsToUTCTime . realToFrac)
+
+justIf :: (a -> Bool) -> a -> Maybe a
+justIf cond x = if cond x then Just x else Nothing
 
 toBitmap :: Enum a => [a] -> CInt
 toBitmap = fromIntegral . foldr ((.|.) . fromEnum) 0

@@ -13,14 +13,15 @@ import Alpm.Core
 import Alpm.Database
 import Alpm.Internal.List
 import Alpm.Internal.Types
+import Alpm.StringLike
 import Alpm.Utils
 
 {# import Alpm.Internal.Types #}
 
 #include <alpm.h>
 
-package :: String -> Database -> Alpm Package
-package pkg = liftIO . (newCString pkg >>=) . {# call db_get_pkg #}
+package :: StringLike a => a -> Database -> Alpm Package
+package pkg = liftIO . (toC pkg >>=) . {# call db_get_pkg #}
 
 pkgCache :: Database -> Alpm [Package]
 pkgCache = liftIO . (toList =<<) . (castPtr <$>) . {# call db_get_pkgcache #}

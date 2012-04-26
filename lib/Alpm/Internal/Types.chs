@@ -17,13 +17,19 @@ module Alpm.Internal.Types
     , SignatureResult
     , Trans
 
-    , TransactionFlags(..)
+    , Origin(..)
+    , Reason(..)
     , SignatureLevel(..)
+    , TransactionFlags(..)
     ) where
 
 import Control.Applicative
 import Foreign.C
 import Foreign.Ptr
+import qualified Data.ByteString.Char8 as B
+import qualified Data.Text as T
+
+import Alpm.StringLike
 
 #include <alpm.h>
 
@@ -32,8 +38,16 @@ class AlpmType a where
     pack   :: Ptr a -> IO a
 
 instance AlpmType String where
-    unpack = fmap castPtr . newCString
-    pack   = peekCString . castPtr
+    unpack = fmap castPtr . toC
+    pack   = fromC . castPtr
+
+instance AlpmType B.ByteString where
+    unpack = fmap castPtr . toC
+    pack   = fromC . castPtr
+
+instance AlpmType T.Text where
+    unpack = fmap castPtr . toC
+    pack   = fromC . castPtr
 
 {# pointer *alpm_backup_t       as Backup newtype #}
 {# pointer *alpm_db_t           as Database newtype #}
@@ -107,10 +121,18 @@ instance AlpmType Trans where
     unpack (Trans ptr) = return ptr
     pack = return . Trans
 
--- | Transaction Flags
-{# enum _alpm_transflag_t as TransactionFlags {underscoreToCase}
+-- | Origin
+{# enum alpm_pkgfrom_t as Origin {underscoreToCase}
+    with prefix = "ALPM_" deriving (Eq, Read, Show) #}
+
+-- | Install Reason
+{# enum alpm_pkgreason_t as Reason {underscoreToCase}
     with prefix = "ALPM_" deriving (Eq, Read, Show) #}
 
 -- | Signature Level
 {# enum _alpm_siglevel_t as SignatureLevel {underscoreToCase}
+    with prefix = "ALPM_" deriving (Eq, Read, Show) #}
+
+-- | Transaction Flags
+{# enum _alpm_transflag_t as TransactionFlags {underscoreToCase}
     with prefix = "ALPM_" deriving (Eq, Read, Show) #}
