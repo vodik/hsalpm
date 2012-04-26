@@ -23,7 +23,7 @@ import Alpm.Utils
 #include <alpm.h>
 
 newtype Transaction a = Transaction { transaction :: Alpm a }
-    deriving (Functor, Applicative, Monad, MonadIO, MonadReader AlpmHandle)
+    deriving (Functor, Applicative, Monad, MonadIO, MonadReader AlpmEnv)
 
 withTransaction :: [TransactionFlags] -> Transaction a -> Alpm a
 withTransaction flags trans = do

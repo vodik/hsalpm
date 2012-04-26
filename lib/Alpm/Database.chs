@@ -12,6 +12,7 @@ import Foreign.Ptr
 import System.IO.Unsafe
 
 import Alpm.Core
+import Alpm.Monad
 import Alpm.Internal.List
 import Alpm.Internal.Types
 import Alpm.StringLike

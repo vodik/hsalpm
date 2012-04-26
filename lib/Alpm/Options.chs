@@ -14,6 +14,7 @@ import Foreign.Marshal.Utils (toBool, fromBool)
 
 import Alpm.Core
 import Alpm.Internal.Callbacks
+import Alpm.Callbacks
 import Alpm.StringLike
 import Alpm.Utils
 
@@ -72,16 +73,25 @@ systemArch = arch :=> liftIO $ machine <$> getSystemID
 
 ---------------------------------------------------------------------
 
--- onLog :: (Int -> String -> IO ()) -> Alpm ()
--- onLog f = do
-    -- ptr <- liftIO $ logFunc f
-    -- withHandle $ flip {# call set_logcb #} ptr
-    -- -- TODO: store ptr
-    -- return ()
+type LogCallback = Int -> String -> IO ()
+type DownloadCallback = String -> Int -> Int -> IO ()
 
-onDownload :: (String -> Int -> Int -> IO ()) -> Alpm ()
-onDownload f = do
-    ptr <- liftIO $ downloadFunc f
-    withHandle $ flip {# call set_dlcb #} ptr
-    -- TODO: store ptr
-    return ()
+foreign import ccall "alpm_option_set_logcb"
+    set_logcb :: Ptr () -> FunPtr LogFunc -> IO CInt
+
+onLog :: Maybe LogCallback -> Alpm ()
+onLog = setCallback LogCB set_logcb logFunc
+
+onDownload :: Maybe DownloadCallback -> Alpm ()
+onDownload = setCallback DownloadCB {# call set_dlcb #} downloadFunc
+
+logFunc :: LogCallback -> IO (FunPtr LogFunc)
+logFunc f = mkLogFunc $ \lvl str ->
+    peekCString str >>= f (fromIntegral lvl) . reverse . drop 1 . reverse
+
+downloadFunc :: DownloadCallback -> IO (FunPtr DownloadFunc)
+downloadFunc f = mkDownloadFunc $ \name xfer total -> do
+    let xfer'  = fromIntegral xfer
+        total' = fromIntegral total
+    name' <- peekCString name
+    f name' xfer' total'
