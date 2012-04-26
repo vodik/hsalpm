@@ -21,8 +21,8 @@ maybeString str = liftIO $ do
         then Just <$> fromC ptr
         else return Nothing
 
-toDate :: (MonadIO m, Real a) => IO a -> m UTCTime
-toDate = liftIO . fmap (posixSecondsToUTCTime . realToFrac)
+toDate :: (MonadIO m, Integral a) => IO a -> m UTCTime
+toDate = liftIO . fmap (posixSecondsToUTCTime . fromIntegral)
 
 justIf :: (a -> Bool) -> a -> Maybe a
 justIf cond x = if cond x then Just x else Nothing
