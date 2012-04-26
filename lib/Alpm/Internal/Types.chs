@@ -17,8 +17,10 @@ module Alpm.Internal.Types
     , SignatureResult
     , Trans
 
-    , TransactionFlags(..)
+    , Origin(..)
+    , Reason(..)
     , SignatureLevel(..)
+    , TransactionFlags(..)
     ) where
 
 import Control.Applicative
@@ -119,10 +121,18 @@ instance AlpmType Trans where
     unpack (Trans ptr) = return ptr
     pack = return . Trans
 
--- | Transaction Flags
-{# enum _alpm_transflag_t as TransactionFlags {underscoreToCase}
+-- | Origin
+{# enum alpm_pkgfrom_t as Origin {underscoreToCase}
+    with prefix = "ALPM_" deriving (Eq, Read, Show) #}
+
+-- | Install Reason
+{# enum alpm_pkgreason_t as Reason {underscoreToCase}
     with prefix = "ALPM_" deriving (Eq, Read, Show) #}
 
 -- | Signature Level
 {# enum _alpm_siglevel_t as SignatureLevel {underscoreToCase}
+    with prefix = "ALPM_" deriving (Eq, Read, Show) #}
+
+-- | Transaction Flags
+{# enum _alpm_transflag_t as TransactionFlags {underscoreToCase}
     with prefix = "ALPM_" deriving (Eq, Read, Show) #}

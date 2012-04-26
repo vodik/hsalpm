@@ -30,7 +30,8 @@ pkgName = unsafePerformIO . readString . {# call get_name #}
 pkgVersion :: StringLike a => Package -> a
 pkgVersion = unsafePerformIO . readString . {# call get_version #}
 
-pkgOrigin = undefined
+pkgOrigin :: Package -> Origin
+pkgOrigin = toEnum . fromIntegral . unsafePerformIO . {# call get_origin #}
 
 pkgDescription :: StringLike a => Package -> a
 pkgDescription = unsafePerformIO . readString . {# call get_desc #}
@@ -56,16 +57,47 @@ pkgSHA256Sum = unsafePerformIO . maybeString . {# call get_sha256sum #}
 pkgArch :: StringLike a => Package -> a
 pkgArch = unsafePerformIO . readString . {# call get_arch #}
 
-pkgSize = undefined
+pkgSize :: Package -> Maybe Int
+pkgSize = justIf (> 0) . fromIntegral . unsafePerformIO . {# call get_size #}
 
-pkgInstallSize = undefined
+pkgInstallSize :: Package -> Int
+pkgInstallSize = fromIntegral . unsafePerformIO . {# call get_isize #}
 
-pkgReason = undefined
+pkgReason :: Package -> Reason
+pkgReason = toEnum . fromIntegral . unsafePerformIO . {# call get_reason #}
 
-pkgLicenses = undefined
+pkgLicenses :: (StringLike a, AlpmType a) => Package -> [a]
+pkgLicenses = unsafePerformIO . (toList =<<) . (castPtr <$>) . {# call get_licenses #}
 
 pkgGroups :: (StringLike a, AlpmType a) => Package -> [a]
 pkgGroups = unsafePerformIO . (toList =<<) . (castPtr <$>) . {# call get_groups #}
 
+pkgDepends :: (StringLike a, AlpmType a) => Package -> [a]
+pkgDepends = unsafePerformIO . (toList =<<) . (castPtr <$>) . {# call get_depends #}
+
+pkgOptDepends :: (StringLike a, AlpmType a) => Package -> [a]
+pkgOptDepends = unsafePerformIO . (toList =<<) . (castPtr <$>) . {# call get_optdepends #}
+
+pkgConflicts :: (StringLike a, AlpmType a) => Package -> [a]
+pkgConflicts = unsafePerformIO . (toList =<<) . (castPtr <$>) . {# call get_conflicts #}
+
+pkgProvides :: (StringLike a, AlpmType a) => Package -> [a]
+pkgProvides = unsafePerformIO . (toList =<<) . (castPtr <$>) . {# call get_provides #}
+
+pkgDeltas :: (StringLike a, AlpmType a) => Package -> [a]
+pkgDeltas = unsafePerformIO . (toList =<<) . (castPtr <$>) . {# call get_deltas #}
+
+pkgReplaces :: (StringLike a, AlpmType a) => Package -> [a]
+pkgReplaces = unsafePerformIO . (toList =<<) . (castPtr <$>) . {# call get_replaces #}
+
+pkgFiles :: (StringLike a, AlpmType a) => Package -> [a]
+pkgFiles = undefined
+
+pkgBackup :: (StringLike a, AlpmType a) => Package -> [a]
+pkgBackup = unsafePerformIO . (toList =<<) . (castPtr <$>) . {# call get_backup #}
+
 pkgDatabase :: Package -> Database
 pkgDatabase = unsafePerformIO . {# call get_db #}
+
+pkgBase64Sig :: StringLike a => Package -> a
+pkgBase64Sig = unsafePerformIO . readString . {# call get_base64_sig #}
