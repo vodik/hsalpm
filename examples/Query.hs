@@ -16,8 +16,8 @@ import Alpm.PkgCache
 import Alpm.Internal.Types
 
 queryPkgs :: (Package -> PkgCache Bool) -> Alpm ()
-queryPkgs f = syncDBs >>= \dbs -> forM_ dbs $ \db -> do
-    withPkgCache db $
+queryPkgs f = syncDBs >>= \dbs ->
+    forM_ dbs $ \db -> withPkgCache db $
         ask >>= filterM f >>= mapM_ (ppPkgInfo $ dbName db)
 
 register :: Alpm ()
