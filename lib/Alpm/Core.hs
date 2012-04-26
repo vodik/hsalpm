@@ -2,6 +2,7 @@
 
 module Alpm.Core
     ( Alpm
+    , AlpmException(..)
     -- , AlpmEnv(..)
     , AlpmHandle(..)
     , AlpmOptions(..)

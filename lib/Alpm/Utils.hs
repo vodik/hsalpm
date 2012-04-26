@@ -9,14 +9,16 @@ import Data.Time.Clock.POSIX
 import Foreign.C
 import Foreign.Ptr
 
-toString :: MonadIO m => IO CString -> m String
-toString = liftIO . (peekCString =<<)
+import Alpm.StringLike
 
-maybeString :: MonadIO m => IO CString -> m (Maybe String)
+readString :: (MonadIO m, StringLike a) => IO CString -> m a
+readString = liftIO . (fromC =<<)
+
+maybeString :: (MonadIO m, StringLike a) => IO CString -> m (Maybe a)
 maybeString str = liftIO $ do
     ptr <- str
     if ptr /= nullPtr
-        then Just <$> peekCString ptr
+        then Just <$> fromC ptr
         else return Nothing
 
 toDate :: MonadIO m => IO CLong -> m UTCTime

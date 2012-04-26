@@ -14,14 +14,15 @@ import System.IO.Unsafe
 import Alpm.Core
 import Alpm.Internal.List
 import Alpm.Internal.Types
+import Alpm.StringLike
 import Alpm.Utils
 
 {# import Alpm.Internal.Types #}
 
 #include <alpm.h>
 
-dbName :: Database -> String
-dbName = unsafePerformIO . toString . {# call db_get_name #}
+dbName :: StringLike a => Database -> a
+dbName = unsafePerformIO . readString . {# call db_get_name #}
 
 localDB :: Alpm Database
 localDB = withHandle {# call get_localdb #}
@@ -30,10 +31,10 @@ localDB = withHandle {# call get_localdb #}
 syncDBs :: Alpm [Database]
 syncDBs = withHandle $ (toList =<<) . (castPtr <$>) . {# call get_syncdbs #}
 
-registerDB :: String -> [SignatureLevel] -> Alpm Database
+registerDB :: StringLike a => a -> [SignatureLevel] -> Alpm Database
 registerDB name sig = do
     withHandle $ \h -> do
-        name' <- newCString name
+        name' <- toC name
         {# call register_syncdb #} h name' (toBitmap sig)
 
 -- TODO: replace void with error handling
@@ -54,12 +55,12 @@ validDB = void . liftIO . {# call db_get_valid #}
 -- TODO: db_set_servers
 
 -- TODO: replace void with error handling
-addServer :: String -> Database -> Alpm ()
-addServer url = void . liftIO . (newCString url >>=) . {# call db_add_server #}
+addServer :: StringLike a => a -> Database -> Alpm ()
+addServer url = void . liftIO . (toC url >>=) . {# call db_add_server #}
 
 -- TODO: replace void with error handling
-removeServer :: String -> Database -> Alpm ()
-removeServer url = void . liftIO . (newCString url >>=) . {# call db_remove_server #}
+removeServer :: StringLike a => a -> Database -> Alpm ()
+removeServer url = void . liftIO . (toC url >>=) . {# call db_remove_server #}
 
 -- TODO: db_update
 

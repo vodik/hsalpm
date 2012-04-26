@@ -14,6 +14,7 @@ import Foreign.Marshal.Utils (toBool, fromBool)
 
 import Alpm.Core
 import Alpm.Internal.Callbacks
+import Alpm.StringLike
 import Alpm.Utils
 
 #include <alpm.h>
@@ -41,16 +42,16 @@ set = mapM_ app
 ---------------------------------------------------------------------
 
 mkStringAttr get set = Attr getter setter
-  where getter   = withHandle $ toString . get
-        setter v = void . withHandle $ (newCString v >>=) . set
+  where getter   = withHandle $ readString . get
+        setter v = void . withHandle $ (toC v >>=) . set
 
-arch :: Attr String
+arch :: StringLike a => Attr a
 arch = mkStringAttr {# call get_arch #} {# call set_arch #}
 
-logFile :: Attr FilePath
+logFile :: StringLike a => Attr a
 logFile = mkStringAttr {# call get_logfile #} {# call set_logfile #}
 
-gpgDirectory :: Attr FilePath
+gpgDirectory :: StringLike a => Attr a
 gpgDirectory = mkStringAttr {# call get_gpgdir #} {# call set_gpgdir #}
 
 ---------------------------------------------------------------------

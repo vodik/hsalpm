@@ -14,28 +14,29 @@ import System.IO.Unsafe
 import Alpm.Database
 import Alpm.Internal.List
 import Alpm.Internal.Types
+import Alpm.StringLike
 import Alpm.Utils
 
 {# import Alpm.Internal.Types #}
 
 #include <alpm.h>
 
-pkgFilename :: Package -> (Maybe String)
+pkgFilename :: StringLike a => Package -> (Maybe a)
 pkgFilename = unsafePerformIO . maybeString . {# call get_filename #}
 
-pkgName :: Package -> String
-pkgName = unsafePerformIO . toString . {# call get_name #}
+pkgName :: StringLike a => Package -> a
+pkgName = unsafePerformIO . readString . {# call get_name #}
 
-pkgVersion :: Package -> String
-pkgVersion = unsafePerformIO . toString . {# call get_version #}
+pkgVersion :: StringLike a => Package -> a
+pkgVersion = unsafePerformIO . readString . {# call get_version #}
 
 pkgOrigin = undefined
 
-pkgDescription :: Package -> String
-pkgDescription = unsafePerformIO . toString . {# call get_desc #}
+pkgDescription :: StringLike a => Package -> a
+pkgDescription = unsafePerformIO . readString . {# call get_desc #}
 
-pkgURL :: Package -> String
-pkgURL = unsafePerformIO . toString . {# call get_url #}
+pkgURL :: StringLike a => Package -> a
+pkgURL = unsafePerformIO . readString . {# call get_url #}
 
 pkgBuildDate :: Package -> UTCTime
 pkgBuildDate = unsafePerformIO . toDate . {# call get_builddate #}
@@ -43,17 +44,17 @@ pkgBuildDate = unsafePerformIO . toDate . {# call get_builddate #}
 pkgInstallDate :: Package -> UTCTime
 pkgInstallDate = unsafePerformIO . toDate . {# call get_installdate #}
 
-pkgPackager :: Package -> String
-pkgPackager = unsafePerformIO . toString . {# call get_packager #}
+pkgPackager :: StringLike a => Package -> a
+pkgPackager = unsafePerformIO . readString . {# call get_packager #}
 
-pkgMD5Sum :: Package -> (Maybe String)
+pkgMD5Sum :: StringLike a => Package -> (Maybe a)
 pkgMD5Sum = unsafePerformIO . maybeString . {# call get_md5sum #}
 
-pkgSHA256Sum :: Package -> (Maybe String)
+pkgSHA256Sum :: StringLike a => Package -> (Maybe a)
 pkgSHA256Sum = unsafePerformIO . maybeString . {# call get_sha256sum #}
 
-pkgArch :: Package -> String
-pkgArch = unsafePerformIO . toString . {# call get_arch #}
+pkgArch :: StringLike a => Package -> a
+pkgArch = unsafePerformIO . readString . {# call get_arch #}
 
 pkgSize = undefined
 
@@ -63,7 +64,7 @@ pkgReason = undefined
 
 pkgLicenses = undefined
 
-pkgGroups :: Package -> [String]
+pkgGroups :: (StringLike a, AlpmType a) => Package -> [a]
 pkgGroups = unsafePerformIO . (toList =<<) . (castPtr <$>) . {# call get_groups #}
 
 pkgDatabase :: Package -> Database

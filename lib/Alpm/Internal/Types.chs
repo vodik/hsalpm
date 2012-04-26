@@ -24,6 +24,10 @@ module Alpm.Internal.Types
 import Control.Applicative
 import Foreign.C
 import Foreign.Ptr
+import qualified Data.ByteString.Char8 as B
+import qualified Data.Text as T
+
+import Alpm.StringLike
 
 #include <alpm.h>
 
@@ -32,8 +36,16 @@ class AlpmType a where
     pack   :: Ptr a -> IO a
 
 instance AlpmType String where
-    unpack = fmap castPtr . newCString
-    pack   = peekCString . castPtr
+    unpack = fmap castPtr . toC
+    pack   = fromC . castPtr
+
+instance AlpmType B.ByteString where
+    unpack = fmap castPtr . toC
+    pack   = fromC . castPtr
+
+instance AlpmType T.Text where
+    unpack = fmap castPtr . toC
+    pack   = fromC . castPtr
 
 {# pointer *alpm_backup_t       as Backup newtype #}
 {# pointer *alpm_db_t           as Database newtype #}

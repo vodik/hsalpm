@@ -7,6 +7,8 @@ import Control.Monad.Trans (liftIO)
 import Data.Char
 import Data.List
 import System.Environment
+import qualified Data.Text as T
+import qualified Data.Text.IO as TI
 
 import Alpm.Core
 import Alpm.Database
@@ -29,7 +31,7 @@ register = void $ do
 
 main :: IO ()
 main = do
-    args <- getArgs
+    args <- map T.pack <$> getArgs
     rslt <- runAlpm defaultOptions $ do
         register
         queryPkgs $ myFilter args
@@ -37,15 +39,15 @@ main = do
         Left  err  -> print err
         Right pkgs -> return ()
 
-myFilter :: [String] -> Package -> PkgCache Bool
+myFilter :: [T.Text] -> Package -> PkgCache Bool
 myFilter ts pkg = do
     name   <- pkgName pkg
-    desc   <- map toLower <$> pkgDescription pkg
+    desc   <- T.toLower <$> pkgDescription pkg
     groups <- pkgGroups pkg
 
-    let ts' = map (map toLower) ts
-        f1  = all (`isInfixOf` name) ts'
-        f2  = all (`isInfixOf` desc) ts'
+    let ts' = map T.toLower ts
+        f1  = all (`T.isInfixOf` name) ts'
+        f2  = all (`T.isInfixOf` desc) ts'
         f3  = any (`elem` groups) ts'
     return $ f1 || f2 || f3
 

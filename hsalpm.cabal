@@ -22,13 +22,15 @@ Library
     Alpm.PkgCache
     Alpm.Transaction
     Alpm.Options
+    Alpm.StringLike
     Alpm.Utils
   Extra-libraries:
     alpm
   Build-depends:
     base -any,
     containers -any,
-    deepseq -any,
+    bytestring -any,
+    text -any,
     mtl -any,
     time -any,
     unix -any

@@ -12,6 +12,7 @@ import Alpm.Core
 import Alpm.Database
 import Alpm.Internal.List
 import Alpm.Internal.Types
+import Alpm.StringLike
 import Alpm.Utils
 
 import qualified Alpm.Unsafe.Database as UD
@@ -28,21 +29,21 @@ withPkgCaches dbs (PkgCache f) = concat <$> mapM UD.pkgCache dbs >>= runReaderT 
 
 ---------------------------------------------------------------------
 
-pkgFilename :: Package -> PkgCache (Maybe String)
+pkgFilename :: StringLike a => Package -> PkgCache (Maybe a)
 pkgFilename = (return $!) . U.pkgFilename
 
-pkgName :: Package -> PkgCache String
+pkgName :: StringLike a => Package -> PkgCache a
 pkgName = (return $!) . U.pkgName
 
-pkgVersion :: Package -> PkgCache String
+pkgVersion :: StringLike a => Package -> PkgCache a
 pkgVersion = (return $!) . U.pkgVersion
 
 pkgOrigin = undefined
 
-pkgDescription :: Package -> PkgCache String
+pkgDescription :: StringLike a => Package -> PkgCache a
 pkgDescription = (return $!) . U.pkgDescription
 
-pkgURL :: Package -> PkgCache String
+pkgURL :: StringLike a => Package -> PkgCache a
 pkgURL = (return $!) . U.pkgURL
 
 pkgBuildDate :: Package -> PkgCache UTCTime
@@ -51,16 +52,16 @@ pkgBuildDate = (return $!) . U.pkgBuildDate
 pkgInstallDate :: Package -> PkgCache UTCTime
 pkgInstallDate = (return $!) . U.pkgInstallDate
 
-pkgPackager :: Package -> PkgCache String
+pkgPackager :: StringLike a => Package -> PkgCache a
 pkgPackager = (return $!) . U.pkgPackager
 
-pkgMD5Sum :: Package -> PkgCache (Maybe String)
+pkgMD5Sum :: StringLike a => Package -> PkgCache (Maybe a)
 pkgMD5Sum = (return $!) . U.pkgMD5Sum
 
-pkgSHA256Sum :: Package -> PkgCache (Maybe String)
+pkgSHA256Sum :: StringLike a => Package -> PkgCache (Maybe a)
 pkgSHA256Sum = (return $!) . U.pkgSHA256Sum
 
-pkgArch :: Package -> PkgCache String
+pkgArch :: StringLike a => Package -> PkgCache a
 pkgArch = (return $!) . U.pkgArch
 
 pkgSize = undefined
@@ -71,7 +72,7 @@ pkgReason = undefined
 
 pkgLicenses = undefined
 
-pkgGroups :: Package -> PkgCache [String]
+pkgGroups :: (StringLike a, AlpmType a) => Package -> PkgCache [a]
 pkgGroups = (return $!) . U.pkgGroups
 
 pkgDatabase :: Package -> PkgCache Database
