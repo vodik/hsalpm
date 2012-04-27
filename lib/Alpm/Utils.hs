@@ -27,5 +27,8 @@ toDate = liftIO . fmap (posixSecondsToUTCTime . fromIntegral)
 justIf :: (a -> Bool) -> a -> Maybe a
 justIf cond x = if cond x then Just x else Nothing
 
-toBitmap :: Enum a => [a] -> CInt
+toBitmap :: (Enum a, Num b) => [a] -> b
 toBitmap = fromIntegral . foldr ((.|.) . fromEnum) 0
+
+fromBitmap :: (Num a, Enum b) => a -> [b]
+fromBitmap = undefined

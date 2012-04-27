@@ -12,6 +12,7 @@ import qualified Data.Text.IO as TI
 
 import Alpm.Core
 import Alpm.Database
+import Alpm.Options
 import Alpm.PkgCache
 import Alpm.Internal.Types
 
@@ -33,6 +34,7 @@ main :: IO ()
 main = do
     args <- map T.pack <$> getArgs
     rslt <- runAlpm defaultOptions $ do
+        set [ useSyslog := True ]
         register
         queryPkgs $ myFilter args
     case rslt of

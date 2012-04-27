@@ -4,7 +4,8 @@ module Alpm.Internal.Alpm
     ( AlpmHandle
     , alpmInitialize
     , strerror, errno
-	, alpmVersion
+    , alpmVersion
+    , alpmCapabilities
     ) where
 
 {# context lib="alpm" prefix="alpm" #}
@@ -44,3 +45,6 @@ errno = {# call errno #}
 
 alpmVersion :: StringLike a => IO a
 alpmVersion = readString {# call version #}
+
+alpmCapabilities :: IO [Capabilities]
+alpmCapabilities = fromBitmap <$> {# call capabilities #}

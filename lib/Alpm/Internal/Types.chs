@@ -4,23 +4,32 @@ module Alpm.Internal.Types
     ( AlpmType(..)
 
     , Database(..)
-    , Delta
-    , Depend
-    , DepMissing
-    , File
-    , FileConflict
-    , FileList
-    , Group
+    , Delta(..)
+    , Depend(..)
+    , DepMissing(..)
+    , File(..)
+    , FileConflict(..)
+    , FileList(..)
+    , Group(..)
     , Package(..)
-    , PGPKey
-    , SignatureList
-    , SignatureResult
-    , Trans
+    , PGPKey(..)
+    , SignatureList(..)
+    , SignatureResult(..)
+    , Trans(..)
 
-    , Origin(..)
     , Reason(..)
+    , Origin(..)
+    , DepMod(..)
+    , FileConflictType(..)
     , SignatureLevel(..)
+    , SignatureStatue(..)
+    , SignatureValidity(..)
+    , LogLevel(..)
+    , Event(..)
+    , Question(..)
+    , Progress(..)
     , TransactionFlags(..)
+    , Capabilities(..)
     ) where
 
 import Control.Applicative

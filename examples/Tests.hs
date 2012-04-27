@@ -15,23 +15,23 @@ import qualified Data.ByteString.Char8 as BS
 test1 = runAlpm defaultOptions $ dbName <$> localDB
 
 test2 = runAlpm defaultOptions $ do
-    registerDB "core" [SigUseDefault]
+    registerDB "core" [ SigUseDefault ]
     map dbName <$> syncDBs
 
 -- Unsafe package cache manipulation
 test3 = runAlpm defaultOptions $ do
-    db <- registerDB "core" [SigUseDefault]
+    db <- registerDB "core" [ SigUseDefault ]
     UP.pkgName <$> UD.package "linux" db
 
 -- Using the PkgCache monad
 test4 = runAlpm defaultOptions $ do
-    db <- registerDB "core" [SigUseDefault]
+    db <- registerDB "core" [ SigUseDefault ]
     withPkgCache db $ ask >>= \lst ->
         sort <$> mapM pkgName lst
 
 -- Start an update/transaction
 test5 repo = runAlpm defaultOptions $ do
-    set [ systemArch ]
+    set [ systemArch, useSyslog := True ]
 
     db   <- registerDB repo [SigUseDefault]
     arch <- get arch
@@ -42,6 +42,7 @@ test5 repo = runAlpm defaultOptions $ do
 
 main = do
     alpmVersion >>= BS.putStrLn
+    alpmCapabilities >>= print
 
     test1 >>= either print BS.putStrLn
     test2 >>= either print (mapM_ BS.putStrLn)

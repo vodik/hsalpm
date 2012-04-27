@@ -36,7 +36,7 @@ withTransaction flags trans = do
 
 -- loadPkg filename full level = do
     -- alloca $ \pkg -> do
-		-- rst <- withHandle $ \h -> {# call pkg_load #} h filename full (toBitmap level) pkg
+        -- rst <- withHandle $ \h -> {# call pkg_load #} h filename full (toBitmap level) pkg
 
 ----------------------------------------------------------------------
 
@@ -51,3 +51,8 @@ updateDB force db = Transaction $ do
         n | n  < 0    -> throwAlpmException "unable to update database"
           | n == 0    -> return UpToDate
           | otherwise -> return Updated
+
+-- TODO: replace void with error handling
+syncSysupgrade :: Bool -> Transaction ()
+syncSysupgrade downgrade = Transaction $ do
+    void . withHandle $ flip {# call sync_sysupgrade #} (fromBool downgrade)
