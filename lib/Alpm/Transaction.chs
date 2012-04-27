@@ -27,7 +27,7 @@ newtype Transaction a = Transaction { transaction :: Alpm a }
 
 withTransaction :: [TransactionFlags] -> Transaction a -> Alpm a
 withTransaction flags trans = do
-    withHandle $ flip {# call trans_init #} (toBitmap flags)
+    withHandle $ flip {# call trans_init #} (toBitfield flags)
     rst <- transaction trans
     withHandle $ {# call trans_release #}
     return rst
@@ -36,7 +36,7 @@ withTransaction flags trans = do
 
 -- loadPkg filename full level = do
     -- alloca $ \pkg -> do
-        -- rst <- withHandle $ \h -> {# call pkg_load #} h filename full (toBitmap level) pkg
+        -- rst <- withHandle $ \h -> {# call pkg_load #} h filename full (toBitfield level) pkg
 
 ----------------------------------------------------------------------
 
