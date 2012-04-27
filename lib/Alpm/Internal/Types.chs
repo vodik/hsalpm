@@ -121,18 +121,54 @@ instance AlpmType Trans where
     unpack (Trans ptr) = return ptr
     pack = return . Trans
 
--- | Origin
-{# enum alpm_pkgfrom_t as Origin {underscoreToCase}
-    with prefix = "ALPM_" deriving (Eq, Read, Show) #}
-
 -- | Install Reason
 {# enum alpm_pkgreason_t as Reason {underscoreToCase}
     with prefix = "ALPM_" deriving (Eq, Read, Show) #}
 
+-- | Origin
+{# enum alpm_pkgfrom_t as Origin {underscoreToCase}
+    with prefix = "ALPM_" deriving (Eq, Read, Show) #}
+
+-- | DepMod
+{# enum alpm_depmod_t as DepMod {underscoreToCase}
+    with prefix = "ALPM_" deriving (Eq, Read, Show) #}
+
+-- | FileConflictType
+{# enum alpm_fileconflicttype_t as FileConflictType {underscoreToCase}
+    with prefix = "ALPM_" deriving (Eq, Read, Show) #}
+
 -- | Signature Level
-{# enum _alpm_siglevel_t as SignatureLevel {underscoreToCase}
+{# enum alpm_siglevel_t as SignatureLevel {underscoreToCase}
+    with prefix = "ALPM_" deriving (Eq, Read, Show) #}
+
+-- | Signature Status
+{# enum alpm_sigstatus_t as SignatureStatue {underscoreToCase}
+    with prefix = "ALPM_" deriving (Eq, Read, Show) #}
+
+-- | Signtaure Validity
+{# enum alpm_sigvalidity_t as SignatureValidity {underscoreToCase}
+    with prefix = "ALPM_" deriving (Eq, Read, Show) #}
+
+-- | LogLevel
+{# enum alpm_loglevel_t as LogLevel {underscoreToCase}
+    with prefix = "ALPM_" deriving (Eq, Read, Show) #}
+
+-- | AlpmEvent
+{# enum alpm_event_t as Event {underscoreToCase}
+    with prefix = "ALPM_" deriving (Eq, Read, Show) #}
+
+-- | Question
+{# enum alpm_question_t as Question {underscoreToCase}
+    with prefix = "ALPM_" deriving (Eq, Read, Show) #}
+
+-- | Progress
+{# enum alpm_progress_t as Progress {underscoreToCase}
     with prefix = "ALPM_" deriving (Eq, Read, Show) #}
 
 -- | Transaction Flags
-{# enum _alpm_transflag_t as TransactionFlags {underscoreToCase}
+{# enum alpm_transflag_t as TransactionFlags {underscoreToCase}
+    with prefix = "ALPM_" deriving (Eq, Read, Show) #}
+
+-- | Capabilities
+{# enum alpm_caps as Capabilities {underscoreToCase}
     with prefix = "ALPM_" deriving (Eq, Read, Show) #}
