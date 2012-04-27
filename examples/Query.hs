@@ -1,11 +1,8 @@
 module Main where
 
 import Control.Applicative
-import Control.Monad
 import Control.Monad.Reader
 import Control.Monad.Trans (liftIO)
-import Data.Char
-import Data.List
 import System.Environment
 import qualified Data.Text as T
 
