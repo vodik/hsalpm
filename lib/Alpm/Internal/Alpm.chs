@@ -4,6 +4,7 @@ module Alpm.Internal.Alpm
     ( AlpmHandle
     , alpmInitialize
     , strerror, errno
+	, alpmVersion
     ) where
 
 {# context lib="alpm" prefix="alpm" #}
@@ -16,6 +17,8 @@ import Foreign.Marshal.Alloc
 import Foreign.Storable
 
 import Alpm.Internal.Types
+import Alpm.StringLike
+import Alpm.Utils
 
 #include <alpm.h>
 
@@ -38,3 +41,6 @@ strerror err = {# call strerror #} err >>= peekCString
 
 errno :: Ptr () -> IO CInt
 errno = {# call errno #}
+
+alpmVersion :: StringLike a => IO a
+alpmVersion = readString {# call version #}

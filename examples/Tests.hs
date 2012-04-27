@@ -2,6 +2,7 @@ import Alpm.Core
 import Alpm.Database
 import Alpm.PkgCache
 import Alpm.Transaction
+import Alpm.Internal.Alpm
 import Alpm.Internal.Types
 import Alpm.Options
 import Control.Applicative
@@ -40,6 +41,8 @@ test5 repo = runAlpm defaultOptions $ do
         updateDB True db
 
 main = do
+    alpmVersion >>= BS.putStrLn
+
     test1 >>= either print BS.putStrLn
     test2 >>= either print (mapM_ BS.putStrLn)
     test3 >>= either print BS.putStrLn
