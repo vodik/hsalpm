@@ -1,6 +1,6 @@
 {-# LANGUAGE ForeignFunctionInterface, TypeSynonymInstances, FlexibleInstances #-}
 
-module Alpm.Internal.Types
+module System.Alpm.Internal.Types
     ( AlpmType(..)
 
     , Database(..)
@@ -38,7 +38,7 @@ import Foreign.Ptr
 import qualified Data.ByteString.Char8 as B
 import qualified Data.Text as T
 
-import Alpm.StringLike
+import System.Alpm.StringLike
 
 #include <alpm.h>
 

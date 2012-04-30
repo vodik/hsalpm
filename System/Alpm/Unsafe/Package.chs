@@ -2,7 +2,7 @@
 
 {# context lib="alpm" prefix="alpm_pkg" #}
 
-module Alpm.Unsafe.Package where
+module System.Alpm.Unsafe.Package where
 
 import Control.Applicative
 import Control.Monad.Trans
@@ -11,13 +11,13 @@ import Foreign.C
 import Foreign.Ptr
 import System.IO.Unsafe
 
-import Alpm.Database
-import Alpm.Internal.List
-import Alpm.Internal.Types
-import Alpm.StringLike
-import Alpm.Utils
+import System.Alpm.Database
+import System.Alpm.Internal.List
+import System.Alpm.Internal.Types
+import System.Alpm.StringLike
+import System.Alpm.Utils
 
-{# import Alpm.Internal.Types #}
+{# import System.Alpm.Internal.Types #}
 
 #include <alpm.h>
 

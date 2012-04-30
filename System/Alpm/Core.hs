@@ -1,6 +1,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-module Alpm.Core
+module System.Alpm.Core
     ( Alpm
     , AlpmException(..)
     -- , AlpmEnv(..)
@@ -22,7 +22,7 @@ import Data.IORef
 import Foreign.ForeignPtr
 import Foreign.Ptr
 
-import Alpm.Internal.Alpm
+import System.Alpm.Internal.Alpm
 
 type AlpmEnv = IORef Env
 data Env = Env

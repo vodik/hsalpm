@@ -1,6 +1,6 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
 
-module Alpm.Internal.Callbacks where
+module System.Alpm.Internal.Callbacks where
 
 import Foreign.C
 import Foreign.Ptr

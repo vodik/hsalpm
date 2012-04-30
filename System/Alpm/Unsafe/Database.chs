@@ -2,21 +2,21 @@
 
 {# context lib="alpm" prefix="alpm" #}
 
-module Alpm.Unsafe.Database where
+module System.Alpm.Unsafe.Database where
 
 import Control.Applicative
 import Control.Monad.Trans
 import Foreign.C
 import Foreign.Ptr
 
-import Alpm.Core
-import Alpm.Database
-import Alpm.Internal.List
-import Alpm.Internal.Types
-import Alpm.StringLike
-import Alpm.Utils
+import System.Alpm.Core
+import System.Alpm.Database
+import System.Alpm.Internal.List
+import System.Alpm.Internal.Types
+import System.Alpm.StringLike
+import System.Alpm.Utils
 
-{# import Alpm.Internal.Types #}
+{# import System.Alpm.Internal.Types #}
 
 #include <alpm.h>
 

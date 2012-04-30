@@ -2,7 +2,7 @@
 
 {# context lib="alpm" prefix="alpm_option" #}
 
-module Alpm.Options where
+module System.Alpm.Options where
 
 import Control.Applicative
 import Control.Monad
@@ -12,10 +12,10 @@ import Foreign.C
 import Foreign.Ptr
 import Foreign.Marshal.Utils (toBool, fromBool)
 
-import Alpm.Core
-import Alpm.Internal.Callbacks
-import Alpm.StringLike
-import Alpm.Utils
+import System.Alpm.Core
+import System.Alpm.Internal.Callbacks
+import System.Alpm.StringLike
+import System.Alpm.Utils
 
 #include <alpm.h>
 

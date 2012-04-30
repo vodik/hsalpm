@@ -11,19 +11,21 @@ Cabal-version:     >=1.8
 
 Library
   Exposed-modules:
-    Alpm.Internal.Alpm
-    Alpm.Internal.Types
-    Alpm.Internal.List
-    Alpm.Internal.Callbacks
-    Alpm.Core
-    Alpm.Database
-    Alpm.Unsafe.Database
-    Alpm.Unsafe.Package
-    Alpm.PkgCache
-    Alpm.Transaction
-    Alpm.Options
-    Alpm.StringLike
-    Alpm.Utils
+    System.Alpm.Core.Class
+    System.Alpm.Core.Error
+    System.Alpm.Internal.Alpm
+    System.Alpm.Internal.Types
+    System.Alpm.Internal.List
+    System.Alpm.Internal.Callbacks
+    System.Alpm.Core
+    System.Alpm.Database
+    System.Alpm.Unsafe.Database
+    System.Alpm.Unsafe.Package
+    System.Alpm.PkgCache
+    System.Alpm.Transaction
+    System.Alpm.Options
+    System.Alpm.StringLike
+    System.Alpm.Utils
   Extra-libraries:
     alpm
   Build-depends:
@@ -35,4 +37,3 @@ Library
     time -any,
     unix -any
   Build-tools: c2hs
-  Hs-source-dirs: lib

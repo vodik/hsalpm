@@ -1,6 +1,6 @@
 {-# LANGUAGE GeneralizedNewtypeDeriving #-}
 
-module Alpm.PkgCache where
+module System.Alpm.PkgCache where
 
 import Control.Applicative
 import Control.Monad.Reader
@@ -8,15 +8,15 @@ import Data.Time
 import Foreign.C
 import Foreign.Ptr
 
-import Alpm.Core
-import Alpm.Database
-import Alpm.Internal.List
-import Alpm.Internal.Types
-import Alpm.StringLike
-import Alpm.Utils
+import System.Alpm.Core
+import System.Alpm.Database
+import System.Alpm.Internal.List
+import System.Alpm.Internal.Types
+import System.Alpm.StringLike
+import System.Alpm.Utils
 
-import qualified Alpm.Unsafe.Database as UD
-import qualified Alpm.Unsafe.Package as U
+import qualified System.Alpm.Unsafe.Database as UD
+import qualified System.Alpm.Unsafe.Package as U
 
 newtype PkgCache a = PkgCache (ReaderT [Package] Alpm a)
     deriving (Functor, Applicative, Monad, MonadIO, MonadReader [Package])

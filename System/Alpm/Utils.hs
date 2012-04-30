@@ -1,4 +1,4 @@
-module Alpm.Utils where
+module System.Alpm.Utils where
 
 import Control.Applicative
 import Control.Monad
@@ -9,7 +9,7 @@ import Data.Time.Clock.POSIX
 import Foreign.C
 import Foreign.Ptr
 
-import Alpm.StringLike
+import System.Alpm.StringLike
 
 readString :: (MonadIO m, StringLike a) => IO CString -> m a
 readString = liftIO . (fromC =<<)

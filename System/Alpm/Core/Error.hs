@@ -1,4 +1,10 @@
-module Alpm.Core.Error where
+{-# LANGUAGE DeriveDataTypeable #-}
+
+module System.Alpm.Core.Error where
+
+import Control.Exception
+import Control.Monad.Error
+import Data.Typeable
 
 data AlpmError = Generic String
                | UnknownError String
@@ -7,9 +13,9 @@ data AlpmError = Generic String
 instance Exception AlpmError
 
 instance Show AlpmError where
-    show (Generic s)     = s
-    show (UnkownError s) = s
+    show (Generic s)      = s
+    show (UnknownError s) = s
 
-instance Error MPDError where
+instance Error AlpmError where
     noMsg  = UnknownError "An error occured"
     strMsg = UnknownError

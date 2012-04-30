@@ -1,6 +1,6 @@
 {-# LANGUAGE ForeignFunctionInterface #-}
 
-module Alpm.Internal.Alpm
+module System.Alpm.Internal.Alpm
     ( AlpmHandle
     , alpmInitialize
     , strerror, errno
@@ -17,9 +17,9 @@ import Foreign.ForeignPtr
 import Foreign.Marshal.Alloc
 import Foreign.Storable
 
-import Alpm.Internal.Types
-import Alpm.StringLike
-import Alpm.Utils
+import System.Alpm.Internal.Types
+import System.Alpm.StringLike
+import System.Alpm.Utils
 
 #include <alpm.h>
 

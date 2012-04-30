@@ -2,7 +2,7 @@
 
 {# context lib="alpm" prefix="alpm" #}
 
-module Alpm.Transaction where
+module System.Alpm.Transaction where
 
 import Control.Applicative
 import Control.Monad
@@ -13,12 +13,12 @@ import Foreign.C
 import Foreign.Ptr
 import Foreign.Marshal.Utils (toBool, fromBool)
 
-import Alpm.Core
-import Alpm.Database
-import Alpm.Internal.Types
-import Alpm.Utils
+import System.Alpm.Core
+import System.Alpm.Database
+import System.Alpm.Internal.Types
+import System.Alpm.Utils
 
-{# import Alpm.Internal.Types #}
+{# import System.Alpm.Internal.Types #}
 
 #include <alpm.h>
 

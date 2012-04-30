@@ -1,6 +1,6 @@
 {-# LANGUAGE ForeignFunctionInterface, TypeSynonymInstances, FlexibleInstances #-}
 
-module Alpm.Internal.List
+module System.Alpm.Internal.List
     ( AlpmList(..)
     , toList
     ) where
@@ -11,7 +11,7 @@ import Foreign.C
 import Foreign.Ptr
 import Foreign.Storable
 
-import Alpm.Internal.Types
+import System.Alpm.Internal.Types
 
 #include <alpm.h>
 

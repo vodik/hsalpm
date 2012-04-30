@@ -1,6 +1,6 @@
 {-# LANGUAGE TypeSynonymInstances, FlexibleInstances #-}
 
-module Alpm.StringLike where
+module System.Alpm.StringLike where
 
 import Foreign.C.String
 import Foreign.Ptr
