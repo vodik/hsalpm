@@ -11,11 +11,18 @@ import Control.Monad.Trans
 import Data.Bits
 import Foreign.C
 import Foreign.Ptr
+import Foreign.ForeignPtr
+import Foreign.Marshal.Alloc
 import Foreign.Marshal.Utils (toBool, fromBool)
+import Foreign.Storable
+
+import System.IO.Unsafe
 
 import Alpm.Core
+import Alpm.Caching
 import Alpm.Database
 import Alpm.Internal.Types
+import Alpm.StringLike
 import Alpm.Utils
 
 {# import Alpm.Internal.Types #}
@@ -34,9 +41,25 @@ withTransaction flags trans = do
 
 ----------------------------------------------------------------------
 
--- loadPkg filename full level = do
-    -- alloca $ \pkg -> do
-        -- rst <- withHandle $ \h -> {# call pkg_load #} h filename full (toBitfield level) pkg
+instance Storable Package where
+    sizeOf (Package r)    = sizeOf r
+    alignment (Package r) = alignment r
+
+    peek p             = Package <$> peek (castPtr p)
+    poke p (Package r) = poke (castPtr p) r
+
+loadPkg :: (StringLike s) => s -> Bool -> [SignatureLevel] -> Alpm Package
+loadPkg filename full level = do
+    rst <- withHandle $ \h -> do
+        pkg <- malloc
+        fn  <- toC filename
+        rst <- {# call pkg_load #} h fn (fromBool full) (toBitfield level) pkg
+        if rst < 0
+            then return Nothing
+            else return . Just $ Package pkg
+    case rst of
+        Nothing -> throwAlpmException "unable to load package"
+        Just p  -> return p
 
 ----------------------------------------------------------------------
 
