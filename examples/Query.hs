@@ -12,6 +12,7 @@ import Alpm.Options
 import Alpm.PkgCache
 import Alpm.Internal.Types
 
+dbs :: [String]
 dbs = [ "testing", "core", "extra", "community", "community-testing" ]
 
 queryPkgs :: (Package -> PkgCache Bool) -> Alpm ()

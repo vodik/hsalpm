@@ -30,82 +30,82 @@ withPkgCaches dbs (PkgCache f) = concat <$> mapM UD.pkgCache dbs >>= runReaderT 
 ---------------------------------------------------------------------
 
 pkgFilename :: StringLike a => Package -> PkgCache (Maybe a)
-pkgFilename = (return $!) . U.pkgFilename
+pkgFilename = return . U.pkgFilename
 
 pkgName :: StringLike a => Package -> PkgCache a
-pkgName = (return $!) . U.pkgName
+pkgName = return . U.pkgName
 
 pkgVersion :: StringLike a => Package -> PkgCache a
-pkgVersion = (return $!) . U.pkgVersion
+pkgVersion = return . U.pkgVersion
 
 pkgOrigin :: Package -> PkgCache Origin
-pkgOrigin = (return $!) . U.pkgOrigin
+pkgOrigin = return . U.pkgOrigin
 
 pkgDescription :: StringLike a => Package -> PkgCache a
-pkgDescription = (return $!) . U.pkgDescription
+pkgDescription = return . U.pkgDescription
 
 pkgURL :: StringLike a => Package -> PkgCache a
-pkgURL = (return $!) . U.pkgURL
+pkgURL = return . U.pkgURL
 
 pkgBuildDate :: Package -> PkgCache UTCTime
-pkgBuildDate = (return $!) . U.pkgBuildDate
+pkgBuildDate = return . U.pkgBuildDate
 
 pkgInstallDate :: Package -> PkgCache UTCTime
-pkgInstallDate = (return $!) . U.pkgInstallDate
+pkgInstallDate = return . U.pkgInstallDate
 
 pkgPackager :: StringLike a => Package -> PkgCache a
-pkgPackager = (return $!) . U.pkgPackager
+pkgPackager = return . U.pkgPackager
 
 pkgMD5Sum :: StringLike a => Package -> PkgCache (Maybe a)
-pkgMD5Sum = (return $!) . U.pkgMD5Sum
+pkgMD5Sum = return . U.pkgMD5Sum
 
 pkgSHA256Sum :: StringLike a => Package -> PkgCache (Maybe a)
-pkgSHA256Sum = (return $!) . U.pkgSHA256Sum
+pkgSHA256Sum = return . U.pkgSHA256Sum
 
 pkgArch :: StringLike a => Package -> PkgCache a
-pkgArch = (return $!) . U.pkgArch
+pkgArch = return . U.pkgArch
 
 pkgSize :: Package -> PkgCache (Maybe Int)
-pkgSize = (return $!) . U.pkgSize
+pkgSize = return . U.pkgSize
 
 pkgInstallSize :: Package -> PkgCache Int
-pkgInstallSize = (return $!) . U.pkgInstallSize
+pkgInstallSize = return . U.pkgInstallSize
 
 pkgReason :: Package -> PkgCache Reason
-pkgReason = (return $!) . U.pkgReason
+pkgReason = return . U.pkgReason
 
 pkgLicenses :: (StringLike a, AlpmType a) => Package -> PkgCache [a]
-pkgLicenses = (return $!) . U.pkgLicenses
+pkgLicenses = return . U.pkgLicenses
 
 pkgGroups :: (StringLike a, AlpmType a) => Package -> PkgCache [a]
-pkgGroups = (return $!) . U.pkgGroups
+pkgGroups = return . U.pkgGroups
 
 pkgDepends :: (StringLike a, AlpmType a) => Package -> PkgCache [a]
-pkgDepends = (return $!) . U.pkgDepends
+pkgDepends = return . U.pkgDepends
 
 pkgOptDepends :: (StringLike a, AlpmType a) => Package -> PkgCache [a]
-pkgOptDepends = (return $!) . U.pkgOptDepends
+pkgOptDepends = return . U.pkgOptDepends
 
 pkgConflicts :: (StringLike a, AlpmType a) => Package -> PkgCache [a]
-pkgConflicts = (return $!) . U.pkgConflicts
+pkgConflicts = return . U.pkgConflicts
 
 pkgProvides :: (StringLike a, AlpmType a) => Package -> PkgCache [a]
-pkgProvides = (return $!) . U.pkgProvides
+pkgProvides = return . U.pkgProvides
 
 pkgDeltas :: (StringLike a, AlpmType a) => Package -> PkgCache [a]
-pkgDeltas = (return $!) . U.pkgDeltas
+pkgDeltas = return . U.pkgDeltas
 
 pkgReplaces :: (StringLike a, AlpmType a) => Package -> PkgCache [a]
-pkgReplaces = (return $!) . U.pkgReplaces
+pkgReplaces = return . U.pkgReplaces
 
 pkgFiles :: (StringLike a, AlpmType a) => Package -> PkgCache [a]
-pkgFiles = (return $!) . U.pkgFiles
+pkgFiles = return . U.pkgFiles
 
 pkgBackup :: (StringLike a, AlpmType a) => Package -> PkgCache [a]
-pkgBackup = (return $!) . U.pkgBackup
+pkgBackup = return . U.pkgBackup
 
 pkgDatabase :: Package -> PkgCache Database
-pkgDatabase = (return $!) . U.pkgDatabase
+pkgDatabase = return . U.pkgDatabase
 
 pkgBase64Sig :: StringLike a => Package -> PkgCache a
-pkgBase64Sig = (return $!) . U.pkgBase64Sig
+pkgBase64Sig = return . U.pkgBase64Sig
