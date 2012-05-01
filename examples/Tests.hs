@@ -14,6 +14,7 @@ import qualified System.Alpm.Unsafe.Package as UP
 
 root   = "/"
 dbPath = "/var/lib/pacman/"
+mirror = "http://mirrors.kernel.org/archlinux/"
 
 test1 = withAlpm root dbPath $ dbName <$> localDB
 
@@ -38,7 +39,7 @@ test5 repo = withAlpm root dbPath $ do
 
     db   <- registerDB repo [SigUseDefault]
     arch <- get arch
-    addServer ("http://mirrors.kernel.org/archlinux/" ++ repo ++ "/os/" ++ arch) db
+    addServer (mirror ++ repo ++ "/os/" ++ arch) db
 
     withTransaction [TransFlagDbonly] $
         updateDB True db
