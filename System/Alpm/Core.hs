@@ -49,11 +49,11 @@ lastError :: Alpm ErrorCode
 lastError = withHandle $ errno
 
 throwAlpmException :: String -> Alpm a
-throwAlpmException _ = (throwError =<<) . (<$> lastError) $ Library
+throwAlpmException = (throwError =<<) . (<$> lastError) . flip Library
 
 withAlpm :: AlpmOptions -> Alpm a -> IO (Either AlpmError a)
 withAlpm opt alpm =
     alpmInitialize (root opt) (dbPath opt) >>= either failed run
   where
-    failed  = return . Left . Library
+    failed  = return . Left . flip Library "failed to initialize alpm"
     run env = withForeignPtr env . const $ (`runReaderT` env) . runErrorT $ runAlpm alpm
