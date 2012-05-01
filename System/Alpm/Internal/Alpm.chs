@@ -41,11 +41,10 @@ alpmInitialize root dbPath = do
             else Right <$> newForeignPtr c_alpm_release alpm_ptr
 
 strerror :: StringLike s => ErrorCode -> s
-strerror err = unsafePerformIO $ do
-    {# call strerror #} (fromIntegral $ fromEnum err) >>= fromC
+strerror = unsafePerformIO . (fromC =<<) . {# call strerror #} . fromIntegral . fromEnum
 
--- errno :: Ptr a -> ErrorCode
-errno e = {# call errno #} e >>= return . toEnum . fromIntegral
+errno :: Ptr () -> IO ErrorCode
+errno = (toEnum . fromIntegral <$>) . {# call errno #}
 
 alpmVersion :: StringLike a => IO a
 alpmVersion = readString {# call version #}

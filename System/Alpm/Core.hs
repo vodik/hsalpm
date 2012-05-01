@@ -43,10 +43,10 @@ defaultOptions = AlpmOptions
     }
 
 withHandle :: (Ptr () -> IO a) -> Alpm a
-withHandle f = ask >>= liftIO . flip withForeignPtr f
+withHandle = (ask >>=) . (liftIO .) . flip withForeignPtr
 
 lastError :: Alpm ErrorCode
-lastError = withHandle $ errno
+lastError = withHandle errno
 
 throwAlpmException :: String -> Alpm a
 throwAlpmException = (throwError =<<) . (<$> lastError) . flip Library
@@ -56,4 +56,4 @@ withAlpm opt alpm =
     alpmInitialize (root opt) (dbPath opt) >>= either failed run
   where
     failed  = return . Left . flip Library "failed to initialize alpm"
-    run env = withForeignPtr env . const $ (`runReaderT` env) . runErrorT $ runAlpm alpm
+    run env = withForeignPtr env . const . (`runReaderT` env) . runErrorT $ runAlpm alpm
