@@ -16,8 +16,6 @@ import Foreign.Marshal.Alloc
 import Foreign.Marshal.Utils (toBool, fromBool)
 import Foreign.Storable
 
-import System.IO.Unsafe
-
 import System.Alpm.Core
 import System.Alpm.Database
 import System.Alpm.Internal.Types
@@ -28,13 +26,13 @@ import System.Alpm.Utils
 
 #include <alpm.h>
 
-newtype Transaction a = Transaction { transaction :: Alpm a }
+newtype Transaction a = Transaction { runTransaction :: Alpm a }
     deriving (Functor, Applicative, Monad, MonadIO, MonadReader AlpmHandle)
 
 withTransaction :: [TransactionFlags] -> Transaction a -> Alpm a
 withTransaction flags trans = do
     withHandle $ flip {# call trans_init #} (toBitfield flags)
-    rst <- transaction trans
+    rst <- runTransaction trans
     withHandle $ {# call trans_release #}
     return rst
 
