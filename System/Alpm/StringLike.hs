@@ -9,25 +9,18 @@ import qualified Data.Text as T
 import qualified Data.Text.Encoding as E
 
 class StringLike a where
-    toC        :: a -> IO CString
-    fromC      :: CString -> IO a
-    toString   :: a -> String
-    fromString :: String -> a
+    toC   :: a -> IO CString
+    fromC :: CString -> IO a
 
 instance StringLike String where
-    toC        = newCString
-    fromC      = peekCString
-    toString   = id
-    fromString = id
+    toC   = newCString
+    fromC = peekCString
 
+-- TODO: toC is a hack
 instance StringLike BS.ByteString where
-    toC        = newCString . show
-    fromC      = BS.packCString
-    toString   = BS.unpack
-    fromString = BS.pack
+    toC   = newCString . show
+    fromC = BS.packCString
 
 instance StringLike T.Text where
-    toC        = toC . E.encodeUtf8
-    fromC      = fmap E.decodeUtf8 . fromC
-    toString   = T.unpack
-    fromString = T.pack
+    toC   = toC . E.encodeUtf8
+    fromC = fmap E.decodeUtf8 . fromC
