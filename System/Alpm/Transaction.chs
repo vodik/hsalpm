@@ -11,11 +11,17 @@ import Control.Monad.Trans
 import Data.Bits
 import Foreign.C
 import Foreign.Ptr
+import Foreign.ForeignPtr
+import Foreign.Marshal.Alloc
 import Foreign.Marshal.Utils (toBool, fromBool)
+import Foreign.Storable
+
+import System.IO.Unsafe
 
 import System.Alpm.Core
 import System.Alpm.Database
 import System.Alpm.Internal.Types
+import System.Alpm.StringLike
 import System.Alpm.Utils
 
 {# import System.Alpm.Internal.Types #}
@@ -27,16 +33,32 @@ newtype Transaction a = Transaction { transaction :: Alpm a }
 
 withTransaction :: [TransactionFlags] -> Transaction a -> Alpm a
 withTransaction flags trans = do
-    withHandle $ flip {# call trans_init #} (toBitmap flags)
+    withHandle $ flip {# call trans_init #} (toBitfield flags)
     rst <- transaction trans
     withHandle $ {# call trans_release #}
     return rst
 
 ----------------------------------------------------------------------
 
--- loadPkg filename full level = do
-    -- alloca $ \pkg -> do
-        -- rst <- withHandle $ \h -> {# call pkg_load #} h filename full (toBitmap level) pkg
+instance Storable Package where
+    sizeOf (Package r)    = sizeOf r
+    alignment (Package r) = alignment r
+
+    peek p             = Package <$> peek (castPtr p)
+    poke p (Package r) = poke (castPtr p) r
+
+loadPkg :: (StringLike s) => s -> Bool -> [SignatureLevel] -> Alpm Package
+loadPkg filename full level = do
+    rst <- withHandle $ \h -> do
+        pkg <- malloc
+        fn  <- toC filename
+        rst <- {# call pkg_load #} h fn (fromBool full) (toBitfield level) pkg
+        if rst < 0
+            then return Nothing
+            else Just <$> peek pkg
+    case rst of
+        Nothing -> throwAlpmException "unable to load package"
+        Just p  -> return p
 
 ----------------------------------------------------------------------
 

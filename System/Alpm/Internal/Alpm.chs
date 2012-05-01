@@ -47,4 +47,4 @@ alpmVersion :: StringLike a => IO a
 alpmVersion = readString {# call version #}
 
 alpmCapabilities :: IO [Capabilities]
-alpmCapabilities = fromBitmap <$> {# call capabilities #}
+alpmCapabilities = fromBitfield <$> {# call capabilities #}

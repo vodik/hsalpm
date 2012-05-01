@@ -11,6 +11,7 @@ module System.Alpm.Internal.Types
     , FileConflict(..)
     , FileList(..)
     , Group(..)
+    -- , Handle(..)
     , Package(..)
     , PGPKey(..)
     , SignatureList(..)
@@ -68,6 +69,7 @@ instance AlpmType T.Text where
 {# pointer *alpm_fileconflict_t as FileConflict newtype #}
 {# pointer *alpm_filelist_t     as FileList newtype #}
 {# pointer *alpm_group_t        as Group newtype #}
+-- {# pointer *alpm_handle_t       as Handle newtype #}
 {# pointer *alpm_pkg_t          as Package newtype #}
 {# pointer *alpm_pgpkey_t       as PGPKey newtype #}
 {# pointer *alpm_siglist_t      as SignatureList newtype #}
@@ -109,6 +111,10 @@ instance AlpmType FileList where
 instance AlpmType Group where
     unpack (Group ptr) = return ptr
     pack = return . Group
+
+-- instance AlpmType Handle where
+--     unpack (Handle ptr) = return ptr
+--     pack = return . Handle
 
 instance AlpmType Package where
     unpack (Package ptr) = return ptr

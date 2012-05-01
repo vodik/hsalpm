@@ -1,11 +1,8 @@
 module Main where
 
 import Control.Applicative
-import Control.Monad
 import Control.Monad.Reader
 import Control.Monad.Trans (liftIO)
-import Data.Char
-import Data.List
 import System.Environment
 import qualified Data.Text as T
 
@@ -15,6 +12,7 @@ import Alpm.Options
 import Alpm.PkgCache
 import Alpm.Internal.Types
 
+dbs :: [String]
 dbs = [ "testing", "core", "extra", "community", "community-testing" ]
 
 queryPkgs :: (Package -> PkgCache Bool) -> Alpm ()
