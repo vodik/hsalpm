@@ -56,7 +56,7 @@ loadPkg filename full level = do
         rst <- {# call pkg_load #} h fn (fromBool full) (toBitfield level) pkg
         if rst < 0
             then return Nothing
-            else return . Just $ Package pkg
+            else Just <$> peek pkg
     case rst of
         Nothing -> throwAlpmException "unable to load package"
         Just p  -> return p

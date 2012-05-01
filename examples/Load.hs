@@ -12,9 +12,10 @@ package = "/var/cache/pacman/pkg/linux-3.3.4-1-i686.pkg.tar.xz"
 loader :: Alpm ()
 loader = do
     pkg <- loadPkg package False [ SigUseDefault ]
-    liftIO $ putStrLn "omg"
-    liftIO $ print $! (UP.pkgName pkg :: BS.ByteString)
-    liftIO $ putStrLn "no fucks where given"
+    liftIO $ do
+        BS.putStrLn $ UP.pkgName pkg
+        BS.putStrLn $ UP.pkgVersion pkg
+        BS.putStrLn $ UP.pkgDescription pkg
 
 main = do
     runAlpm defaultOptions loader >>= either print noop
