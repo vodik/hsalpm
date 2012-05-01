@@ -19,5 +19,4 @@ loader = do
 
 main = do
     runAlpm defaultOptions loader >>= either print noop
-  where
-    noop = const $ return ()
+  where noop = const $ return ()

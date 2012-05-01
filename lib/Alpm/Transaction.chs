@@ -19,7 +19,7 @@ import Foreign.Storable
 import System.IO.Unsafe
 
 import Alpm.Core
-import Alpm.Caching
+-- import Alpm.Caching
 import Alpm.Database
 import Alpm.Internal.Types
 import Alpm.StringLike
