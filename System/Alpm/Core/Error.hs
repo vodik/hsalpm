@@ -5,17 +5,20 @@ module System.Alpm.Core.Error where
 import Control.Exception
 import Control.Monad.Error
 import Data.Typeable
+import System.Alpm.Internal.Alpm
+import System.Alpm.Internal.Types
 
-data AlpmError = Generic String String
+data AlpmError = Library ErrorCode
+               | Custom String
                | UnknownError String
                deriving (Eq, Typeable)
 
 instance Exception AlpmError
 
 instance Show AlpmError where
-    show (Generic s v)    = s ++ ": " ++ v
-    show (UnknownError s) = s
+    show (Library n) = strerror n
+    show (Custom s)  = s
 
 instance Error AlpmError where
-    noMsg  = UnknownError "An error occured"
-    strMsg = UnknownError
+    noMsg  = Custom "An error occured"
+    strMsg = Custom

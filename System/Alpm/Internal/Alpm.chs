@@ -12,14 +12,17 @@ module System.Alpm.Internal.Alpm
 
 import Control.Applicative
 import Foreign.C
-import Foreign.Ptr (Ptr, nullPtr)
+import Foreign.Ptr
 import Foreign.ForeignPtr
 import Foreign.Marshal.Alloc
 import Foreign.Storable
+import System.IO.Unsafe
 
 import System.Alpm.Internal.Types
 import System.Alpm.StringLike
 import System.Alpm.Utils
+
+{# import System.Alpm.Internal.Types #}
 
 #include <alpm.h>
 
@@ -27,21 +30,22 @@ type AlpmHandle = ForeignPtr ()
 
 foreign import ccall "&alpm_release" c_alpm_release :: FinalizerPtr ()
 
-alpmInitialize :: FilePath -> FilePath -> IO (Either String AlpmHandle)
+alpmInitialize :: FilePath -> FilePath -> IO (Either ErrorCode AlpmHandle)
 alpmInitialize root dbPath = do
     root'   <- newCString root
     dbPath' <- newCString dbPath
     alloca $ \errPtr -> do
         alpm_ptr <- {# call initialize #} root' dbPath' errPtr
         if alpm_ptr == nullPtr
-            then Left  <$> (peek errPtr >>= strerror)
+            then Left  <$> errno (castPtr errPtr)
             else Right <$> newForeignPtr c_alpm_release alpm_ptr
 
-strerror :: CInt -> IO String
-strerror err = {# call strerror #} err >>= peekCString
+strerror :: StringLike s => ErrorCode -> s
+strerror err = unsafePerformIO $ do
+    {# call strerror #} (fromIntegral $ fromEnum err) >>= fromC
 
-errno :: Ptr () -> IO CInt
-errno = {# call errno #}
+-- errno :: Ptr a -> ErrorCode
+errno e = {# call errno #} e >>= return . toEnum . fromIntegral
 
 alpmVersion :: StringLike a => IO a
 alpmVersion = readString {# call version #}

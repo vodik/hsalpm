@@ -31,6 +31,7 @@ module System.Alpm.Internal.Types
     , Progress(..)
     , TransactionFlags(..)
     , Capabilities(..)
+    , ErrorCode(..)
     ) where
 
 import Control.Applicative
@@ -186,4 +187,8 @@ instance AlpmType Trans where
 
 -- | Capabilities
 {# enum alpm_caps as Capabilities {underscoreToCase}
+    with prefix = "ALPM_" deriving (Eq, Read, Show) #}
+
+-- | ErrorCode
+{# enum alpm_errno_t as ErrorCode {underscoreToCase}
     with prefix = "ALPM_" deriving (Eq, Read, Show) #}

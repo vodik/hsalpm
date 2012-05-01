@@ -13,8 +13,8 @@ Library
   Exposed-modules:
     System.Alpm.Core.Class
     System.Alpm.Core.Error
-    System.Alpm.Internal.Alpm
     System.Alpm.Internal.Types
+    System.Alpm.Internal.Alpm
     System.Alpm.Internal.List
     System.Alpm.Internal.Callbacks
     System.Alpm.Core

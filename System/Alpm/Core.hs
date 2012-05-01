@@ -21,6 +21,7 @@ import Foreign.ForeignPtr
 import Foreign.Ptr
 
 import System.Alpm.Internal.Alpm
+import System.Alpm.Internal.Types
 import System.Alpm.Core.Class
 import System.Alpm.Core.Error
 
@@ -44,15 +45,15 @@ defaultOptions = AlpmOptions
 withHandle :: (Ptr () -> IO a) -> Alpm a
 withHandle f = ask >>= liftIO . flip withForeignPtr f
 
-lastStrerror :: Alpm String
-lastStrerror = withHandle $ (strerror =<<) . errno
+lastError :: Alpm ErrorCode
+lastError = withHandle $ errno
 
 throwAlpmException :: String -> Alpm a
-throwAlpmException = (throwError =<<) . (<$> lastStrerror) . Generic
+throwAlpmException _ = (throwError =<<) . (<$> lastError) $ Library
 
 withAlpm :: AlpmOptions -> Alpm a -> IO (Either AlpmError a)
 withAlpm opt alpm =
     alpmInitialize (root opt) (dbPath opt) >>= either failed run
   where
-    failed  = return . Left . Generic "failed to initialize alpm library"
+    failed  = return . Left . Library
     run env = withForeignPtr env . const $ (`runReaderT` env) . runErrorT $ runAlpm alpm
