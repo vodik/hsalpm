@@ -3,14 +3,13 @@ module Main where
 import Control.Applicative
 import Control.Monad.Reader
 import Control.Monad.Trans (liftIO)
+import System.Alpm.Core
+import System.Alpm.Database
+import System.Alpm.Options
+import System.Alpm.PkgCache
+import System.Alpm.Internal.Types
 import System.Environment
 import qualified Data.Text as T
-
-import Alpm.Core
-import Alpm.Database
-import Alpm.Options
-import Alpm.PkgCache
-import Alpm.Internal.Types
 
 dbs :: [String]
 dbs = [ "testing", "core", "extra", "community", "community-testing" ]
@@ -26,7 +25,7 @@ register = mapM_ $ flip registerDB [ SigUseDefault ]
 main :: IO ()
 main = do
     args <- map T.pack <$> getArgs
-    rslt <- runAlpm defaultOptions $ do
+    rslt <- withAlpm defaultOptions $ do
         set [ useSyslog := True ]
         register dbs
         queryPkgs $ myFilter args
