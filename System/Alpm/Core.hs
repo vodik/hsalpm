@@ -4,8 +4,6 @@ module System.Alpm.Core
     ( Alpm
     , AlpmError(..)
     , AlpmHandle(..)
-    , AlpmOptions(..)
-    , defaultOptions
     , withHandle
     , throwAlpmException
     , withAlpm
@@ -37,11 +35,6 @@ newtype Alpm a = Alpm
     { runAlpm :: ErrorT AlpmError (ReaderT AlpmHandle IO) a }
     deriving (Functor, Applicative, Monad, MonadIO, MonadError AlpmError, MonadReader AlpmHandle)
 
-defaultOptions = AlpmOptions
-    { root   = "/"
-    , dbPath = "/var/lib/pacman"
-    }
-
 withHandle :: (Ptr () -> IO a) -> Alpm a
 withHandle = (ask >>=) . (liftIO .) . flip withForeignPtr
 
@@ -51,9 +44,9 @@ lastError = withHandle errno
 throwAlpmException :: String -> Alpm a
 throwAlpmException = (throwError =<<) . (<$> lastError) . flip Library
 
-withAlpm :: AlpmOptions -> Alpm a -> IO (Either AlpmError a)
-withAlpm opt alpm =
-    alpmInitialize (root opt) (dbPath opt) >>= either failed run
+withAlpm :: FilePath -> FilePath -> Alpm a -> IO (Either AlpmError a)
+withAlpm root dbPath alpm =
+    alpmInitialize root dbPath >>= either failed run
   where
     failed  = return . Left . flip Library "failed to initialize alpm"
     run env = withForeignPtr env . const . (`runReaderT` env) . runErrorT $ runAlpm alpm

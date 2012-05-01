@@ -11,8 +11,9 @@ import System.Alpm.Internal.Types
 import System.Environment
 import qualified Data.Text as T
 
-dbs :: [String]
-dbs = [ "testing", "core", "extra", "community", "community-testing" ]
+root   = "/"
+dbPath = "/var/lib/pacman/"
+dbs    = [ "testing", "core", "extra", "community", "community-testing" ]
 
 queryPkgs :: (Package -> PkgCache Bool) -> Alpm ()
 queryPkgs f = syncDBs >>= \dbs ->
@@ -25,7 +26,7 @@ register = mapM_ $ flip registerDB [ SigUseDefault ]
 main :: IO ()
 main = do
     args <- map T.pack <$> getArgs
-    rslt <- withAlpm defaultOptions $ do
+    rslt <- withAlpm root dbPath $ do
         set [ useSyslog := True ]
         register dbs
         queryPkgs $ myFilter args

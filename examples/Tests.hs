@@ -12,25 +12,28 @@ import qualified Data.ByteString.Char8 as BS
 import qualified System.Alpm.Unsafe.Database as UD
 import qualified System.Alpm.Unsafe.Package as UP
 
-test1 = withAlpm defaultOptions $ dbName <$> localDB
+root   = "/"
+dbPath = "/var/lib/pacman/"
 
-test2 = withAlpm defaultOptions $ do
+test1 = withAlpm root dbPath $ dbName <$> localDB
+
+test2 = withAlpm root dbPath $ do
     registerDB "core" [ SigUseDefault ]
     map dbName <$> syncDBs
 
 -- Unsafe package cache manipulation
-test3 = withAlpm defaultOptions $ do
+test3 = withAlpm root dbPath $ do
     db <- registerDB "core" [ SigUseDefault ]
     UP.pkgName <$> UD.package "linux" db
 
 -- Using the PkgCache monad
-test4 = withAlpm defaultOptions $ do
+test4 = withAlpm root dbPath $ do
     db <- registerDB "core" [ SigUseDefault ]
     withPkgCache db $ ask >>= \lst ->
         sort <$> mapM pkgName lst
 
 -- Start an update/transaction
-test5 repo = withAlpm defaultOptions $ do
+test5 repo = withAlpm root dbPath $ do
     set [ systemArch, useSyslog := True ]
 
     db   <- registerDB repo [SigUseDefault]
