@@ -18,19 +18,19 @@ import qualified System.Alpm.Unsafe.Package as UP
 root   = "/"
 dbPath = "/var/lib/pacman/"
 
-loader :: [String] -> Alpm Bool
-loader []    = return False
-loader paths = do
+upgrade :: [String] -> Alpm Bool
+upgrade []    = return False
+upgrade paths = do
     set [ useSyslog := True ]
-
-    pkgs <- forM paths $ \path -> do
-        pkg <- loadPkg path False [ SigUseDefault ]
-        liftIO $ do
-            T.putStrLn $ T.unwords [ UP.pkgName pkg, UP.pkgVersion pkg ]
-            T.putStrLn $ T.concat  [ "    ", UP.pkgDescription pkg ]
-        return pkg
-
-    withTransaction [] $ stageEach Add pkgs
+    withTransaction [] . stageEach Add =<< mapM loadFromPath paths
     return True
 
-main = getArgs >>= withAlpm root dbPath . loader >>= either print print
+loadFromPath :: String -> Alpm Package
+loadFromPath path = do
+    pkg <- loadPkg path False [ SigUseDefault ]
+    liftIO $ do
+        T.putStrLn $ T.unwords [ UP.pkgName pkg, UP.pkgVersion pkg ]
+        T.putStrLn $ T.concat  [ "    ", UP.pkgDescription pkg ]
+    return pkg
+
+main = getArgs >>= withAlpm root dbPath . upgrade >>= either print print
