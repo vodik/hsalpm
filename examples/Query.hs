@@ -4,6 +4,7 @@ import Control.Applicative
 import Control.Monad.Reader
 import Control.Monad.Trans (liftIO)
 import System.Alpm.Core
+import System.Alpm.Cache
 import System.Alpm.Database
 import System.Alpm.Options
 import System.Alpm.PkgCache
@@ -18,7 +19,7 @@ dbs    = [ "testing", "core", "extra", "community", "community-testing" ]
 queryPkgs :: (Package -> PkgCache Bool) -> Alpm ()
 queryPkgs f = syncDBs >>= \dbs ->
     forM_ dbs $ \db -> withPkgCache db $
-        ask >>= filterM f >>= mapM_ (ppPkgInfo $ dbName db)
+        cache >>= filterM f >>= mapM_ (ppPkgInfo $ dbName db)
 
 register :: [String] -> Alpm ()
 register = mapM_ $ flip registerDB [ SigUseDefault ]

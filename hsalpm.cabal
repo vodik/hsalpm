@@ -18,6 +18,7 @@ Library
     System.Alpm.Internal.List
     System.Alpm.Internal.Callbacks
     System.Alpm.Core
+    System.Alpm.Cache
     System.Alpm.Database
     System.Alpm.Unsafe.Database
     System.Alpm.Unsafe.Package
