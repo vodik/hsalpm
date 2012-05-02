@@ -1,5 +1,7 @@
 {-# LANGUAGE OverloadedStrings #-}
 
+module Main where
+
 import Control.Monad
 import Control.Monad.Trans
 import System.Alpm.Core
@@ -8,7 +10,8 @@ import System.Alpm.Transaction
 import System.Alpm.Options
 import System.Alpm.Internal.Types
 import System.Environment
-import qualified Data.ByteString.Char8 as BS
+import qualified Data.Text as T
+import qualified Data.Text.IO as T
 import qualified System.Alpm.Unsafe.Database as UD
 import qualified System.Alpm.Unsafe.Package as UP
 
@@ -23,11 +26,8 @@ loader paths = do
     pkgs <- forM paths $ \path -> do
         pkg <- loadPkg path False [ SigUseDefault ]
         liftIO $ do
-            BS.putStr $ UP.pkgName pkg
-            BS.putStr "-"
-            BS.putStrLn $ UP.pkgVersion pkg
-            BS.putStr "    "
-            BS.putStrLn $ UP.pkgDescription pkg
+            T.putStrLn $ T.unwords [ UP.pkgName pkg, UP.pkgVersion pkg ]
+            T.putStrLn $ T.concat  [ "    ", UP.pkgDescription pkg ]
         return pkg
 
     withTransaction [] $ stageEach Add pkgs

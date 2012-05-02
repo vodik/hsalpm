@@ -1,3 +1,5 @@
+{-# LANGUAGE OverloadedStrings #-}
+
 module Main where
 
 import Control.Applicative
@@ -11,6 +13,7 @@ import System.Alpm.PkgCache
 import System.Alpm.Internal.Types
 import System.Environment
 import qualified Data.Text as T
+import qualified Data.Text.IO as T
 
 root   = "/"
 dbPath = "/var/lib/pacman/"
@@ -47,11 +50,11 @@ myFilter ts pkg = do
         f3  = any (`elem` groups) ts'      -- any of the keywords is a group
     return $ f1 || f2 || f3
 
-ppPkgInfo :: String -> Package -> PkgCache ()
+ppPkgInfo :: T.Text -> Package -> PkgCache ()
 ppPkgInfo db pkg = do
     name    <- pkgName pkg
     desc    <- pkgDescription pkg
     version <- pkgVersion pkg
     liftIO $ do
-        putStrLn $ unwords [ db ++ "/" ++ name, version ]
-        putStrLn $ "    " ++ desc
+        T.putStrLn $ T.concat [ db, "/", name, version ]
+        T.putStrLn $ T.concat [ "    ", desc ]
