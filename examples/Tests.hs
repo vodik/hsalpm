@@ -2,6 +2,7 @@ import Control.Applicative
 import Control.Monad.Reader
 import Data.List
 import System.Alpm.Core
+import System.Alpm.Cache
 import System.Alpm.Database
 import System.Alpm.PkgCache
 import System.Alpm.Transaction
@@ -30,8 +31,7 @@ test3 = withAlpm root dbPath $ do
 -- Using the PkgCache monad
 test4 = withAlpm root dbPath $ do
     db <- registerDB "core" [ SigUseDefault ]
-    withPkgCache db $ ask >>= \lst ->
-        sort <$> mapM pkgName lst
+    withPkgCache db $ sort <$> (cache >>= mapM pkgName)
 
 -- Start an update/transaction
 test5 repo = withAlpm root dbPath $ do

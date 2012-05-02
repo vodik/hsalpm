@@ -22,10 +22,8 @@ import qualified System.Alpm.Unsafe.Database as UD
 newtype PkgCache a = PkgCache (ReaderT [Package] Alpm a)
     deriving (Functor, Applicative, Monad, MonadIO, MonadReader [Package], MonadError AlpmError)
 
-instance MonadPkgCache PkgCache where
+instance MonadCache PkgCache where
     cache = ask
-    add = undefined
-    remove = undefined
 
 withPkgCache :: Database -> PkgCache a -> Alpm a
 withPkgCache db (PkgCache f) = UD.pkgCache db >>= runReaderT f
