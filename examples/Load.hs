@@ -4,19 +4,20 @@ import System.Alpm.Cache
 import System.Alpm.Transaction
 import System.Alpm.Options
 import System.Alpm.Internal.Types
+import System.Environment
 import qualified Data.ByteString.Char8 as BS
 import qualified System.Alpm.Unsafe.Database as UD
 import qualified System.Alpm.Unsafe.Package as UP
 
-root    = "/"
-dbPath  = "/var/lib/pacman/"
-package = "/var/cache/pacman/pkg/linux-3.3.4-1-i686.pkg.tar.xz"
+root   = "/"
+dbPath = "/var/lib/pacman/"
 
-loader :: Alpm Bool
-loader = do
+loader :: [String] -> Alpm Bool
+loader []    = return False
+loader paths = do
     set [ useSyslog := True ]
 
-    pkg <- loadPkg package False [ SigUseDefault ]
+    pkg <- loadPkg (head paths) False [ SigUseDefault ]
     liftIO $ do
         BS.putStrLn $ UP.pkgName pkg
         BS.putStrLn $ UP.pkgVersion pkg
@@ -25,4 +26,4 @@ loader = do
     withTransaction [] $ stage Add pkg
     return True
 
-main = withAlpm root dbPath loader >>= either print print
+main = getArgs >>= withAlpm root dbPath . loader >>= either print print
