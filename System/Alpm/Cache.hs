@@ -18,6 +18,9 @@ class (Monad m, MonadError AlpmError m) => MonadCache m where
 class (Monad m, MonadError AlpmError m) => MonadStage m where
     stage :: Action -> Package -> m ()
 
+stageEach :: MonadStage m => Action -> [Package] -> m ()
+stageEach = mapM_ . stage
+
 ----------------------------------------------------------------------
 
 pkgFilename :: (MonadCache m, StringLike a) => Package -> m (Maybe a)

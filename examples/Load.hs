@@ -30,7 +30,7 @@ loader paths = do
             BS.putStrLn $ UP.pkgDescription pkg
         return pkg
 
-    withTransaction [] $ mapM_ (stage Add) pkgs
+    withTransaction [] $ stageEach Add pkgs
     return True
 
 main = getArgs >>= withAlpm root dbPath . loader >>= either print print
