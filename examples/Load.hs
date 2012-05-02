@@ -1,3 +1,6 @@
+{-# LANGUAGE OverloadedStrings #-}
+
+import Control.Monad
 import Control.Monad.Trans
 import System.Alpm.Core
 import System.Alpm.Cache
@@ -17,13 +20,17 @@ loader []    = return False
 loader paths = do
     set [ useSyslog := True ]
 
-    pkg <- loadPkg (head paths) False [ SigUseDefault ]
-    liftIO $ do
-        BS.putStrLn $ UP.pkgName pkg
-        BS.putStrLn $ UP.pkgVersion pkg
-        BS.putStrLn $ UP.pkgDescription pkg
+    pkgs <- forM paths $ \path -> do
+        pkg <- loadPkg path False [ SigUseDefault ]
+        liftIO $ do
+            BS.putStr $ UP.pkgName pkg
+            BS.putStr "-"
+            BS.putStrLn $ UP.pkgVersion pkg
+            BS.putStr "    "
+            BS.putStrLn $ UP.pkgDescription pkg
+        return pkg
 
-    withTransaction [] $ stage Add pkg
+    withTransaction [] $ mapM_ (stage Add) pkgs
     return True
 
 main = getArgs >>= withAlpm root dbPath . loader >>= either print print
