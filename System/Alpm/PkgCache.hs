@@ -18,7 +18,6 @@ import System.Alpm.StringLike
 import System.Alpm.Utils
 
 import qualified System.Alpm.Unsafe.Database as UD
-import qualified System.Alpm.Unsafe.Package as U
 
 newtype PkgCache a = PkgCache (ReaderT [Package] Alpm a)
     deriving (Functor, Applicative, Monad, MonadIO, MonadReader [Package], MonadError AlpmError)
