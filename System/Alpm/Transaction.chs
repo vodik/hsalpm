@@ -21,6 +21,7 @@ import Foreign.Storable
 import System.Alpm.Core
 import System.Alpm.Cache
 import System.Alpm.Database
+import System.Alpm.Internal.Alpm
 import System.Alpm.Internal.Types
 import System.Alpm.StringLike
 import System.Alpm.Utils
@@ -55,14 +56,26 @@ withTransaction flags trans = do
             rst <- {# call trans_prepare #} h ptr
             if rst /= -1
                 then return $ Right ()
-                else return $ Left "failed to prepare transaction"
+                else errno h >>= \err -> do
+                    return . Left $ case err of
+                        ErrPkgInvalidArch  -> undefined
+                        ErrUnsatisfiedDeps -> undefined
+                        ErrConflictingDeps -> undefined
+                        _ -> "failed to prepare transaction"
 
     commit = ErrorT $ withHandle $ \h -> do
         alloca $ \ptr -> do
             rst <- {# call trans_commit #} h ptr
             if rst /= -1
                 then return $ Right ()
-                else return $ Left "failed to commit transaction"
+                else errno h >>= \err -> do
+                    return . Left $ case err of
+                        ErrFileConflicts      -> undefined
+                        ErrPkgInvalid         -> undefined
+                        ErrPkgInvalidChecksum -> undefined
+                        ErrPkgInvalidSig      -> undefined
+                        ErrDltInvalid         -> undefined
+                        _ -> "failed to commit transaction"
 
     release = do
         rst <- withHandle $ {# call trans_release #}
