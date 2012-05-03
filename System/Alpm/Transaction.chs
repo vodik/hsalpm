@@ -5,6 +5,7 @@
 module System.Alpm.Transaction where
 
 import Control.Applicative
+import Control.Exception
 import Control.Monad
 import Control.Monad.Error
 import Control.Monad.Reader
@@ -39,26 +40,29 @@ withTransaction :: [TransactionFlags] -> Transaction a -> Alpm a
 withTransaction flags trans = do
     initialize flags
     rst <- runTransaction trans
-    prepare
-    commit
+    run <- runErrorT $ prepare >> commit
     release
-    return rst
+    case run of
+        Left  e -> throwAlpmException e
+        Right _ -> return rst
   where
     initialize flags = do
         rst <- withHandle $ flip {# call trans_init #} (toBitfield flags)
         when (rst == -1) $ throwAlpmException "failed to initialize transaction"
 
-    -- TODO: handle errors by parsing the data ptr
-    prepare = do
-        rst <- withHandle $ \h -> do
-            alloca $ {# call trans_prepare #} h
-        when (rst == -1) $ throwAlpmException "failed to prepare transaction"
+    prepare = ErrorT $ withHandle $ \h -> do
+        alloca $ \ptr -> do
+            rst <- {# call trans_prepare #} h ptr
+            if rst /= -1
+                then return $ Right ()
+                else return $ Left "failed to prepare transaction"
 
-    -- TODO: handle errors by parsing the data ptr
-    commit = do
-        rst <- withHandle $ \h -> do
-            alloca $ {# call trans_commit #} h
-        when (rst == -1) $ throwAlpmException "failed to commit transaction"
+    commit = ErrorT $ withHandle $ \h -> do
+        alloca $ \ptr -> do
+            rst <- {# call trans_commit #} h ptr
+            if rst /= -1
+                then return $ Right ()
+                else return $ Left "failed to commit transaction"
 
     release = do
         rst <- withHandle $ {# call trans_release #}
